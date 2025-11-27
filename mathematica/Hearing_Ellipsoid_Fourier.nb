@@ -1,0 +1,480 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[     16475,        472]
+NotebookOptionsPosition[     15761,        451]
+NotebookOutlinePosition[     16164,        467]
+CellTagsIndexPosition[     16121,        464]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], "\n", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"--", 
+      RowBox[{"-", "Parameter"}]}], " ", "des", " ", "\"\<wahren\>\"", " ", 
+     RowBox[{"Ellipsoids", "--"}]}], "-"}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"aTrue", "=", "1.0"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"bTrue", "=", "1.5"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"cTrue", "=", "2.3"}], ";"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"--", 
+      RowBox[{"-", "Ellipsoid"}]}], " ", "als", " ", 
+     RowBox[{"ImplicitRegion", "--"}]}], "-"}], "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"ellipsoidRegion", "[", 
+     RowBox[{"a_", ",", "b_", ",", "c_"}], "]"}], ":=", 
+    RowBox[{"ImplicitRegion", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        RowBox[{
+         RowBox[{"x", "^", "2"}], "/", 
+         RowBox[{"a", "^", "2"}]}], "+", 
+        RowBox[{
+         RowBox[{"y", "^", "2"}], "/", 
+         RowBox[{"b", "^", "2"}]}], "+", 
+        RowBox[{
+         RowBox[{"z", "^", "2"}], "/", 
+         RowBox[{"c", "^", "2"}]}]}], "<=", "1"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"x", ",", 
+          RowBox[{"-", "a"}], ",", "a"}], "}"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"y", ",", 
+          RowBox[{"-", "b"}], ",", "b"}], "}"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"z", ",", 
+          RowBox[{"-", "c"}], ",", "c"}], "}"}]}], "}"}]}], "]"}]}], ";"}], 
+  "\n"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"reg", "=", 
+    RowBox[{"ellipsoidRegion", "[", 
+     RowBox[{"aTrue", ",", "bTrue", ",", "cTrue"}], "]"}]}], ";"}], 
+  "\[IndentingNewLine]", "\n", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"--", 
+      RowBox[{"-", "Anzahl"}]}], " ", "der", " ", 
+     RowBox[{"Eigenwerte", "--"}]}], "-"}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"nVals", "=", "20"}], ";"}], " ", "\[IndentingNewLine]", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"--", 
+     RowBox[{"-", "Dirichlet"}]}], "-", 
+    RowBox[{"Eigenwerte", " ", 
+     RowBox[{"berechnen", "--"}]}], "-"}], "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"eigvalsRaw", "=", 
+    RowBox[{"NDEigenvalues", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", 
+         RowBox[{"Laplacian", "[", 
+          RowBox[{
+           RowBox[{"u", "[", 
+            RowBox[{"x", ",", "y", ",", "z"}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"x", ",", "y", ",", "z"}], "}"}]}], "]"}]}], ",", 
+        RowBox[{"DirichletCondition", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"u", "[", 
+            RowBox[{"x", ",", "y", ",", "z"}], "]"}], "==", "0"}], ",", 
+          "True"}], "]"}]}], "}"}], ",", "u", ",", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"x", ",", "y", ",", "z"}], "}"}], "\[Element]", "reg"}], ",", 
+      "nVals"}], "]"}]}], ";"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"Sortieren", ",", " ", 
+    RowBox[{
+     RowBox[{"ggf", ".", " ", "ist"}], " ", "bereits", " ", "vorsortiert"}]}],
+    "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"eigvals", "=", 
+    RowBox[{"Sort", "[", "eigvalsRaw", "]"}]}], ";"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"Kurzer", " ", "Check"}], "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{"Print", "[", 
+   RowBox[{"\"\<Anzahl Eigenwerte: \>\"", ",", 
+    RowBox[{"Length", "[", "eigvals", "]"}]}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Print", "[", 
+   RowBox[{"\"\<Erste 10 Eigenwerte: \>\"", ",", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"NumberForm", "[", 
+       RowBox[{"#", ",", 
+        RowBox[{"{", 
+         RowBox[{"Infinity", ",", "6"}], "}"}]}], "]"}], "&"}], "/@", 
+     RowBox[{"Take", "[", 
+      RowBox[{"eigvals", ",", "10"}], "]"}]}]}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Print", "[", 
+    RowBox[{"\"\<Letzte 10 Eigenwerte: \>\"", ",", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"NumberForm", "[", 
+        RowBox[{"#", ",", 
+         RowBox[{"{", 
+          RowBox[{"Infinity", ",", "6"}], "}"}]}], "]"}], "&"}], "/@", 
+      RowBox[{"Take", "[", 
+       RowBox[{"eigvals", ",", 
+        RowBox[{"-", "10"}]}], "]"}]}]}], "]"}], ";"}], "\[IndentingNewLine]",
+   "\n"}], "\[IndentingNewLine]"}], "Input",
+ CellChangeTimes->{{3.972748261297674*^9, 3.972748321548092*^9}, {
+   3.972753412649185*^9, 3.972753418239153*^9}, {3.9727540475343704`*^9, 
+   3.9727540595326233`*^9}, {3.9727540975873833`*^9, 
+   3.9727541489092712`*^9}, {3.9727548413133144`*^9, 
+   3.9727548435501156`*^9}, {3.972754922797655*^9, 3.972754943688671*^9}, {
+   3.9727549832418175`*^9, 3.972754984566908*^9}, {3.9727550433322334`*^9, 
+   3.9727550657828083`*^9}, {3.972755251266676*^9, 3.9727552525630856`*^9}, {
+   3.9727553116789627`*^9, 3.9727553143902245`*^9}, {3.9727553693625126`*^9, 
+   3.972755375530012*^9}, 3.9727558231899414`*^9, {3.972755951208767*^9, 
+   3.9727559525166607`*^9}, {3.972755989549158*^9, 3.9727560658174744`*^9}, {
+   3.972756161115366*^9, 3.972756175472809*^9}, {3.972756219596493*^9, 
+   3.9727562557789555`*^9}, {3.9727564022387066`*^9, 3.972756419460842*^9}, {
+   3.9727564598754177`*^9, 3.972756472719511*^9}, {3.972756556721033*^9, 
+   3.972756575779148*^9}, {3.9727566108156033`*^9, 3.972756627360737*^9}, {
+   3.973219895013525*^9, 3.973219922106186*^9}, {3.9732200488176727`*^9, 
+   3.973220050383665*^9}, {3.973226306729515*^9, 3.973226310093628*^9}, 
+   3.9732263726002483`*^9, {3.9732264510767975`*^9, 3.9732265007733135`*^9}, {
+   3.973226623236315*^9, 3.9732266248119984`*^9}, {3.9732273518467426`*^9, 
+   3.9732273804569225`*^9}, {3.973229139859892*^9, 3.9732291412107925`*^9}, {
+   3.9732291997823143`*^9, 3.9732292084447746`*^9}, {3.9732327330456905`*^9, 
+   3.9732328014215794`*^9}},
+ CellLabel->"In[87]:=",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Anzahl Eigenwerte: \"\>", "\[InvisibleSpace]", "20"}],
+  SequenceForm["Anzahl Eigenwerte: ", 20],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9727483395020084`*^9, 3.9727534317417927`*^9, {3.972754155299076*^9, 
+   3.9727541641978626`*^9}, {3.972754847687172*^9, 3.9727548569962597`*^9}, {
+   3.972754959462227*^9, 3.9727549894555817`*^9}, {3.9727550503507977`*^9, 
+   3.97275507011594*^9}, 3.972755267667446*^9, 3.9727553830912704`*^9, 
+   3.972756077408598*^9, 3.9727561830870724`*^9, {3.972756230138445*^9, 
+   3.972756261916151*^9}, 3.9727564872781124`*^9, 3.9727566372372494`*^9, 
+   3.9732201027317905`*^9, 3.9732263170806465`*^9, 3.9732265081479836`*^9, 
+   3.9732266390188065`*^9, 3.9732273861279144`*^9, {3.9732292701973686`*^9, 
+   3.9732292831572304`*^9}, 3.9732327525188713`*^9, 3.973232841725319*^9},
+ CellLabel->
+  "During evaluation of \
+In[87]:=",ExpressionUUID->"22f8671c-85ae-8b4c-8cdd-5ff78739da4d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Erste 10 Eigenwerte: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"5.282821\"\>",
+        ShowStringCharacters->False],
+       5.282821092176552,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"7.875319\"\>",
+        ShowStringCharacters->False],
+       7.875318778745579,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"10.033445\"\>",
+        ShowStringCharacters->False],
+       10.033445075961417`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"11.194559\"\>",
+        ShowStringCharacters->False],
+       11.194558580631362`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"13.394770\"\>",
+        ShowStringCharacters->False],
+       13.394770169241493`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"14.362825\"\>",
+        ShowStringCharacters->False],
+       14.362825185102196`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"15.276360\"\>",
+        ShowStringCharacters->False],
+       15.276360305572503`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"16.752064\"\>",
+        ShowStringCharacters->False],
+       16.75206367700608,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"17.430308\"\>",
+        ShowStringCharacters->False],
+       17.430307572306425`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"18.229072\"\>",
+        ShowStringCharacters->False],
+       18.22907217384962,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ]}], "}"}]}],
+  SequenceForm["Erste 10 Eigenwerte: ", {
+    NumberForm[5.282821092176552, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[7.875318778745579, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[10.033445075961417`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[11.194558580631362`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[13.394770169241493`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[14.362825185102196`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[15.276360305572503`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[16.75206367700608, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[17.430307572306425`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[18.22907217384962, {
+      DirectedInfinity[1], 6}]}],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9727483395020084`*^9, 3.9727534317417927`*^9, {3.972754155299076*^9, 
+   3.9727541641978626`*^9}, {3.972754847687172*^9, 3.9727548569962597`*^9}, {
+   3.972754959462227*^9, 3.9727549894555817`*^9}, {3.9727550503507977`*^9, 
+   3.97275507011594*^9}, 3.972755267667446*^9, 3.9727553830912704`*^9, 
+   3.972756077408598*^9, 3.9727561830870724`*^9, {3.972756230138445*^9, 
+   3.972756261916151*^9}, 3.9727564872781124`*^9, 3.9727566372372494`*^9, 
+   3.9732201027317905`*^9, 3.9732263170806465`*^9, 3.9732265081479836`*^9, 
+   3.9732266390188065`*^9, 3.9732273861279144`*^9, {3.9732292701973686`*^9, 
+   3.9732292831572304`*^9}, 3.9732327525188713`*^9, 3.97323284173263*^9},
+ CellLabel->
+  "During evaluation of \
+In[87]:=",ExpressionUUID->"150513b8-fbe7-2341-9c3c-f30edae42e79"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Letzte 10 Eigenwerte: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"20.140704\"\>",
+        ShowStringCharacters->False],
+       20.14070379675655,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"20.989676\"\>",
+        ShowStringCharacters->False],
+       20.989676451569004`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"21.009652\"\>",
+        ShowStringCharacters->False],
+       21.009651709082483`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"22.163463\"\>",
+        ShowStringCharacters->False],
+       22.163463414008344`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"22.763957\"\>",
+        ShowStringCharacters->False],
+       22.76395681613967,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"25.448140\"\>",
+        ShowStringCharacters->False],
+       25.448139996613836`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"25.596448\"\>",
+        ShowStringCharacters->False],
+       25.59644830853126,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"25.793036\"\>",
+        ShowStringCharacters->False],
+       25.793035889351472`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"25.907891\"\>",
+        ShowStringCharacters->False],
+       25.907891408693388`,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ], ",", 
+     TagBox[
+      InterpretationBox[
+       StyleBox["\<\"27.615245\"\>",
+        ShowStringCharacters->False],
+       27.61524471169058,
+       AutoDelete->True],
+      NumberForm[#, {
+        DirectedInfinity[1], 6}]& ]}], "}"}]}],
+  SequenceForm["Letzte 10 Eigenwerte: ", {
+    NumberForm[20.14070379675655, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[20.989676451569004`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[21.009651709082483`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[22.163463414008344`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[22.76395681613967, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[25.448139996613836`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[25.59644830853126, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[25.793035889351472`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[25.907891408693388`, {
+      DirectedInfinity[1], 6}], 
+    NumberForm[27.61524471169058, {
+      DirectedInfinity[1], 6}]}],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9727483395020084`*^9, 3.9727534317417927`*^9, {3.972754155299076*^9, 
+   3.9727541641978626`*^9}, {3.972754847687172*^9, 3.9727548569962597`*^9}, {
+   3.972754959462227*^9, 3.9727549894555817`*^9}, {3.9727550503507977`*^9, 
+   3.97275507011594*^9}, 3.972755267667446*^9, 3.9727553830912704`*^9, 
+   3.972756077408598*^9, 3.9727561830870724`*^9, {3.972756230138445*^9, 
+   3.972756261916151*^9}, 3.9727564872781124`*^9, 3.9727566372372494`*^9, 
+   3.9732201027317905`*^9, 3.9732263170806465`*^9, 3.9732265081479836`*^9, 
+   3.9732266390188065`*^9, 3.9732273861279144`*^9, {3.9732292701973686`*^9, 
+   3.9732292831572304`*^9}, 3.9732327525188713`*^9, 3.973232841748295*^9},
+ CellLabel->
+  "During evaluation of \
+In[87]:=",ExpressionUUID->"79803ba6-929b-b24c-981c-7117bddc5ddd"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1016.25, 606.75},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"14.1 for Microsoft Windows (64-bit) (July 16, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"64f6c136-0a57-4843-8d61-bad993e8d2d1"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 6108, 162, 675, "Input",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"],
+Cell[CellGroupData[{
+Cell[6709, 188, 977, 17, 22, "Print",ExpressionUUID->"22f8671c-85ae-8b4c-8cdd-5ff78739da4d"],
+Cell[7689, 207, 4018, 119, 22, "Print",ExpressionUUID->"150513b8-fbe7-2341-9c3c-f30edae42e79"],
+Cell[11710, 328, 4023, 119, 22, "Print",ExpressionUUID->"79803ba6-929b-b24c-981c-7117bddc5ddd"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
