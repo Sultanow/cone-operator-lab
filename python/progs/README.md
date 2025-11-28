@@ -25,3 +25,7 @@ sudo apt update
 sudo apt install gmsh -y
 pip install gmsh
 ```
+
+# Run the programs
+
+First generate the mesh via `python make_ellipsoid_mesh.py` and then calculate the eigenvalues via `python ellipsoid_eigs.py` or `mpirun -n 1 python ellipsoid_eigs.py`.
