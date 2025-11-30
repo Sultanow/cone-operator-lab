@@ -137,19 +137,19 @@ def compute_ellipsoid_eigenvalues(
     eps.setOperators(A_sub, M_sub)
     eps.setProblemType(SLEPc.EPS.ProblemType.GHEP)
     eps.setWhichEigenpairs(SLEPc.EPS.Which.SMALLEST_REAL)
-
-    # Robuster iterativer Solver
     eps.setType(SLEPc.EPS.Type.KRYLOVSCHUR)
 
-    # Kein Shift-and-Invert, nur einfacher Shift (σ = 0)
+    # Spektraltransformation: einfacher Shift (kein explizites Shift-and-Invert)
     st = eps.getST()
     st.setType(SLEPc.ST.Type.SHIFT)
     st.setShift(0.0)
 
-    # Iterativer linearer Solver statt LU/MUMPS
-    opts = PETSc.Options()
-    opts["st_ksp_type"] = "cg"
-    opts["st_pc_type"] = "gamg"
+    # KSP/PC des ST explizit auf CG+GAMG setzen
+    ksp = st.getKSP()
+    ksp.setType(PETSc.KSP.Type.CG)
+    pc = ksp.getPC()
+    pc.setType(PETSc.PC.Type.GAMG)
+    # pc.setMGLevels(3)
 
     eps.setDimensions(nev=num_eigs, ncv=PETSc.DECIDE)
     eps.setTolerances(1e-6, 3000)
@@ -158,7 +158,6 @@ def compute_ellipsoid_eigenvalues(
         print("Löse Eigenwertproblem für", num_eigs, "Eigenwerte ...")
 
     eps.solve()
-
 
     nconv = eps.getConverged()
     k = min(nconv, num_eigs)
