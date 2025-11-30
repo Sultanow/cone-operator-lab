@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      9753,        238]
-NotebookOptionsPosition[      9137,        218]
-NotebookOutlinePosition[      9540,        234]
-CellTagsIndexPosition[      9497,        231]
+NotebookDataLength[      8341,        196]
+NotebookOptionsPosition[      7725,        176]
+NotebookOutlinePosition[      8128,        192]
+CellTagsIndexPosition[      8085,        189]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -21,102 +21,59 @@ Notebook[{
 
 Cell[CellGroupData[{
 Cell[BoxData[{
+ RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], "\n", 
  RowBox[{
-  RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], "\[IndentingNewLine]", 
-  "\n", 
+  RowBox[{"Needs", "[", "\"\<NDSolve`FEM`\>\"", "]"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]", 
   RowBox[{"(*", 
-   RowBox[{"1.", " ", "Geometrie", " ", "definieren"}], "*)"}]}], "\n", 
- RowBox[{
-  RowBox[{"a", "=", "1.0"}], ";"}], "\n", 
- RowBox[{
-  RowBox[{"b", "=", "1.5"}], ";"}], "\n", 
- RowBox[{
-  RowBox[{"c", "=", "2.3"}], ";"}], "\n", 
- RowBox[{
-  RowBox[{"ellipsoidRegion", "=", 
-   RowBox[{"Ellipsoid", "[", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"a", ",", "b", ",", "c"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   RowBox[{"ACHTUNG", ":", 
+    RowBox[{"Pfad", " ", "zur", " ", "Datei", " ", 
+     RowBox[{"anpassen", "!"}]}]}], "*)"}]}], "\n", 
  RowBox[{
   RowBox[{
-   RowBox[{"Needs", "[", "\"\<NDSolve`FEM`\>\"", "]"}], ";"}], 
-  "\[IndentingNewLine]", "\n", 
-  RowBox[{"(*", 
-   RowBox[{"Mesh", " ", "erzeugen"}], "*)"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"mesh", "=", 
-   RowBox[{"ToElementMesh", "[", 
-    RowBox[{"ellipsoidRegion", ",", 
-     RowBox[{"MaxCellMeasure", "->", "0.001"}], ",", 
-     RowBox[{"\"\<MeshOrder\>\"", "->", "2"}]}], "]"}]}], ";"}], "\n", 
- RowBox[{
-  RowBox[{
-   RowBox[{"numEigs", "=", "1000"}], ";"}], "\n"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"\[Lambda]list", "=", 
-   RowBox[{"NDEigenvalues", "[", "\[IndentingNewLine]", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{
-       RowBox[{"-", 
-        RowBox[{"Laplacian", "[", 
-         RowBox[{
-          RowBox[{"u", "[", 
-           RowBox[{"x", ",", "y", ",", "z"}], "]"}], ",", 
-          RowBox[{"{", 
-           RowBox[{"x", ",", "y", ",", "z"}], "}"}]}], "]"}]}], ",", 
-       RowBox[{"DirichletCondition", "[", 
-        RowBox[{
-         RowBox[{
-          RowBox[{"u", "[", 
-           RowBox[{"x", ",", "y", ",", "z"}], "]"}], "==", "0"}], ",", 
-         "True"}], "]"}]}], "}"}], ",", "\[IndentingNewLine]", 
-     RowBox[{"u", "[", 
-      RowBox[{"x", ",", "y", ",", "z"}], "]"}], ",", "\[IndentingNewLine]", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{"x", ",", "y", ",", "z"}], "}"}], "\[Element]", "mesh"}], ",", 
-     "\[IndentingNewLine]", "numEigs", ",", "\[IndentingNewLine]", 
-     RowBox[{"Method", "->", 
-      RowBox[{"{", 
-       RowBox[{"\"\<Eigensystem\>\"", "->", 
-        RowBox[{"{", 
-         RowBox[{"\"\<Arnoldi\>\"", ",", " ", 
-          RowBox[{"\"\<MaxIterations\>\"", "->", " ", "20000"}]}], "}"}]}], 
-       "}"}]}]}], "\[IndentingNewLine]", 
-    RowBox[{"(*", 
-     RowBox[{"Method", "->", 
-      RowBox[{"{", 
-       RowBox[{"\"\<Eigensystem\>\"", "->", "\"\<Direct\>\""}], "}"}]}], 
-     "*)"}], "\[IndentingNewLine]", "]"}]}], ";"}], "\n", 
- RowBox[{
-  RowBox[{
-   RowBox[{"\[Lambda]sorted", "=", 
-    RowBox[{"Sort", "@", "\[Lambda]list"}]}], ";"}], "\[IndentingNewLine]", 
-  "\n", 
-  RowBox[{"(*", 
    RowBox[{
-   "2.", " ", "Ausgabe", " ", "der", " ", "Eigenwerte", " ", "erzwingen"}], 
-   "*)"}]}], "\[IndentingNewLine]", 
+   "eigenvalueFilePath", "=", 
+    "\"\<C:/Users/sulta/git/cone-operator-lab/mathematica/ellipsoid_eigs_a1_\
+b1.5_c2.3_arnoldi.txt\>\""}], ";"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"Einlesen", " ", "der", " ", "1000", " ", "Eigenwerte", " ", 
+    RowBox[{"(", 
+     RowBox[{"das", " ", "\"\<gemessene\>\"", " ", "Spektrum"}], ")"}]}], 
+   "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{"targetEigenvalues", "=", 
+   RowBox[{
+    RowBox[{"Import", "[", 
+     RowBox[{"eigenvalueFilePath", ",", "\"\<Table\>\""}], "]"}], "//", 
+    "Flatten"}]}], ";"}], "\n", 
  RowBox[{
   RowBox[{
-  "Print", "[", "\"\<--- Erste 20 Dirichlet-Eigenwerte (3D Volumen) ---\>\"", 
-   "]"}], ";"}], "\n", 
+   RowBox[{"numEigs", "=", 
+    RowBox[{"Length", "[", "targetEigenvalues", "]"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
+ RowBox[{"Print", "[", 
+  RowBox[{
+  "\"\<Anzahl der eingelesenen Eigenwerte (N): \>\"", ",", "numEigs"}], 
+  "]"}], "\n", 
+ RowBox[{"Print", "[", 
+  RowBox[{"\"\<Kleinster Eigenwert: \>\"", ",", 
+   RowBox[{"First", "@", "targetEigenvalues"}]}], "]"}], "\n", 
  RowBox[{
   RowBox[{"Print", "[", 
-   RowBox[{
-    RowBox[{"Take", "[", 
-     RowBox[{"\[Lambda]sorted", ",", "20"}], "]"}], "//", "Column"}], "]"}], 
-  ";"}], "\[IndentingNewLine]", 
+   RowBox[{"\"\<Gr\[ODoubleDot]\[SZ]ter Eigenwert: \>\"", ",", 
+    RowBox[{"Last", "@", "targetEigenvalues"}]}], "]"}], 
+  "\[IndentingNewLine]", "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"Definierte", " ", "Achsen", " ", "des", " ", "Originals", " ", 
+    RowBox[{"(", 
+     RowBox[{"zum", " ", "Vergleich"}], ")"}]}], "*)"}]}], "\n", 
  RowBox[{
-  RowBox[{"Export", "[", 
-   RowBox[{
-   "\"\<C:\\\\Users\\\\sulta\\\\git\\\\cone-operator-lab\\\\mathematica\\\\\
-ellipsoid_eigs_a1_b1.5_c2.3.txt\>\"", ",", "\[Lambda]sorted", ",", 
-    "\"\<Table\>\""}], "]"}], ";"}], "\n"}], "Input",
+  RowBox[{"trueA", "=", "1.0"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"trueB", "=", "1.5"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"trueC", "=", "2.3"}], ";"}], "\n"}], "Input",
  CellChangeTimes->{{3.972748261297674*^9, 3.972748321548092*^9}, {
    3.972753412649185*^9, 3.972753418239153*^9}, {3.9727540475343704`*^9, 
    3.9727540595326233`*^9}, {3.9727540975873833`*^9, 
@@ -161,8 +118,9 @@ ellipsoid_eigs_a1_b1.5_c2.3.txt\>\"", ",", "\[Lambda]sorted", ",",
    3.973492935351839*^9}, 3.973492991098015*^9, {3.973500919445383*^9, 
    3.9735010607282486`*^9}, {3.97350172234824*^9, 3.9735017361641273`*^9}, {
    3.973504145012804*^9, 3.973504171621256*^9}, {3.973504335080019*^9, 
-   3.973504362898155*^9}, {3.9735045747246857`*^9, 
-   3.9735046059046135`*^9}},ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-\
+   3.973504362898155*^9}, {3.9735045747246857`*^9, 3.9735046059046135`*^9}, {
+   3.9735049181633434`*^9, 
+   3.973504948117136*^9}},ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-\
 b7eb9f83e8a1"],
 
 Cell[CellGroupData[{
@@ -234,10 +192,10 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[576, 22, 6719, 143, 721, "Input",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"],
+Cell[576, 22, 5307, 101, 484, "Input",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"],
 Cell[CellGroupData[{
-Cell[7320, 169, 543, 9, 22, "Print",ExpressionUUID->"b99bcc9c-c9b2-0543-be69-c5c82b7e3e45"],
-Cell[7866, 180, 1243, 34, 313, "Print",ExpressionUUID->"91714e07-b221-7d4f-9124-778bad8fb5b7"]
+Cell[5908, 127, 543, 9, 22, "Print",ExpressionUUID->"b99bcc9c-c9b2-0543-be69-c5c82b7e3e45"],
+Cell[6454, 138, 1243, 34, 313, "Print",ExpressionUUID->"91714e07-b221-7d4f-9124-778bad8fb5b7"]
 }, Open  ]]
 }, Open  ]]
 }
