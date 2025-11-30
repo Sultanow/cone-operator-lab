@@ -134,7 +134,6 @@ def compute_ellipsoid_eigenvalues(
 
     # 4. Eigenwertproblem A_sub x = λ M_sub x
     eps = SLEPc.EPS().create(comm)
-    eps.setComputeEigenvectors(False)
     eps.setOperators(A_sub, M_sub)
     eps.setProblemType(SLEPc.EPS.ProblemType.GHEP)
     eps.setWhichEigenpairs(SLEPc.EPS.Which.SMALLEST_REAL)
@@ -152,8 +151,8 @@ def compute_ellipsoid_eigenvalues(
     opts["st_ksp_type"] = "cg"
     opts["st_pc_type"] = "gamg"
 
-    eps.setDimensions(num_eigs, PETSc.DECIDE)
-    eps.setTolerances(1e-7, 5000)
+    eps.setDimensions(nev=num_eigs, ncv=PETSc.DECIDE)
+    eps.setTolerances(1e-6, 3000)
 
     if rank == 0:
         print("Löse Eigenwertproblem für", num_eigs, "Eigenwerte ...")
