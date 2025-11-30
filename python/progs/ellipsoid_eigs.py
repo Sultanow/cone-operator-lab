@@ -137,22 +137,26 @@ def compute_ellipsoid_eigenvalues(
     eps.setOperators(A_sub, M_sub)
     eps.setProblemType(SLEPc.EPS.ProblemType.GHEP)
     eps.setWhichEigenpairs(SLEPc.EPS.Which.SMALLEST_REAL)
-    eps.setType(SLEPc.EPS.Type.KRYLOVSCHUR)
 
-    # Spektraltransformation: einfacher Shift (kein explizites Shift-and-Invert)
+    # Verwende LOBPCG, speziell für SPD-GHEP gut geeignet
+    eps.setType(SLEPc.EPS.Type.LOBPCG)
+
+    # Preconditioner-basiertes Spektral-Transformationsschema
     st = eps.getST()
-    st.setType(SLEPc.ST.Type.SHIFT)
-    st.setShift(0.0)
+    st.setType(SLEPc.ST.Type.PRECOND)
 
-    # KSP/PC des ST explizit auf CG+GAMG setzen
+    # KSP/PC für den Preconditioner
     ksp = st.getKSP()
     ksp.setType(PETSc.KSP.Type.CG)
     pc = ksp.getPC()
     pc.setType(PETSc.PC.Type.GAMG)
-    # pc.setMGLevels(3)
 
-    eps.setDimensions(nev=num_eigs, ncv=PETSc.DECIDE)
-    eps.setTolerances(1e-6, 3000)
+    # optional etwas schärfere Toleranzen
+    ksp.setTolerances(rtol=1e-8)
+
+    # Größe des Suchraums moderat überdimensionieren
+    eps.setDimensions(nev=num_eigs, ncv=3 * num_eigs)
+    eps.setTolerances(1e-7, 500)
 
     if rank == 0:
         print("Löse Eigenwertproblem für", num_eigs, "Eigenwerte ...")
