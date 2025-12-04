@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[     10745,        250]
-NotebookOptionsPosition[     10129,        230]
-NotebookOutlinePosition[     10531,        246]
-CellTagsIndexPosition[     10488,        243]
+NotebookDataLength[     10802,        252]
+NotebookOptionsPosition[     10184,        232]
+NotebookOutlinePosition[     10588,        248]
+CellTagsIndexPosition[     10545,        245]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -21,8 +21,11 @@ Notebook[{
 
 Cell[CellGroupData[{
 Cell[BoxData[{
+ RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], "\n", 
  RowBox[{
-  RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], "\n", "\n", 
+  RowBox[{
+   RowBox[{"Needs", "[", "\"\<NDSolve`FEM`\>\"", "]"}], ";"}], "\n", 
+  "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{"1.", " ", "Geometrie", " ", "definieren"}], "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
@@ -32,16 +35,14 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{"c", "=", "2.3"}], ";"}], "\n", 
  RowBox[{
-  RowBox[{"ellipsoidRegion", "=", 
-   RowBox[{"Ellipsoid", "[", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"a", ",", "b", ",", "c"}], "}"}]}], "]"}]}], ";"}], "\n", 
- RowBox[{
   RowBox[{
-   RowBox[{"Needs", "[", "\"\<NDSolve`FEM`\>\"", "]"}], ";"}], 
+   RowBox[{"ellipsoidRegion", "=", 
+    RowBox[{"Ellipsoid", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"a", ",", "b", ",", "c"}], "}"}]}], "]"}]}], ";"}], 
   "\[IndentingNewLine]", "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{"Mesh", " ", "erzeugen"}], "*)"}]}], "\n", 
@@ -56,7 +57,7 @@ Cell[BoxData[{
      RowBox[{"\"\<MeshOrder\>\"", "->", "2"}]}], "]"}]}], ";"}], "\n", 
  RowBox[{
   RowBox[{
-   RowBox[{"numEigs", "=", "1800"}], ";"}], "\[IndentingNewLine]"}], "\n", 
+   RowBox[{"numEigs", "=", "1800"}], ";"}], "\n"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"\[Lambda]list", "=", 
    RowBox[{"NDEigenvalues", "[", "\[IndentingNewLine]", 
@@ -97,8 +98,8 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"\[Lambda]sorted", "=", 
-    RowBox[{"Sort", "@", "\[Lambda]list"}]}], ";"}], "\n", 
-  "\[IndentingNewLine]", 
+    RowBox[{"Sort", "@", "\[Lambda]list"}]}], ";"}], "\[IndentingNewLine]", 
+  "\n", 
   RowBox[{"(*", 
    RowBox[{
    "2.", " ", "Ausgabe", " ", "der", " ", "Eigenwerte", " ", "erzwingen"}], 
@@ -170,8 +171,9 @@ txt\>\"", ",", "\[Lambda]sorted", ",", "\"\<Table\>\""}], "]"}],
    3.9737418715635033`*^9, 3.9737418716161575`*^9}, {3.9737732846437817`*^9, 
    3.973773285234745*^9}, {3.973829373989603*^9, 3.9738294650408535`*^9}, {
    3.973829586520767*^9, 3.973829612773136*^9}, {3.9738404735253754`*^9, 
-   3.973840480407364*^9}},
- CellLabel->"In[51]:=",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"],
+   3.973840480407364*^9}, {3.973857738251871*^9, 
+   3.973857741740244*^9}},ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-\
+b7eb9f83e8a1"],
 
 Cell[CellGroupData[{
 
@@ -228,8 +230,8 @@ In[51]:=",ExpressionUUID->"e9d8c9aa-4d4a-1643-9837-cbe1bf01c412"]
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{1280, 732},
-WindowMargins->{{-5.5, Automatic}, {Automatic, -5.5}},
+WindowSize->{1920, 1011.75},
+WindowMargins->{{1020, Automatic}, {Automatic, -6}},
 FrontEndVersion->"14.3 for Microsoft Windows (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"64f6c136-0a57-4843-8d61-bad993e8d2d1"
@@ -246,10 +248,10 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[576, 22, 7467, 151, 899, "Input",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"],
+Cell[576, 22, 7522, 153, 873, "Input",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"],
 Cell[CellGroupData[{
-Cell[8068, 177, 669, 11, 22, "Print",ExpressionUUID->"fb231dd1-e98c-3643-8c5e-2c2ae093ef19"],
-Cell[8740, 190, 1361, 36, 313, "Print",ExpressionUUID->"e9d8c9aa-4d4a-1643-9837-cbe1bf01c412"]
+Cell[8123, 179, 669, 11, 22, "Print",ExpressionUUID->"fb231dd1-e98c-3643-8c5e-2c2ae093ef19"],
+Cell[8795, 192, 1361, 36, 313, "Print",ExpressionUUID->"e9d8c9aa-4d4a-1643-9837-cbe1bf01c412"]
 }, Open  ]]
 }, Open  ]]
 }
