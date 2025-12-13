@@ -1,3 +1,8 @@
+# ------------------------------------------------------------
+# Run the program
+# cd c:/Users/sulta/git/cone-operator-lab/python/progs/high_precision
+# c:/Users/sulta/AppData/Local/Programs/Python/Python310/python eigs_scipy.py
+# ------------------------------------------------------------
 import os
 import numpy as np
 from scipy.sparse.linalg import eigsh
@@ -9,7 +14,7 @@ from laplace_ellipsoid import build_laplace_ellipsoid
 # Parameter
 # ------------------------------------------------------------
 nx = ny = nz = 31
-num_ev = 100
+num_ev = 400
 sigma = 0.0
 
 out_dir = r"C:\Users\sulta\git\cone-operator-lab\data\eigenvalues"
