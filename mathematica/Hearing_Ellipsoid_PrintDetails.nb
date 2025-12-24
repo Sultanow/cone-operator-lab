@@ -1,0 +1,173 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      5716,        165]
+NotebookOptionsPosition[      5228,        148]
+NotebookOutlinePosition[      5630,        164]
+CellTagsIndexPosition[      5587,        161]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"a", ",", "b", ",", "c"}], "}"}], "=", 
+   RowBox[{"SetPrecision", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1.", ",", "1.5", ",", "2.3"}], "}"}], ",", "40"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Vol", "=", 
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{"4", " ", 
+      RowBox[{"Pi", "/", "3"}]}], ")"}], " ", "a", " ", "b", " ", "c"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"AreaE", "=", 
+   RowBox[{"NIntegrate", "[", 
+    RowBox[{
+     RowBox[{"Norm", "@", 
+      RowBox[{"Cross", "[", 
+       RowBox[{
+        RowBox[{"D", "[", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"a", " ", 
+             RowBox[{"Sin", "[", "\[Theta]", "]"}], " ", 
+             RowBox[{"Cos", "[", "\[CurlyPhi]", "]"}]}], ",", 
+            RowBox[{"b", " ", 
+             RowBox[{"Sin", "[", "\[Theta]", "]"}], " ", 
+             RowBox[{"Sin", "[", "\[CurlyPhi]", "]"}]}], ",", 
+            RowBox[{"c", " ", 
+             RowBox[{"Cos", "[", "\[Theta]", "]"}]}]}], "}"}], ",", 
+          "\[Theta]"}], "]"}], ",", 
+        RowBox[{"D", "[", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"a", " ", 
+             RowBox[{"Sin", "[", "\[Theta]", "]"}], " ", 
+             RowBox[{"Cos", "[", "\[CurlyPhi]", "]"}]}], ",", 
+            RowBox[{"b", " ", 
+             RowBox[{"Sin", "[", "\[Theta]", "]"}], " ", 
+             RowBox[{"Sin", "[", "\[CurlyPhi]", "]"}]}], ",", 
+            RowBox[{"c", " ", 
+             RowBox[{"Cos", "[", "\[Theta]", "]"}]}]}], "}"}], ",", 
+          "\[CurlyPhi]"}], "]"}]}], "]"}]}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\[Theta]", ",", "0", ",", "Pi"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\[CurlyPhi]", ",", "0", ",", 
+       RowBox[{"2", " ", "Pi"}]}], "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"IntH", "=", 
+   RowBox[{"2", " ", "Pi", " ", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"a", " ", "b"}], "+", 
+      RowBox[{"a", " ", "c"}], "+", 
+      RowBox[{"b", " ", "c"}]}], ")"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"A0", "=", 
+   RowBox[{"Vol", "/", 
+    RowBox[{"(", 
+     RowBox[{"6", " ", 
+      RowBox[{"Pi", "^", "2"}]}], ")"}]}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"A1D", "=", 
+   RowBox[{
+    RowBox[{"-", "AreaE"}], "/", 
+    RowBox[{"(", 
+     RowBox[{"16", " ", "Pi"}], ")"}]}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"A1N", "=", 
+   RowBox[{"AreaE", "/", 
+    RowBox[{"(", 
+     RowBox[{"16", " ", "Pi"}], ")"}]}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"A2", "=", 
+   RowBox[{"IntH", "/", 
+    RowBox[{"(", 
+     RowBox[{"12", " ", 
+      RowBox[{"Pi", "^", "2"}]}], ")"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"<|", 
+  RowBox[{
+   RowBox[{"\"\<Volume\>\"", "->", "Vol"}], ",", 
+   RowBox[{"\"\<Area\>\"", "->", "AreaE"}], ",", 
+   RowBox[{"\"\<\[Integral]\[PartialD]E H\:0304 dS\>\"", "->", "IntH"}], ",", 
+   RowBox[{"\"\<A0\>\"", "->", "A0"}], ",", 
+   RowBox[{"\"\<A1 (Dirichlet)\>\"", "->", "A1D"}], ",", 
+   RowBox[{"\"\<A1 (Neumann)\>\"", "->", "A1N"}], ",", 
+   RowBox[{"\"\<A2\>\"", "->", "A2"}]}], "|>"}], "\n"}], "Input",
+ CellChangeTimes->{{3.9755676861013737`*^9, 3.975567726477598*^9}, {
+   3.9755677716174126`*^9, 3.9755678249443817`*^9}, 3.9755682353660297`*^9, {
+   3.9755709286023064`*^9, 3.975570959117996*^9}},
+ CellLabel->
+  "In[351]:=",ExpressionUUID->"99d96c5a-c0e8-b041-bc34-fec90736a620"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"Volume\"\>", "\[Rule]", 
+    "14.4513262065130477808102402003235054339498897673742835807114`39.\
+52287874528034"}], ",", 
+   RowBox[{"\<\"Area\"\>", "\[Rule]", "31.3553824550437`"}], ",", 
+   RowBox[{"\<\"\[Integral]\[PartialD]E H\:0304 dS\"\>", "\[Rule]", 
+    "45.5530934770519991674135306506472722374662326165610264147033`39.\
+69897000433602"}], ",", 
+   RowBox[{"\<\"A0\"\>", "\[Rule]", 
+    "0.2440375794075728293312236581281270155488636110136442385666`39.\
+52287874528034"}], ",", 
+   RowBox[{"\<\"A1 (Dirichlet)\"\>", "\[Rule]", 
+    RowBox[{"-", "0.6237955137821367`"}]}], ",", 
+   RowBox[{"\<\"A1 (Neumann)\"\>", "\[Rule]", "0.6237955137821367`"}], ",", 
+   RowBox[{"\<\"A2\"\>", "\[Rule]", 
+    "0.384624445805413704548471454346415950453309336637283522582`39.\
+69897000433602"}]}], "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{3.9755678562103767`*^9, 3.9755679698670177`*^9, 
+  3.9755682400093193`*^9, 3.9755709683657513`*^9, 3.975571010001095*^9},
+ CellLabel->
+  "Out[359]=",ExpressionUUID->"6931c7bd-94c1-f148-b167-d68e0b19e05f"]
+}, Open  ]]
+},
+WindowSize->{1016.25, 606.75},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"14.3 for Microsoft Windows (64-bit) (July 8, 2025)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"350c894e-92ae-ae4a-b8b1-4fda3e14dcfc"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 3509, 99, 385, "Input",ExpressionUUID->"99d96c5a-c0e8-b041-bc34-fec90736a620"],
+Cell[4088, 123, 1124, 22, 94, "Output",ExpressionUUID->"6931c7bd-94c1-f148-b167-d68e0b19e05f"]
+}, Open  ]]
+}
+]
+*)
+
