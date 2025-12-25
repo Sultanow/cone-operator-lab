@@ -1,0 +1,218 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      7642,        210]
+NotebookOptionsPosition[      7149,        193]
+NotebookOutlinePosition[      7554,        209]
+CellTagsIndexPosition[      7511,        206]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], ";"}], "\n"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"a", ",", "b", ",", "c"}], "}"}], "=", 
+   RowBox[{"SetPrecision", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1.", ",", "1.5", ",", "2.3"}], "}"}], ",", "40"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Vol", "=", 
+   RowBox[{"a", " ", "b", " ", "c"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"AreaB", "=", 
+   RowBox[{"2", " ", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"a", " ", "b"}], "+", 
+      RowBox[{"a", " ", "c"}], "+", 
+      RowBox[{"b", " ", "c"}]}], ")"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"A0", "=", 
+   RowBox[{"Vol", "/", 
+    RowBox[{"(", 
+     RowBox[{"6", " ", 
+      RowBox[{"Pi", "^", "2"}]}], ")"}]}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"A1D", "=", 
+   RowBox[{
+    RowBox[{"-", "AreaB"}], "/", 
+    RowBox[{"(", 
+     RowBox[{"16", " ", "Pi"}], ")"}]}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"A1N", "=", 
+    RowBox[{"AreaB", "/", 
+     RowBox[{"(", 
+      RowBox[{"16", " ", "Pi"}], ")"}]}]}], ";"}], "\n", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Spectral", "/", "Dirichlet"}], " ", 
+    RowBox[{"box", ":", 
+     RowBox[{"exact", " ", 
+      RowBox[{"t", "^", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"-", "1"}], "/", "2"}], "}"}]}], " ", "coefficient", " ", 
+      "from", " ", "product", " ", "heat", " ", "trace"}]}]}], "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"alpha2Weyl", "=", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"a", "+", "b", "+", "c"}], ")"}], "/", 
+     RowBox[{"(", 
+      RowBox[{"8", " ", 
+       RowBox[{"Sqrt", "[", "Pi", "]"}]}], ")"}]}]}], ";"}], "\n", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"convert", " ", "alpha2"}], "->", 
+    RowBox[{
+     RowBox[{
+     "A2", " ", "in", " ", "the", " ", "same", " ", "normalization", " ", 
+      "used", " ", "in", " ", "the", " ", "heat"}], "-", "fit"}]}], 
+   "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"A2Weyl", "=", 
+    RowBox[{"alpha2Weyl", " ", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{"4", " ", "Pi"}], ")"}], "^", 
+       RowBox[{"(", 
+        RowBox[{"3", "/", "2"}], ")"}]}], "/", 
+      RowBox[{"(", 
+       RowBox[{"4", " ", 
+        RowBox[{"Pi", "^", "3"}]}], ")"}]}]}]}], ";"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Steiner", "/", "edge"}], "-", 
+    RowBox[{"equiv", " ", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"geometric", " ", "surrogate"}], ";", 
+       RowBox[{
+       "not", " ", "the", " ", "spectral", " ", "Weyl", " ", "term", " ", 
+        "for", " ", "polyhedra"}]}], ")"}]}]}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"IntHSteiner", "=", 
+   RowBox[{"Pi", " ", 
+    RowBox[{"(", 
+     RowBox[{"a", "+", "b", "+", "c"}], ")"}]}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"IntHWeyl", "=", 
+   RowBox[{"12", " ", 
+    RowBox[{"Pi", "^", "2"}], " ", "A2Weyl"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"A2SteinerBox", "=", 
+    RowBox[{"IntHSteiner", "/", 
+     RowBox[{"(", 
+      RowBox[{"12", " ", 
+       RowBox[{"Pi", "^", "2"}]}], ")"}]}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
+ RowBox[{
+  RowBox[{"<|", 
+   RowBox[{
+    RowBox[{"\"\<A0\>\"", "->", "A0"}], ",", 
+    RowBox[{"\"\<A1 (Dirichlet)\>\"", "->", "A1D"}], ",", 
+    RowBox[{"\"\<A1 (Neumann)\>\"", "->", "A1N"}], ",", 
+    RowBox[{"\"\<A2_Box_Steiner\>\"", "->", "A2SteinerBox"}], ",", 
+    RowBox[{"\"\<IntH_Steiner\>\"", "->", "IntHSteiner"}], ",", 
+    RowBox[{"\"\<alpha2_Weyl (Dirichlet box)\>\"", "->", "alpha2Weyl"}], ",", 
+    RowBox[{"\"\<A2_Weyl (from alpha2)\>\"", "->", "A2Weyl"}], ",", 
+    RowBox[{"\"\<IntH_Weyl\>\"", "->", "IntHWeyl"}]}], "|>"}], "\n", "\n", 
+  "\n"}], "\n"}], "Input",
+ CellChangeTimes->{{3.9755676861013737`*^9, 3.975567726477598*^9}, {
+   3.9755677716174126`*^9, 3.9755678249443817`*^9}, 3.9755682353660297`*^9, {
+   3.9755709286023064`*^9, 3.975570959117996*^9}, {3.9755859806887226`*^9, 
+   3.975586005795883*^9}, {3.975591634343054*^9, 3.975591710846697*^9}, {
+   3.9755917705152817`*^9, 3.9755918207831764`*^9}, 3.9756042384637737`*^9, {
+   3.9756042940186043`*^9, 3.9756043239589214`*^9}, {3.9756043565095024`*^9, 
+   3.975604427817442*^9}, {3.9756070845250244`*^9, 3.975607179680706*^9}, {
+   3.97560728674559*^9, 3.9756073283380375`*^9}, 3.975608218683628*^9, 
+   3.975608425168394*^9, {3.97560845634124*^9, 3.975608477670164*^9}, {
+   3.9756416986581745`*^9, 3.9756417688529854`*^9}, {3.9756418826432247`*^9, 
+   3.975641888353756*^9}},
+ CellLabel->
+  "In[530]:=",ExpressionUUID->"99d96c5a-c0e8-b041-bc34-fec90736a620"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"A0\"\>", "\[Rule]", 
+    "0.0582596805943442140806662528657063651973645081282640865675`39.\
+52287874528034"}], ",", 
+   RowBox[{"\<\"A1 (Dirichlet)\"\>", "\[Rule]", 
+    RowBox[{
+    "-", "0.2884683343540602784113535907598119628399820024779626419365`39.\
+69897000433602"}]}], ",", 
+   RowBox[{"\<\"A1 (Neumann)\"\>", "\[Rule]", 
+    "0.2884683343540602784113535907598119628399820024779626419365`39.\
+69897000433602"}], ",", 
+   RowBox[{"\<\"A2_Box_Steiner\"\>", "\[Rule]", 
+    "0.1273239544735162639031741492705794047349074218119345799531`40."}], ",", 
+   RowBox[{"\<\"IntH_Steiner\"\>", "\[Rule]", 
+    "15.079644737231006986561728558360509927467868382124906342793`40."}], ",", 
+   RowBox[{"\<\"alpha2_Weyl (Dirichlet box)\"\>", "\[Rule]", 
+    "0.3385137501286537596413223527685147214209639933259553661212`40."}], ",", 
+   RowBox[{"\<\"A2_Weyl (from alpha2)\"\>", "\[Rule]", 
+    "0.1215854203708053212330909173717861395125887422984181795961`40."}], ",", 
+   RowBox[{"\<\"IntH_Weyl\"\>", "\[Rule]", 
+    "14.3999999999999994670929481799248605966567993164062500000091`40."}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{
+  3.9755678562103767`*^9, 3.9755679698670177`*^9, 3.9755682400093193`*^9, 
+   3.9755709683657513`*^9, 3.975571010001095*^9, 3.9755860178712425`*^9, 
+   3.975591716266449*^9, 3.9755918236728096`*^9, 3.9756042429775257`*^9, {
+   3.975604328513771*^9, 3.975604438488924*^9}, 3.9756071833465805`*^9, 
+   3.9756072969936905`*^9, {3.9756073442448864`*^9, 3.975607355677458*^9}, 
+   3.975607960423113*^9, 3.975608221762142*^9, 3.975608429002348*^9, 
+   3.975608485030838*^9, 3.975641775334816*^9, 3.975641898142494*^9},
+ CellLabel->
+  "Out[542]=",ExpressionUUID->"8b633d21-3cc8-e94d-9d95-d2e74a470a66"]
+}, Open  ]]
+},
+WindowSize->{1013.25, 603},
+WindowMargins->{{Automatic, -1896}, {-39, Automatic}},
+FrontEndVersion->"14.3 for Microsoft Windows (64-bit) (July 8, 2025)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"350c894e-92ae-ae4a-b8b1-4fda3e14dcfc"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 4747, 133, 609, "Input",ExpressionUUID->"99d96c5a-c0e8-b041-bc34-fec90736a620"],
+Cell[5326, 157, 1807, 33, 127, "Output",ExpressionUUID->"8b633d21-3cc8-e94d-9d95-d2e74a470a66"]
+}, Open  ]]
+}
+]
+*)
+
