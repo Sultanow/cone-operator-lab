@@ -10,59 +10,24 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      7818,        176]
-NotebookOptionsPosition[      7458,        162]
-NotebookOutlinePosition[      7860,        178]
-CellTagsIndexPosition[      7817,        175]
+NotebookDataLength[      6715,        142]
+NotebookOptionsPosition[      6355,        128]
+NotebookOutlinePosition[      6757,        144]
+CellTagsIndexPosition[      6714,        141]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData[{
- RowBox[{
-  RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], "\[IndentingNewLine]", 
-  "\n", 
-  RowBox[{"(*", 
-   RowBox[{"1.", " ", "Geometrie", " ", "des", " ", "QUADERS"}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], "\n", 
  RowBox[{
   RowBox[{"a", "=", "1.0"}], ";"}], "\n", 
  RowBox[{
   RowBox[{"b", "=", "1.5"}], ";"}], "\n", 
  RowBox[{
-  RowBox[{
-   RowBox[{"c", "=", "2.3"}], ";"}], "\[IndentingNewLine]", 
-  "\[IndentingNewLine]", 
-  RowBox[{"(*", " ", 
-   RowBox[{
-    RowBox[{
-     RowBox[{
-     "Exakte", " ", "Eigenwerte", " ", "f\[UDoubleDot]r", " ", "eine", " ", 
-      "Box", " ", 
-      RowBox[{"(", "Dirichlet", ")"}]}], ":", "\[Lambda]"}], "=", 
-    RowBox[{
-     RowBox[{"Pi", "^", "2"}], "*", 
-     RowBox[{"(", 
-      RowBox[{
-       RowBox[{
-        RowBox[{"(", 
-         RowBox[{"nx", "/", "a"}], ")"}], "^", "2"}], "+", 
-       RowBox[{
-        RowBox[{"(", 
-         RowBox[{"ny", "/", "b"}], ")"}], "^", "2"}], "+", 
-       RowBox[{
-        RowBox[{"(", 
-         RowBox[{"nz", "/", "c"}], ")"}], "^", "2"}]}], ")"}]}]}], " ", 
-   "*)"}], "\[IndentingNewLine]"}], "\n", 
+  RowBox[{"c", "=", "2.3"}], ";"}], "\n", 
  RowBox[{
-  RowBox[{
-   RowBox[{"maxIdx", "=", "50"}], ";"}], " ", 
-  RowBox[{"(*", " ", 
-   RowBox[{
-    RowBox[{"ggf", ".", " ", "Erh\[ODoubleDot]hen"}], ",", " ", 
-    RowBox[{
-     RowBox[{"um", " ", "sicher"}], ">", 
-     RowBox[{"8000", " ", "Kombinationen", " ", "zu", " ", "finden"}]}]}], 
-   " ", "*)"}]}], "\n", 
+  RowBox[{"maxIdx", "=", "50"}], ";"}], "\n", 
  RowBox[{
   RowBox[{"eigenvalues", "=", 
    RowBox[{"Table", "[", 
@@ -88,19 +53,19 @@ Cell[BoxData[{
       RowBox[{"nz", ",", "1", ",", "maxIdx"}], "}"}]}], "]"}]}], 
   ";"}], "\n", 
  RowBox[{
-  RowBox[{"\[Lambda]sorted", "=", 
+  RowBox[{"lambdaSorted", "=", 
    RowBox[{
     RowBox[{"Sort", "[", 
      RowBox[{"Flatten", "[", "eigenvalues", "]"}], "]"}], "[", 
     RowBox[{"[", 
-     RowBox[{"1", ";;", "20000"}], "]"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+     RowBox[{"1", ";;", "20000"}], "]"}], "]"}]}], ";"}], "\n", 
  RowBox[{
   RowBox[{
    RowBox[{"Export", "[", 
     RowBox[{"\"\<C:\\\\Users\\\\sulta\\\\git\\\\cone-operator-lab\\\\data\\\\\
-eigenvalues\\\\box_a1.0_b1.5_c2.3_N20000.txt\>\"", ",", "\[Lambda]sorted", 
+eigenvalues\\\\box_a1.0_b1.5_c2.3_N20000.txt\>\"", ",", "lambdaSorted", 
      ",", "\"\<Table\>\""}], "]"}], ";"}], 
-  "\[IndentingNewLine]"}], "\n"}], "Input",
+  "\n"}], "\[IndentingNewLine]"}], "Input",
  CellChangeTimes->{{3.972748261297674*^9, 3.972748321548092*^9}, {
    3.972753412649185*^9, 3.972753418239153*^9}, {3.9727540475343704`*^9, 
    3.9727540595326233`*^9}, {3.9727540975873833`*^9, 
@@ -157,8 +122,9 @@ eigenvalues\\\\box_a1.0_b1.5_c2.3_N20000.txt\>\"", ",", "\[Lambda]sorted",
    3.9755862920306664`*^9}, 3.9755907014714108`*^9, {3.975592230564287*^9, 
    3.9755922309478493`*^9}, {3.9755923561981354`*^9, 
    3.9755924510991497`*^9}, {3.975594583003586*^9, 3.975594583435545*^9}, {
-   3.975738916168461*^9, 3.975738988599777*^9}},
- CellLabel->"In[1]:=",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"]
+   3.975738916168461*^9, 3.975738988599777*^9}, {3.9757418927003746`*^9, 
+   3.975741895293417*^9}},
+ CellLabel->"In[9]:=",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"]
 },
 WindowSize->{1016.25, 606.75},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
@@ -177,7 +143,7 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[554, 20, 6900, 140, 386, "Input",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"]
+Cell[554, 20, 5797, 106, 290, "Input",ExpressionUUID->"e17b0a34-6cc5-7e4e-80ca-b7eb9f83e8a1"]
 }
 ]
 *)
