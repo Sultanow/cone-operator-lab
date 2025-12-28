@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[     18512,        481]
-NotebookOptionsPosition[     17931,        463]
-NotebookOutlinePosition[     18329,        479]
-CellTagsIndexPosition[     18286,        476]
+NotebookDataLength[     18514,        480]
+NotebookOptionsPosition[     17933,        462]
+NotebookOutlinePosition[     18331,        478]
+CellTagsIndexPosition[     18288,        475]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -24,14 +24,14 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], ";"}], 
-  "\[IndentingNewLine]", "\n", 
+  "\[IndentingNewLine]", "\[IndentingNewLine]", 
   RowBox[{"(*", 
-   RowBox[{"1.", " ", "Daten", " ", "laden"}], "*)"}]}], "\[IndentingNewLine]", 
+   RowBox[{"1.", " ", "Daten", " ", "laden"}], "*)"}]}], "\n", 
  RowBox[{
   RowBox[{
   "path", "=", \
-"\"\<C:/Users/sulta/git/cone-operator-lab/data/eigenvalues/box_eigs_exact_\
-20000.txt\>\""}], ";"}], "\n", 
+"\"\<C:/Users/sulta/git/cone-operator-lab/data/eigenvalues/box_a1.0_b1.5_c2.3_\
+N20000.txt\>\""}], ";"}], "\n", 
  RowBox[{
   RowBox[{"eigs", "=", 
    RowBox[{"Sort", "@", 
@@ -46,13 +46,12 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"\[Lambda]N", "=", 
-    RowBox[{"Last", "[", "eigs", "]"}]}], ";"}], "\[IndentingNewLine]", 
-  "\[IndentingNewLine]", 
+    RowBox[{"Last", "[", "eigs", "]"}]}], ";"}], "\n", "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{
     RowBox[{
     "2.", " ", "Parameter", " ", "f\[UDoubleDot]r", " ", "die", " ", 
-     "Plateau"}], "-", "Suche"}], "*)"}], "\n", 
+     "Plateau"}], "-", "Suche"}], "*)"}], "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{
    "Wir", " ", "variieren", " ", "den", " ", "Faktor", " ", "f\[UDoubleDot]r",
@@ -143,9 +142,9 @@ Cell[BoxData[{
         RowBox[{"calculateA2", "[", "f", "]"}]}], "}"}], ",", 
       RowBox[{"{", 
        RowBox[{"f", ",", "tMinFactors"}], "}"}]}], "]"}]}], ";"}], 
-  "\[IndentingNewLine]", "\n", 
+  "\[IndentingNewLine]", "\[IndentingNewLine]", 
   RowBox[{"(*", 
-   RowBox[{"3.", " ", "Visualisierung"}], "*)"}]}], "\[IndentingNewLine]", 
+   RowBox[{"3.", " ", "Visualisierung"}], "*)"}]}], "\n", 
  RowBox[{
   RowBox[{
    RowBox[{"A2true", "=", 
@@ -184,9 +183,9 @@ Cell[BoxData[{
         RowBox[{"{", 
          RowBox[{"1", ",", "0"}], "}"}]}], "]"}]}], "}"}]}]}], 
   "]"}]}], "Input",
- CellChangeTimes->{{3.975606051851572*^9, 3.975606051851572*^9}},
- CellLabel->
-  "In[138]:=",ExpressionUUID->"551562bd-6e3c-5c4a-a197-12df96c1df79"],
+ CellChangeTimes->{{3.975606051851572*^9, 3.975606051851572*^9}, 
+   3.975891121378681*^9},ExpressionUUID->"551562bd-6e3c-5c4a-a197-\
+12df96c1df79"],
 
 Cell[BoxData["\<\"Berechne Plateau...\"\>"], "Print",
  CellChangeTimes->{3.975606054768135*^9},
@@ -479,13 +478,11 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[576, 22, 5786, 166, 838, "Input",ExpressionUUID->"551562bd-6e3c-5c4a-a197-12df96c1df79"],
-Cell[6365, 190, 201, 4, 22, "Print",ExpressionUUID->"a34b75c7-52b8-fe4a-b0a0-69a9ddf5377a"],
-Cell[6569, 196, 11346, 264, 279, "Output",ExpressionUUID->"c06b00f1-3f85-9d47-9b08-6567fbf6ee0e"]
+Cell[576, 22, 5788, 165, 838, "Input",ExpressionUUID->"551562bd-6e3c-5c4a-a197-12df96c1df79"],
+Cell[6367, 189, 201, 4, 22, "Print",ExpressionUUID->"a34b75c7-52b8-fe4a-b0a0-69a9ddf5377a"],
+Cell[6571, 195, 11346, 264, 260, "Output",ExpressionUUID->"c06b00f1-3f85-9d47-9b08-6567fbf6ee0e"]
 }, Open  ]]
 }
 ]
 *)
-
-(* End of internal cache information *)
 
