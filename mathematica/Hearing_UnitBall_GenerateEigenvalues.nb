@@ -1,0 +1,127 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      4005,        119]
+NotebookOptionsPosition[      3520,        102]
+NotebookOutlinePosition[      3922,        118]
+CellTagsIndexPosition[      3879,        115]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], "\n"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"numTarget", "=", "20000"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"lMax", "=", "150"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"nMax", "=", "150"}], ";"}], "\[IndentingNewLine]"}], "\n", 
+ RowBox[{
+  RowBox[{"eigenvalues", "=", 
+   RowBox[{"Flatten", "[", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"With", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"zeros", "=", 
+          RowBox[{"N", "[", 
+           RowBox[{"BesselJZero", "[", 
+            RowBox[{
+             RowBox[{"l", "+", 
+              RowBox[{"1", "/", "2"}]}], ",", 
+             RowBox[{"Range", "[", "nMax", "]"}]}], "]"}], "]"}]}], "}"}], ",", 
+        RowBox[{"ConstantArray", "[", 
+         RowBox[{
+          RowBox[{"zeros", "^", "2"}], ",", 
+          RowBox[{
+           RowBox[{"2", " ", "l"}], "+", "1"}]}], "]"}]}], "]"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"l", ",", "0", ",", "lMax"}], "}"}]}], "]"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"lambdaSorted", "=", 
+    RowBox[{"Sort", "[", 
+     RowBox[{"Flatten", "[", "eigenvalues", "]"}], "]"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
+ RowBox[{"If", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"Length", "[", "lambdaSorted", "]"}], ">=", "numTarget"}], ",", 
+   RowBox[{
+    RowBox[{"finalEigs", "=", 
+     RowBox[{"Take", "[", 
+      RowBox[{"lambdaSorted", ",", "numTarget"}], "]"}]}], ";", 
+    "\[IndentingNewLine]", "\[IndentingNewLine]", 
+    RowBox[{
+    "exportPath", 
+     "=", "\"\<C:\\\\Users\\\\sulta\\\\git\\\\cone-operator-lab\\\\data\\\\\
+eigenvalues\\\\unit_ball_N20000.txt\>\""}], ";", "\[IndentingNewLine]", 
+    RowBox[{"Export", "[", 
+     RowBox[{"exportPath", ",", "finalEigs", ",", "\"\<Table\>\""}], "]"}], ";",
+     "\[IndentingNewLine]", 
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Erfolgreich exportiert. Letzter Eigenwert: \>\"", ",", 
+      RowBox[{"Last", "[", "finalEigs", "]"}]}], "]"}], ";"}], ",", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Nicht genug Eigenwerte gefunden. Erh\[ODoubleDot]he lMax \
+oder nMax! Aktuelle Anzahl: \>\"", ",", 
+      RowBox[{"Length", "[", "lambdaSorted", "]"}]}], "]"}], ";"}]}], 
+  "]"}]}], "Input",
+ CellChangeTimes->{{3.975917850379383*^9, 3.9759178890859337`*^9}, 
+   3.975917949320215*^9},
+ CellLabel->"In[25]:=",ExpressionUUID->"1b505466-965c-084a-bea9-f7b6c80719f5"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Erfolgreich exportiert. Letzter Eigenwert: \"\>", "\[InvisibleSpace]",
+    "4481.248295204642`"}],
+  SequenceForm[
+  "Erfolgreich exportiert. Letzter Eigenwert: ", 4481.248295204642],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.975917906538254*^9, 3.975918085972599*^9},
+ CellLabel->
+  "During evaluation of \
+In[25]:=",ExpressionUUID->"02a32bde-415b-4b48-9f74-11dc9b56359e"]
+}, Open  ]]
+},
+WindowSize->{1016.25, 606.75},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"14.3 for Microsoft Windows (64-bit) (July 8, 2025)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"f80d1dbe-49d4-4b42-a809-d07f75741b37"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 2494, 65, 432, "Input",ExpressionUUID->"1b505466-965c-084a-bea9-f7b6c80719f5"],
+Cell[3073, 89, 431, 10, 22, "Print",ExpressionUUID->"02a32bde-415b-4b48-9f74-11dc9b56359e"]
+}, Open  ]]
+}
+]
+*)
+
