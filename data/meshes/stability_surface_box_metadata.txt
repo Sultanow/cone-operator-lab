@@ -1,0 +1,40 @@
+# Stability surface for Dirichlet box Laplacian
+# Quantity: f* = t_min * lambda_N (stability minimum of A2 reconstruction)
+
+Geometry:
+  Domain: rectangular box
+  Boundary conditions: Dirichlet
+  Box dimensions:
+    a, b, c explicitly stored in data file
+  Normalization:
+    a fixed to 1.0 in this dataset
+
+Derived parameters:
+  x = b/a
+  y = c/a
+
+Sampling:
+  x in [0.3, 3.]
+  y in [0.3, 3.]
+  logarithmic sampling
+  nSamples = 200
+
+Spectral data:
+  Eigenvalues:
+    lambda_nmk = pi^2 (n^2/a^2 + m^2/b^2 + k^2/c^2)
+  Truncation:
+    N = 2000
+
+Heat trace fit:
+  Fit basis: t^{-3/2}, t^{-1}, t^{-1/2}, t^0
+  Time window: t in [f/lambda_N, 500/lambda_N]
+  Time grid: logarithmic, nTGrid = 150
+
+Stability search:
+  f in [20,150], step 1
+  Criterion: minimization of relative A2 error
+
+Software:
+  Wolfram Mathematica
+  Version: 14.3.0 for Microsoft Windows (64-bit) (July 8, 2025)
+  Date: 2026-01-05
