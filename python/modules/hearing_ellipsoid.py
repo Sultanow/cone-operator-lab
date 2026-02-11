@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from sklearn.linear_model import Ridge
+from scipy.linalg import lstsq
 
 def fit_weyl_3_ridge(eigs, frac_range=(0.2, 0.9), alpha=1e-6):
     eigs = np.asarray(eigs, dtype=float)
