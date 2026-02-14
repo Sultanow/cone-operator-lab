@@ -66,7 +66,7 @@ def generate_box_eigenvalues(a: float, b: float, c: float, max_idx: int = 50, N_
     return lam[:N_keep].astype(float)
 
 
-def compute_A2_hat(eigs, f, *, tmax_factor=500.0, m_grid=151, diagnostics=False):
+def compute_A2_hat(eigs, f, *, tmax_factor=500.0, m_grid=251, diagnostics=False):
     """
     Compute A2_hat for a given eigenvalue list and f = t_min * lambda_N.
     If diagnostics=True, also return cond(X) and relative residual.
@@ -89,7 +89,7 @@ def compute_A2_hat(eigs, f, *, tmax_factor=500.0, m_grid=151, diagnostics=False)
     return float(A2_hat), condX, rel_res
 
 
-def scan_A2_grid(eigs_all, n_steps, factors, *, tmax_factor=500.0, m_grid=151, diagnostics=False):
+def scan_A2_grid(eigs_all, n_steps, factors, *, tmax_factor=500.0, m_grid=251, diagnostics=False):
     """
     Compute results for all (N,f) once and return a DataFrame.
     Columns:
@@ -181,7 +181,7 @@ def scan_stability_minimum(
     A2_exact: float,
     f_values=np.arange(1, 201),
     tmax_factor: float = 500.0,
-    m_grid: int = 151,
+    m_grid: int = 251,
     diagnostics: bool = False,
 ):
     """

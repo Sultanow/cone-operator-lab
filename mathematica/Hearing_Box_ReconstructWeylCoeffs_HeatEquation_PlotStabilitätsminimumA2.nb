@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[    125160,       2558]
-NotebookOptionsPosition[     66548,       1465]
-NotebookOutlinePosition[    124972,       2556]
-CellTagsIndexPosition[    124929,       2553]
+NotebookDataLength[    125295,       2564]
+NotebookOptionsPosition[     66684,       1471]
+NotebookOutlinePosition[    125107,       2562]
+CellTagsIndexPosition[    125064,       2559]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -23,7 +23,8 @@ Cell[CellGroupData[{
 Cell[BoxData[{
  RowBox[{
   RowBox[{
-   RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], ";"}], "\n"}], "\[IndentingNewLine]", 
+   RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
  RowBox[{
   RowBox[{
   "path", "=", \
@@ -48,13 +49,13 @@ N20000.txt\>\""}], ";"}], "\n",
       RowBox[{"1.0", "+", "1.5", "+", "2.3"}], ")"}], "/", 
      RowBox[{"(", 
       RowBox[{"4", " ", 
-       RowBox[{"Pi", "^", "2"}]}], ")"}]}]}], ";"}], "\n", 
+       RowBox[{"Pi", "^", "2"}]}], ")"}]}]}], ";"}], "\[IndentingNewLine]", 
   "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{
     RowBox[{
     "Wir", " ", "scannen", " ", "f\[UDoubleDot]r", " ", "verschiedene", " ", 
-     "N"}], "-", "Stufen"}], "*)"}]}], "\[IndentingNewLine]", 
+     "N"}], "-", "Stufen"}], "*)"}]}], "\n", 
  RowBox[{
   RowBox[{"nSteps", "=", 
    RowBox[{"{", 
@@ -64,7 +65,8 @@ N20000.txt\>\""}], ";"}], "\n",
   RowBox[{
    RowBox[{"factors", "=", 
     RowBox[{"Range", "[", 
-     RowBox[{"10", ",", "120", ",", "1"}], "]"}]}], ";"}], "\n"}], "\[IndentingNewLine]", 
+     RowBox[{"10", ",", "120", ",", "1"}], "]"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
  RowBox[{
   RowBox[{
    RowBox[{"plots", "=", 
@@ -102,20 +104,21 @@ N20000.txt\>\""}], ";"}], "\n",
                  RowBox[{"Times", ",", "eigs", ",", "tGrid"}], "]"}]}], "]"}],
                ",", 
               RowBox[{"{", "1", "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
-           RowBox[{"X", "=", 
-            RowBox[{"Table", "[", 
+           RowBox[{"exps", "=", 
+            RowBox[{"{", 
              RowBox[{
-              RowBox[{"t", "^", 
-               RowBox[{"{", 
-                RowBox[{
-                 RowBox[{
-                  RowBox[{"-", "3"}], "/", "2"}], ",", 
-                 RowBox[{"-", "1"}], ",", 
-                 RowBox[{
-                  RowBox[{"-", "1"}], "/", "2"}], ",", "0"}], "}"}]}], ",", 
-              RowBox[{"{", 
-               RowBox[{"t", ",", "tGrid"}], "}"}]}], "]"}]}], ";", 
+              RowBox[{
+               RowBox[{"-", "3"}], "/", "2"}], ",", 
+              RowBox[{"-", "1"}], ",", 
+              RowBox[{
+               RowBox[{"-", "1"}], "/", "2"}], ",", "0"}], "}"}]}], ";", 
            "\[IndentingNewLine]", 
+           RowBox[{"X", "=", 
+            RowBox[{"Transpose", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"tGrid", "^", "#"}], "&"}], "/@", "exps"}], "]"}]}], ";",
+            "\[IndentingNewLine]", 
            RowBox[{"coef", "=", 
             RowBox[{
              RowBox[{"PseudoInverse", "[", "X", "]"}], ".", "Z"}]}], ";", 
@@ -192,8 +195,9 @@ N20000.txt\>\""}], ";"}], "\n",
    3.9758924825410748`*^9, 3.975892507062973*^9}, {3.9760028252548065`*^9, 
    3.9760028281854935`*^9}, 3.976002921851633*^9, {3.9799024326878147`*^9, 
    3.979902433823944*^9}, {3.9799025267417088`*^9, 3.9799025661322384`*^9}, {
-   3.9799027180276794`*^9, 3.979902718091091*^9}},
- CellLabel->"In[46]:=",ExpressionUUID->"54ee3a89-14bc-7843-8be7-996073e87229"],
+   3.9799027180276794`*^9, 3.979902718091091*^9}, {3.9800472312624073`*^9, 
+   3.9800472371295357`*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"54ee3a89-14bc-7843-8be7-996073e87229"],
 
 Cell[BoxData[
  TemplateBox[{
@@ -1454,16 +1458,18 @@ c4TM69DWc6LnlA9Z0EHW+0Q399Fb2uvhVxueP3qYDD1iJ7uzIr3J/KfOpX/W
      RowBox[{#, ",", 
        RowBox[{"Placed", "[", 
          RowBox[{#2, ",", "Above"}], "]"}]}], "]"}]& )]], "Output",
- CellChangeTimes->{3.979902552610668*^9, 3.979902743605797*^9},
- CellLabel->"Out[53]=",ExpressionUUID->"edf8b2c2-f2d3-b940-ae31-901e8cd71198"],
+ CellChangeTimes->{3.979902552610668*^9, 3.979902743605797*^9, 
+  3.9800472678908215`*^9},
+ CellLabel->"Out[8]=",ExpressionUUID->"56ba1048-0985-7b49-bf08-7af7477fa34a"],
 
 Cell[BoxData["\<\"C:/Users/sulta/git/cone-operator-lab/plots/plotA2ErrorMin.\
 pdf\"\>"], "Output",
- CellChangeTimes->{3.979902552610668*^9, 3.979902744322468*^9},
- CellLabel->"Out[54]=",ExpressionUUID->"68d2143c-b904-804d-9065-55c546898ba8"]
+ CellChangeTimes->{3.979902552610668*^9, 3.979902743605797*^9, 
+  3.980047270377018*^9},
+ CellLabel->"Out[9]=",ExpressionUUID->"729a3d37-08bb-7f4a-be62-7b9c4480a52b"]
 }, Open  ]]
 },
-WindowSize->{1016.25, 611.625},
+WindowSize->{1016.25, 606.75},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
 DockedCells->{
   Cell[
@@ -2556,9 +2562,9 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[576, 22, 6905, 173, 1136, "Input",ExpressionUUID->"54ee3a89-14bc-7843-8be7-996073e87229"],
-Cell[7484, 197, 58804, 1260, 390, "Output",ExpressionUUID->"edf8b2c2-f2d3-b940-ae31-901e8cd71198"],
-Cell[66291, 1459, 241, 3, 76, "Output",ExpressionUUID->"68d2143c-b904-804d-9065-55c546898ba8"]
+Cell[576, 22, 6991, 177, 1155, "Input",ExpressionUUID->"54ee3a89-14bc-7843-8be7-996073e87229"],
+Cell[7570, 201, 58830, 1261, 390, "Output",ExpressionUUID->"56ba1048-0985-7b49-bf08-7af7477fa34a"],
+Cell[66403, 1464, 265, 4, 76, "Output",ExpressionUUID->"729a3d37-08bb-7f4a-be62-7b9c4480a52b"]
 }, Open  ]]
 }
 ]
