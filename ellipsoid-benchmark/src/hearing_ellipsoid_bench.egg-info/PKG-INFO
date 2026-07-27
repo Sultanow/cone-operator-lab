@@ -1,0 +1,22 @@
+Metadata-Version: 2.4
+Name: hearing-ellipsoid-bench
+Version: 0.1.0
+Summary: Benchmark framework for large Dirichlet spectra on triaxial ellipsoids.
+Requires-Python: >=3.10
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: plotly
+Requires-Dist: meshio
+Requires-Dist: scikit-fem
+Requires-Dist: gmsh
+Provides-Extra: slepc
+Requires-Dist: petsc4py; extra == "slepc"
+Requires-Dist: slepc4py; extra == "slepc"
+Requires-Dist: mpi4py; extra == "slepc"
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: jupyterlab; extra == "dev"

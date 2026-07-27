@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hearing-ellipsoid-bench"
+version = "0.1.0"
+description = "Benchmark framework for large Dirichlet spectra on triaxial ellipsoids."
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "scipy",
+  "pandas",
+  "matplotlib",
+  "plotly",
+  "meshio",
+  "scikit-fem",
+  "gmsh",
+]
+
+[project.optional-dependencies]
+slepc = ["petsc4py", "slepc4py", "mpi4py"]
+dev = ["pytest", "ruff", "mypy", "jupyterlab"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
