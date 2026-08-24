@@ -2,11 +2,11 @@
 #SBATCH --job-name=hankel-fullspec
 #SBATCH --output=/home/esul01/data/outputs/logs/hankel_fullspec_%A_%a.out
 #SBATCH --error=/home/esul01/data/outputs/logs/hankel_fullspec_%A_%a.err
-#SBATCH --array=0-47%8
+#SBATCH --array=0-47%16
 #SBATCH --requeue
 #SBATCH --time=36:00:00
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=180G
+#SBATCH --mem=90G
 
 # ------------------------------------------------------------------
 # Gap-free tile-parallel resolvent block-Hankel, full-spectrum run.

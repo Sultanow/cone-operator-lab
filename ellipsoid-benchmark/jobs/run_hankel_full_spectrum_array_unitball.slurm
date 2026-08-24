@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=hankel-fullspec
-#SBATCH --output=/home/esul01/data/outputs/logs/hankel_fullspec_%A_%a.out
-#SBATCH --error=/home/esul01/data/outputs/logs/hankel_fullspec_%A_%a.err
+#SBATCH --job-name=hankel-unitball-fullspec
+#SBATCH --output=/home/esul01/data/outputs/logs/hankel_unitball_fullspec_%A_%a.out
+#SBATCH --error=/home/esul01/data/outputs/logs/hankel_unitball_fullspec_%A_%a.err
 #SBATCH --array=0-47%16
 #SBATCH --requeue
 #SBATCH --time=36:00:00
@@ -32,7 +32,7 @@ TASK=${SLURM_ARRAY_TASK_ID}
 BAND_INDEX=$((TASK / N_SEEDS))
 SEED=${SEEDS[$((TASK % N_SEEDS))]}
 
-OUT_DIR="/home/esul01/data/outputs/hankel_full_spectrum_triaxial"
+OUT_DIR="/home/esul01/data/outputs/hankel_full_spectrum_unitball"
 mkdir -p /home/esul01/data/outputs/logs "${OUT_DIR}"
 
 cd /home/esul01/hearing-ellipsoid-bench
@@ -55,8 +55,8 @@ python scripts/run_hankel_band.py \
   --data-root /home/esul01/data \
   --out-dir "${OUT_DIR}" \
   --a 1.0 \
-  --b 1.5 \
-  --c 2.3 \
+  --b 1.0 \
+  --c 1.0 \
   --mesh-h 0.06 \
   --order 2 \
   --n-target 2050 \
@@ -66,8 +66,8 @@ python scripts/run_hankel_band.py \
   --seed "${SEED}" \
   --n-moments 0 \
   --resolution-factor 0.6 \
-  --l-max 34000 \
-  --n-probes 13 \
+  --l-max 41000 \
+  --n-probes 64 \
   --hankel-blocks 110 \
   --max-rank 500 \
   --rank-tol 1e-10 \
@@ -78,6 +78,6 @@ echo "finished=$(date)"
 
 # After ALL array tasks are done, merge + audit on a login/short node:
 #   python scripts/merge_hankel_full_spectrum.py \
-#     --root /home/esul01/data/outputs/hankel_full_spectrum_triaxial \
-#     --a 1.0 --b 1.5 --c 2.3 --min-seeds 5
+#     --root /home/esul01/data/outputs/hankel_full_spectrum_unitball \
+#     --a 1.0 --b 1.0 --c 1.0 --min-seeds 5
 # The audit writes tiles_to_rerun.txt for any tile with a count deficit.
