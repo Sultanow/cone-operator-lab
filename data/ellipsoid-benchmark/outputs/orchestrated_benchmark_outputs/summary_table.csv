@@ -1,0 +1,8 @@
+track,method,n,runtime_sec,metric_1,value_1,metric_2,value_2
+Unitball QS,loaded:unit_ball_P2_h008_N5000_slepc_eigs.txt,5000,0.0,median rel.err all compared,0.07682750000255836,max rel.err all compared,0.178444850956733
+Reverse Geometry,Arnoldi,500,,best |V err| with S known,0.0013453403733591335,signed V err with S known,0.0013453403733591335
+Reverse Geometry,SSG,700,,best |V err| with S known,0.00025102447951726815,signed V err with S known,0.00025102447951726815
+Block-Hankel FDM,raw unique match,139,1546.875285265036,median rel.err,0.006536718895268497,q90 rel.err,0.017909702916328558
+Stable Block-Hankel FDM,stable poles,25,3974.4039728029165,median rel.err,0.005794675500949722,q90 rel.err,0.014492954528145315
+SSG triaxial,ssg_l22_n13,6877,11427.824062929954,median signed rel.err vs Arnoldi,-0.006824916836393059,fraction below Arnoldi,0.988
+DMC triaxial,dmc_bridge_corrected,1,255.764339921996,lambda_1,5.582485597296084,lambda_1 SEM,0.0014778645478071314

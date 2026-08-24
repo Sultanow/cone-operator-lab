@@ -1,0 +1,16 @@
+{
+  "n_stable_landmarks":312.0,
+  "n_exact_distinct_levels":119.0,
+  "n_distinct_levels_hit":88.0,
+  "distinct_level_coverage":0.7394957983,
+  "median_exact_abs_rel_err_all_landmarks":0.0030114875,
+  "max_exact_abs_rel_err_all_landmarks":0.0728719542,
+  "median_exact_abs_rel_err_best_per_level":0.0012645807,
+  "max_exact_abs_rel_err_best_per_level":0.0127049637,
+  "hits_1e-3_all_landmarks":55.0,
+  "hits_1e-4_all_landmarks":4.0,
+  "hits_1e-5_all_landmarks":1.0,
+  "distinct_levels_hit_1e-3":38.0,
+  "distinct_levels_hit_1e-4":4.0,
+  "distinct_levels_hit_1e-5":1.0
+}

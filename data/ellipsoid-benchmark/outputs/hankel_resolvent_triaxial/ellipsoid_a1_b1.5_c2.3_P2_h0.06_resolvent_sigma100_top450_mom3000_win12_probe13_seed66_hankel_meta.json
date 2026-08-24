@@ -1,0 +1,256 @@
+{
+  "run_label": "a1_b1.5_c2.3_P2_h0.06_resolvent_sigma100_top450_mom3000_win12_probe13_seed66",
+  "algorithm": "multi_probe_block_hankel_fdm",
+  "a": 1.0,
+  "b": 1.5,
+  "c": 2.3,
+  "mesh_h": 0.06,
+  "order": 2,
+  "fem_meta": {
+    "mesh_path": "/home/esul01/data/ellipsoid_a1_b1.5_c2.3_h0.06.msh",
+    "assembly_sec": "9.382448702002876"
+  },
+  "K_shape": [
+    378083,
+    378083
+  ],
+  "K_nnz": 10474203,
+  "M_shape": [
+    378083,
+    378083
+  ],
+  "M_nnz": 10474203,
+  "free_dofs": 378083,
+  "lambda_top": 450.0,
+  "lambda_max": null,
+  "n_moments": 3000,
+  "n_windows": 12,
+  "n_probes": 13,
+  "hankel_blocks": 110,
+  "max_rank": 450,
+  "rank_tol": 1e-10,
+  "transition_frac": 0.1,
+  "window_overlap": 0.25,
+  "seed": 66,
+  "n_candidates": 667,
+  "runtime_sec": 62716.63089780102,
+  "fdm_info": {
+    "algorithm": "resolvent_multi_probe_block_hankel",
+    "wall_seconds": 62706.79537080799,
+    "sigma": 100.0,
+    "lambda_bottom": 0.0,
+    "lambda_top": 450.0,
+    "n_moments": 3000,
+    "n_windows": 12,
+    "n_probes": 13,
+    "n_eigs_total": 667,
+    "windows": [
+      {
+        "rank": 212,
+        "rank_auto": 212,
+        "n_on_circle": 199,
+        "n_final": 79,
+        "singular_values": "[2.78602478e-02 2.75004403e-02 2.64687145e-02 ... 5.88740469e-20\n 2.56195283e-20 7.86712663e-21]",
+        "lambda_window": [
+          0.0,
+          37.5
+        ],
+        "mu_window": [
+          0.006808510638297872,
+          0.01
+        ],
+        "n_in_keep": 57
+      },
+      {
+        "rank": 335,
+        "rank_auto": 335,
+        "n_on_circle": 322,
+        "n_final": 148,
+        "singular_values": "[4.15746299e-02 4.11108008e-02 3.93868720e-02 ... 8.73260944e-20\n 3.93666381e-20 1.21287454e-20]",
+        "lambda_window": [
+          37.5,
+          75.0
+        ],
+        "mu_window": [
+          0.005423728813559322,
+          0.007804878048780488
+        ],
+        "n_in_keep": 78
+      },
+      {
+        "rank": 321,
+        "rank_auto": 321,
+        "n_on_circle": 308,
+        "n_final": 151,
+        "singular_values": "[5.42695714e-02 5.36292282e-02 4.52362619e-02 ... 1.11391255e-19\n 6.50233712e-20 3.67244618e-21]",
+        "lambda_window": [
+          75.0,
+          112.5
+        ],
+        "mu_window": [
+          0.004507042253521127,
+          0.0060377358490566035
+        ],
+        "n_in_keep": 91
+      },
+      {
+        "rank": 281,
+        "rank_auto": 281,
+        "n_on_circle": 268,
+        "n_final": 124,
+        "singular_values": "[7.54139929e-02 7.43811388e-02 6.52921796e-02 ... 1.41250884e-19\n 1.01456152e-19 6.71908545e-20]",
+        "lambda_window": [
+          112.5,
+          150.0
+        ],
+        "mu_window": [
+          0.0038554216867469878,
+          0.004923076923076923
+        ],
+        "n_in_keep": 72
+      },
+      {
+        "rank": 253,
+        "rank_auto": 253,
+        "n_on_circle": 240,
+        "n_final": 114,
+        "singular_values": "[8.17970115e-02 8.00418011e-02 8.00074951e-02 ... 1.31800796e-19\n 9.82631408e-20 1.74347426e-20]",
+        "lambda_window": [
+          150.0,
+          187.5
+        ],
+        "mu_window": [
+          0.003368421052631579,
+          0.004155844155844156
+        ],
+        "n_in_keep": 62
+      },
+      {
+        "rank": 234,
+        "rank_auto": 234,
+        "n_on_circle": 220,
+        "n_final": 99,
+        "singular_values": "[9.59434033e-02 9.36635146e-02 8.57753719e-02 ... 1.77697496e-19\n 1.27717094e-19 5.48289781e-20]",
+        "lambda_window": [
+          187.5,
+          225.0
+        ],
+        "mu_window": [
+          0.0029906542056074765,
+          0.0035955056179775282
+        ],
+        "n_in_keep": 56
+      },
+      {
+        "rank": 219,
+        "rank_auto": 219,
+        "n_on_circle": 206,
+        "n_final": 90,
+        "singular_values": "[1.10896616e-01 1.07753219e-01 1.06035997e-01 ... 1.89092151e-19\n 9.67206787e-20 5.24844229e-20]",
+        "lambda_window": [
+          225.0,
+          262.5
+        ],
+        "mu_window": [
+          0.002689075630252101,
+          0.0031683168316831685
+        ],
+        "n_in_keep": 48
+      },
+      {
+        "rank": 201,
+        "rank_auto": 201,
+        "n_on_circle": 188,
+        "n_final": 85,
+        "singular_values": "[1.49309066e-01 1.45898912e-01 1.19018285e-01 ... 2.61281605e-19\n 1.82464395e-19 3.04911883e-20]",
+        "lambda_window": [
+          262.5,
+          300.0
+        ],
+        "mu_window": [
+          0.0024427480916030535,
+          0.002831858407079646
+        ],
+        "n_in_keep": 43
+      },
+      {
+        "rank": 195,
+        "rank_auto": 195,
+        "n_on_circle": 182,
+        "n_final": 80,
+        "singular_values": "[1.52180756e-01 1.48573299e-01 1.39233912e-01 ... 2.74473918e-19\n 1.72632235e-19 2.05040299e-20]",
+        "lambda_window": [
+          300.0,
+          337.5
+        ],
+        "mu_window": [
+          0.0022377622377622378,
+          0.00256
+        ],
+        "n_in_keep": 39
+      },
+      {
+        "rank": 189,
+        "rank_auto": 189,
+        "n_on_circle": 176,
+        "n_final": 74,
+        "singular_values": "[1.86141136e-01 1.82247750e-01 1.74914550e-01 ... 3.17074487e-19\n 2.31092989e-19 2.24585257e-20]",
+        "lambda_window": [
+          337.5,
+          375.0
+        ],
+        "mu_window": [
+          0.002064516129032258,
+          0.0023357664233576644
+        ],
+        "n_in_keep": 36
+      },
+      {
+        "rank": 171,
+        "rank_auto": 171,
+        "n_on_circle": 158,
+        "n_final": 72,
+        "singular_values": "[2.01374361e-01 1.97011083e-01 1.87229425e-01 ... 3.13171824e-19\n 1.87078448e-19 5.26190651e-20]",
+        "lambda_window": [
+          375.0,
+          412.5
+        ],
+        "mu_window": [
+          0.0019161676646706587,
+          0.002147651006711409
+        ],
+        "n_in_keep": 39
+      },
+      {
+        "rank": 167,
+        "rank_auto": 167,
+        "n_on_circle": 154,
+        "n_final": 65,
+        "singular_values": "[2.25844077e-01 2.21671945e-01 1.94817804e-01 ... 3.00855185e-19\n 1.70074818e-19 6.56414474e-20]",
+        "lambda_window": [
+          412.5,
+          450.0
+        ],
+        "mu_window": [
+          0.0018181818181818182,
+          0.001987577639751553
+        ],
+        "n_in_keep": 46
+      }
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.35",
+    "python": "3.12.1",
+    "cwd": "/home/esul01/hearing-ellipsoid-bench",
+    "logical_cpus": 128,
+    "physical_cpus": 128,
+    "ram_gb": 755.53,
+    "cpu_model": "AMD EPYC 9554 64-Core Processor",
+    "kernel": "Linux n31 6.8.0-124-generic #124~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue May 26 21:05:19 UTC  x86_64 x86_64 x86_64 GNU/Linux",
+    "available_logical_cpus": 1,
+    "node_logical_cpus": 128
+  },
+  "sigma": 100.0,
+  "lambda_bottom": 0.0
+}

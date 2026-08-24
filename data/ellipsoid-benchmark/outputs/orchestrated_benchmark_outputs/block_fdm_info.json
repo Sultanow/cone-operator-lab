@@ -1,0 +1,9 @@
+{
+  "wall_seconds": 1484.8628933280706,
+  "n_moments": 4000,
+  "n_windows": 8,
+  "n_probes": 7,
+  "n_eigs_total": 142,
+  "lambda_max_used": 64638.63884831497,
+  "lambda_top": 561.3681071068984
+}

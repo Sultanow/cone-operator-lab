@@ -1,0 +1,2 @@
+method,n_raw,n_unique_matched,max_rel_err_threshold,ref_idx_min,ref_idx_max,median_rel_err,max_rel_err,q90_rel_err,coverage_1e_3,coverage_5e_3,coverage_1e_2,coverage_5e_2
+stable_block_hankel_fdm,25,25,0.05,20,705,0.005794675500949722,0.022283881723409615,0.014492954528145315,4,12,18,25

@@ -1,0 +1,4 @@
+JobID                                 JobName      State    Elapsed   TotalCPU     MaxRSS     ReqMem  AllocCPUS        NodeList 
+------------ -------------------------------- ---------- ---------- ---------- ---------- ---------- ---------- --------------- 
+94598                    ssg-unitball-l36-n20  COMPLETED   01:06:42 2-00:46:57                  700G         64             n31 
+94598.batch                             batch  COMPLETED   01:06:42 2-00:46:57 712303064K                    64             n31 

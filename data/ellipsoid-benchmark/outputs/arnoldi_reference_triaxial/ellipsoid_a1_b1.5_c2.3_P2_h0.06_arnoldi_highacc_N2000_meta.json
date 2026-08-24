@@ -1,0 +1,19 @@
+{
+  "solver": "scipy.sparse.linalg.eigsh",
+  "mode": "shift-invert",
+  "sigma": 0.0,
+  "which": "LM",
+  "tol": 1e-10,
+  "maxiter": null,
+  "ncv_factor": 2.0,
+  "min_ncv": 120,
+  "ncv": 4000,
+  "n_dofs": 378083,
+  "wall_sec": 20258.18437109911,
+  "lambda_min": 5.272850187022797,
+  "lambda_max": 444.5718859591346,
+  "residual_abs_max": 5.399091231923563e-13,
+  "residual_abs_median": 2.1316643782251507e-13,
+  "residual_rel_max": 1.427492828346562e-14,
+  "residual_rel_median": 8.266512535882288e-16
+}

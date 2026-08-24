@@ -1,0 +1,3 @@
+method,fit_start,best_K,best_C_est,C_true,best_abs_rel_err_percent,last_K_within_5_percent,last_K_within_10_percent,last_K_within_20_percent
+arnoldi_P2_h0.06_N2000,50,678,19.75368291126293,20.76929952454497,4.889989727779657,678.0,800,800
+arnoldi_P2_h0.08_N2000,50,200,22.01180106607477,20.76929952454497,5.982395025221839,,200,500

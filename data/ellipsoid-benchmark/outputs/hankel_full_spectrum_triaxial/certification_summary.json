@@ -1,0 +1,12 @@
+{
+  "n_certified_levels_written": 2034,
+  "inertia_total_in_range": 2034,
+  "consistent": true,
+  "n_clusters_input": 1695,
+  "n_actions": 1695,
+  "n_changes": 0,
+  "actions_by_type": {
+    "confirm": 1695
+  },
+  "lambda_top": 448.9830637581921
+}

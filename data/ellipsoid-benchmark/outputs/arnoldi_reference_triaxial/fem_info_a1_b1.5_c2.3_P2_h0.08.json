@@ -1,0 +1,18 @@
+{
+  "run_label": "a1_b1.5_c2.3_P2_h0.08",
+  "fem_meta": {
+    "mesh_path": "/home/esul01/data/ellipsoid_a1_b1.5_c2.3_h0.08.msh",
+    "assembly_sec": "3.856689383974299"
+  },
+  "assembly_wall_sec": 4.301871445029974,
+  "K_shape": [
+    158629,
+    158629
+  ],
+  "K_nnz": 4320277,
+  "M_shape": [
+    158629,
+    158629
+  ],
+  "M_nnz": 4320277
+}

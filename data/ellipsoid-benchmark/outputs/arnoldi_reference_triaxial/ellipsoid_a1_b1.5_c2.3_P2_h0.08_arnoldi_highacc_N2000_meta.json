@@ -1,0 +1,15 @@
+{
+  "solver": "scipy.sparse.linalg.eigsh",
+  "mode": "shift-invert",
+  "sigma": 0.0,
+  "which": "LM",
+  "tol": 1e-10,
+  "maxiter": null,
+  "ncv": 5000,
+  "n_dofs": 158629,
+  "wall_sec": 3458.5442234459333,
+  "residual_abs_max": 6.313324579547739e-13,
+  "residual_abs_median": 4.3848001412304355e-13,
+  "residual_rel_max": 8.647877550638111e-15,
+  "residual_rel_median": 1.5244325929270999e-15
+}

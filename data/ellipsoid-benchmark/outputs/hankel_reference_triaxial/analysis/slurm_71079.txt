@@ -1,0 +1,18 @@
+JobID                               JobName      State    Elapsed   TotalCPU     MaxRSS     ReqMem  AllocCPUS 
+------------ ------------------------------ ---------- ---------- ---------- ---------- ---------- ---------- 
+71079_0                   hankel-h006-scout  COMPLETED   11:35:18   11:34:18                  360G         16 
+71079_0.bat+                          batch  COMPLETED   11:35:18   11:34:18  40694100K                    16 
+71079_1                   hankel-h006-scout  COMPLETED   11:25:01   11:24:04                  360G         16 
+71079_1.bat+                          batch  COMPLETED   11:25:01   11:24:04  36970976K                    16 
+71079_2                   hankel-h006-scout  COMPLETED   12:32:00   12:31:02                  360G         16 
+71079_2.bat+                          batch  COMPLETED   12:32:00   12:31:02  42255512K                    16 
+71079_3                   hankel-h006-scout  COMPLETED   12:37:49   12:36:48                  360G         16 
+71079_3.bat+                          batch  COMPLETED   12:37:49   12:36:48  38131992K                    16 
+71079_4                   hankel-h006-scout  COMPLETED   12:31:01   12:30:04                  360G         16 
+71079_4.bat+                          batch  COMPLETED   12:31:01   12:30:04  43508788K                    16 
+71079_5                   hankel-h006-scout  COMPLETED   12:36:54   12:35:59                  360G         16 
+71079_5.bat+                          batch  COMPLETED   12:36:54   12:35:59  37707240K                    16 
+71079_6                   hankel-h006-scout  COMPLETED   12:44:00   12:43:02                  360G         16 
+71079_6.bat+                          batch  COMPLETED   12:44:00   12:43:02  45155904K                    16 
+71079_7                   hankel-h006-scout  COMPLETED   12:36:04   12:35:07                  360G         16 
+71079_7.bat+                          batch  COMPLETED   12:36:04   12:35:07  34798812K                    16 

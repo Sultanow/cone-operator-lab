@@ -1,0 +1,156 @@
+{
+  "data_dir": "/home/esul01/data",
+  "out_dir": "/home/esul01/data/outputs/orchestrated_benchmark_outputs",
+  "run_unit_ball": true,
+  "unit_ball_compute": false,
+  "unit_ball_truth_path": "/home/esul01/data/reference/unit_ball_N20000.txt",
+  "unit_ball_existing_eigs_path": "/home/esul01/data/generated/unit_ball_P2_h008_N5000_slepc_eigs.txt",
+  "unit_ball": {
+    "n_target": 5000,
+    "mesh_size": 0.08,
+    "order": 2,
+    "solver": "slepc",
+    "force_remesh": false
+  },
+  "run_reverse_geometry": true,
+  "reverse_geometry": {
+    "a": 1.0,
+    "b": 1.5,
+    "c": 2.3,
+    "eig_files": {
+      "SSG": "/home/esul01/data/generated/ssg_a1_b1.5_c2.3_eigenvalues.txt",
+      "Arnoldi": "/home/esul01/data/reference/ellipsoid_eigs_a1_b1.5_c2.3_arnoldi-1000.txt"
+    },
+    "k_values": [
+      50,
+      100,
+      200,
+      300,
+      500,
+      700,
+      1000,
+      1500,
+      2000,
+      3000,
+      5000
+    ]
+  },
+  "run_block_fdm": true,
+  "block_fdm": {
+    "mesh_size": 0.08,
+    "order": 2,
+    "force_remesh": false,
+    "reference_index_top": 800,
+    "n_moments": 4000,
+    "n_windows": 8,
+    "n_probes": 7,
+    "hankel_blocks": 100,
+    "transition_frac": 0.15,
+    "window_overlap": 0.15,
+    "seed": 42,
+    "rank_tol": 1e-09,
+    "max_rank": 350,
+    "verbose": true
+  },
+  "run_block_fdm_stability": true,
+  "block_fdm_stability": {
+    "seeds": [
+      42,
+      137,
+      271,
+      314,
+      999
+    ],
+    "n_moments": 2500,
+    "n_windows": 8,
+    "n_probes": 5,
+    "hankel_blocks": 90,
+    "min_count": 3,
+    "rel_gap": 0.0005,
+    "verbose": false
+  },
+  "run_ssg_triaxial": true,
+  "ssg_triaxial": {
+    "a": 1.0,
+    "b": 1.5,
+    "c": 2.3,
+    "run_sanity": true,
+    "sanity": {
+      "l_max": 6,
+      "n_max": 5,
+      "n_radial": 24,
+      "n_theta": 18,
+      "n_phi": 36,
+      "max_rel_err_target": 1e-12
+    },
+    "configs": [
+      [
+        10,
+        7,
+        28,
+        20,
+        40
+      ],
+      [
+        14,
+        9,
+        32,
+        24,
+        48
+      ],
+      [
+        18,
+        11,
+        36,
+        28,
+        56
+      ],
+      [
+        22,
+        13,
+        40,
+        32,
+        64
+      ]
+    ],
+    "reference_path": "/home/esul01/data/reference/ellipsoid_eigs_a1_b1.5_c2.3_arnoldi-1000.txt",
+    "save_eigs_to": "/home/esul01/data/generated/ssg_a1_b1.5_c2.3_eigenvalues.txt",
+    "n_compare": 500,
+    "block_size": null
+  },
+  "run_dmc": true,
+  "dmc": {
+    "run_sanity": true,
+    "sanity": {
+      "a": 1.0,
+      "b": 1.0,
+      "c": 1.0,
+      "n_walkers_per_run": 500000,
+      "n_runs_per_dt": 20,
+      "dts": [
+        0.004,
+        0.002,
+        0.001,
+        0.0005
+      ],
+      "n_cores": 20
+    },
+    "run_triaxial": true,
+    "triaxial": {
+      "a": 1.0,
+      "b": 1.5,
+      "c": 2.3,
+      "n_walkers_per_run": 1000000,
+      "n_runs_per_dt": 30,
+      "dts": [
+        0.004,
+        0.002,
+        0.001,
+        0.0005
+      ],
+      "n_cores": 20
+    },
+    "ssg_eigs_path": "/home/esul01/data/generated/ssg_a1_b1.5_c2.3_eigenvalues.txt",
+    "arnoldi_eigs_path": "/home/esul01/data/reference/ellipsoid_eigs_a1_b1.5_c2.3_arnoldi-1000.txt"
+  }
+}

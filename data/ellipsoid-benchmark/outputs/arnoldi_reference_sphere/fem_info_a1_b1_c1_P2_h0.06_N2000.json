@@ -1,0 +1,40 @@
+{
+  "run_label": "a1_b1_c1_P2_h0.06",
+  "a": 1.0,
+  "b": 1.0,
+  "c": 1.0,
+  "mesh_size": 0.06,
+  "order": 2,
+  "target_eigs": 2000,
+  "tol": 1e-10,
+  "maxiter": null,
+  "ncv_factor": 2.0,
+  "min_ncv": 120,
+  "fem_meta": {
+    "mesh_path": "/home/esul01/data/ellipsoid_a1_b1_c1_h0.06.msh",
+    "assembly_sec": "2.7241882490052376"
+  },
+  "assembly_wall_sec": 4.469124071998522,
+  "K_shape": [
+    109491,
+    109491
+  ],
+  "K_nnz": 2976421,
+  "M_shape": [
+    109491,
+    109491
+  ],
+  "M_nnz": 2976421,
+  "hardware": {
+    "platform": "Linux-5.15.0-185-generic-x86_64-with-glibc2.35",
+    "python": "3.12.1",
+    "cwd": "/home/esul01/hearing-ellipsoid-bench",
+    "logical_cpus": 128,
+    "physical_cpus": 128,
+    "ram_gb": 377.56,
+    "cpu_model": "AMD EPYC 9554 64-Core Processor",
+    "kernel": "Linux n11 5.15.0-185-generic #195-Ubuntu SMP Fri Jun 19 17:11:50 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+    "available_logical_cpus": 64,
+    "node_logical_cpus": 128
+  }
+}

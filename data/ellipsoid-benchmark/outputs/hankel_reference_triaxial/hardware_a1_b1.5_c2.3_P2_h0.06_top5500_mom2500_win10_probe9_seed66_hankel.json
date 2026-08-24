@@ -1,0 +1,12 @@
+{
+  "platform": "Linux-5.15.0-181-generic-x86_64-with-glibc2.35",
+  "python": "3.12.1",
+  "cwd": "/home/esul01/hearing-ellipsoid-bench",
+  "logical_cpus": 128,
+  "physical_cpus": 128,
+  "ram_gb": 377.56,
+  "cpu_model": "AMD EPYC 9554 64-Core Processor",
+  "kernel": "Linux n11 5.15.0-181-generic #191-Ubuntu SMP Fri May 22 19:09:02 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+  "available_logical_cpus": 1,
+  "node_logical_cpus": 128
+}

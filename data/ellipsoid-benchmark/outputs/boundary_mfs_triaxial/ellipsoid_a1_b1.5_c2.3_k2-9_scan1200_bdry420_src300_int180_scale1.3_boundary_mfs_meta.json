@@ -1,0 +1,36 @@
+{
+  "a": 1.0,
+  "b": 1.5,
+  "c": 2.3,
+  "k_min": 2.0,
+  "k_max": 9.0,
+  "n_scan": 1200,
+  "n_boundary": 420,
+  "n_sources": 300,
+  "n_interior": 180,
+  "source_scale": 1.3,
+  "tension_threshold": 0.002,
+  "peak_prominence": null,
+  "relative_gap": 0.0002,
+  "refinement_xatol": 1e-10,
+  "n_candidates": 4,
+  "runtime_sec": 81.06915948691312,
+  "wave_numbers": [
+    2.2958649147146826,
+    2.8027724819331947,
+    3.1629006945958613,
+    3.340942846689391
+  ],
+  "tensions": [
+    0.0013457079275190497,
+    0.0015135942962511118,
+    0.0015338356375817653,
+    0.0019586889437008302
+  ],
+  "n_eigs_requested": null,
+  "n_eigs_found": 4,
+  "algorithm": "boundary_mfs",
+  "success": true,
+  "message": "",
+  "eigenvalue_file": "/home/esul01/data/outputs/boundary_mfs_triaxial/ellipsoid_a1_b1.5_c2.3_k2-9_scan1200_bdry420_src300_int180_scale1.3_boundary_mfs_eigs.txt"
+}
