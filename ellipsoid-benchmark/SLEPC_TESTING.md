@@ -1,9 +1,21 @@
 # SLEPc handoff: smoke test and paper run
 
-This bundle contains the serial SLEPc Krylov-Schur spectrum-slicing reference
-for the FEM operators used in the paper.  Do not start these runners with
-`mpiexec`: the SciPy CSR matrices are intentionally transferred to PETSc on one
-MPI rank.
+This is an overlay for the existing repository, not a replacement repository.
+Copy only the included paths into the existing checkout; do not rename or
+replace the checkout.  The bundle contains the serial SLEPc Krylov-Schur
+spectrum-slicing reference for the FEM operators used in the paper.  Do not
+start these runners with `mpiexec`: the SciPy CSR matrices are intentionally
+transferred to PETSc on one MPI rank.
+
+Example overlay installation after unpacking to a temporary directory:
+
+```bash
+rsync -av extracted/ellipsoid-benchmark/ /home/esul01/hearing-ellipsoid-bench/
+```
+
+This updates only the files contained in the overlay and leaves all Hankel,
+certification, merge, notebook, and result files in the existing repository
+untouched.
 
 ## 1. Environment check
 
@@ -57,13 +69,21 @@ lambda_top = 449.1182964812976
 Weyl expected count = 2050
 ```
 
-The paper-level acceptance target is:
+The previously certified Hankel result contains 2034 levels only up to its
+largest reported eigenvalue, approximately 448.983.  SLEPc searches the full
+interval through 449.1182964812976.  Therefore the SLEPc count is an
+experimental result, not a prescribed acceptance target.  Both 2034 and a
+larger count are scientifically meaningful.  The mandatory internal acceptance
+condition is only:
 
 ```text
-n_found = 2034
-inertia_count = 2034
+n_found = inertia_count
 count_matches_inertia = true
 ```
+
+If SLEPc reports more than 2034 levels, inspect the narrow interval
+`(448.983, 449.1182964812976]` before drawing a conclusion about the top Hankel
+tile.
 
 The JSON metadata also records the SLEPc convergence reason, maximum and median
 relative residual, all slicing shifts and inertias, matrix dimensions and
@@ -80,7 +100,17 @@ sbatch jobs/run_slepc_slicing_unitball.slurm
 
 Again, the mandatory internal check is `count_matches_inertia = true`.  The
 resulting eigenvalues can then be compared with the analytical spherical-Bessel
-reference spectrum.
+reference spectrum.  The unit-ball defaults are deliberately larger than the
+triaxial defaults (`local_nev=120`, `local_ncv=300`) to leave room for
+multiplicities of about 55 plus neighbouring levels in one slice.
+
+## Threading and runtime fairness
+
+Both Slurm jobs request 16 CPUs and set `OMP_NUM_THREADS`, OpenBLAS threads and
+MKL threads to 16, with OpenMP threads bound to physical cores.  Effective
+MUMPS OpenMP parallelism still depends on how PETSc and MUMPS were built.  Keep
+the logged environment values and verify CPU utilization during the smoke test;
+otherwise a runtime comparison cannot be interpreted as a 16-core comparison.
 
 ## 5. Collect scheduler measurements
 
