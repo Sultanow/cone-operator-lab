@@ -1,208 +1,157 @@
-# scripts/run_slepc_slicing.py
-"""Inertia-based spectrum slicing with SLEPc/MUMPS on the SAME (K, M)
-matrices used by the other solvers in this benchmark.
+#!/usr/bin/env python3
+"""Serial SLEPc spectrum-slicing reference for an FEM ellipsoid.
 
-SLEPc's interval mode (``EPS_ALL`` with ``setInterval``) partitions a
-prescribed interval into slices, runs a shifted Lanczos process per
-slice, and uses the inertia of ``K - sigma M`` obtained from the
-MUMPS ``LDL^T`` factorization to guarantee that no eigenvalue inside
-the interval is missed and that multiplicities are correct. This is
-the established reference for "complete spectrum in an interval" and
-therefore the natural comparison for the gap-free block-Hankel method.
-
-The script deliberately reuses ``load_or_create_problem`` so that the
-mesh, element order, and assembled matrices are bitwise identical to
-the FEM--ARPACK, block-Hankel, and certification runs.
-
-Requirements (module or conda environment):
-    petsc, slepc4py, petsc4py, mumps
-
-Example (single task, whole interval):
-    python scripts/run_slepc_slicing.py \
-        --data-root /home/esul01/data \
-        --out-dir   /home/esul01/data/outputs/slepc_slicing_triaxial \
-        --a 1.0 --b 1.5 --c 2.3 --mesh-h 0.06 --order 2 \
-        --lambda-lo 0.0 --lambda-hi 449.1 --partitions 1
-
-Example (MPI with spectrum partitioning over 8 sub-communicators):
-    mpirun -n 64 python scripts/run_slepc_slicing.py ... --partitions 8
+The defaults reproduce the triaxial block-Hankel production operator and
+derive the identical upper interval edge from the same three-term Weyl model
+and ``n_target=2050``.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import time
+import sys
 from pathlib import Path
 
-import numpy as np
-import scipy.sparse as sp
-
+# PETSc/SLEPc must see their command-line options before either module is used.
 import slepc4py
-import petsc4py
+
+slepc4py.init(sys.argv)
+
+import numpy as np
+
+from hearing_ellipsoid_bench.fem.assembly import load_or_create_problem
+from hearing_ellipsoid_bench.geometry.ellipsoid import (
+    ellipsoid_integrated_mean_curvature,
+    ellipsoid_surface_area,
+    true_ellipsoid_volume,
+)
+from hearing_ellipsoid_bench.solvers.fdm_block import (
+    weyl_counting_function,
+    weyl_equal_count_edges,
+)
+from hearing_ellipsoid_bench.solvers.slepc import solve_slepc_spectrum_slicing
 
 
-def to_petsc_aij(A_csr, comm):
-    """Wrap a SciPy CSR matrix as a PETSc AIJ matrix (rank 0 holds it)."""
-    from petsc4py import PETSc
-
-    A_csr = A_csr.tocsr()
-    A_csr.sort_indices()
-    n = A_csr.shape[0]
-    P = PETSc.Mat().createAIJ(
-        size=(n, n),
-        csr=(A_csr.indptr.astype(PETSc.IntType),
-             A_csr.indices.astype(PETSc.IntType),
-             A_csr.data.astype(PETSc.ScalarType)),
-        comm=comm,
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run serial SLEPc spectrum slicing on an FEM ellipsoid."
     )
-    P.assemble()
-    P.setOption(PETSc.Mat.Option.SYMMETRIC, True)
-    return P
-
-
-def main():
-    petsc4py.init()
-    slepc4py.init()
-    from petsc4py import PETSc
-    from slepc4py import SLEPc
-
-    comm = PETSc.COMM_WORLD
-    rank = comm.getRank()
-
-    p = argparse.ArgumentParser()
-    p.add_argument("--data-root", type=Path, required=True)
-    p.add_argument("--out-dir", type=Path, required=True)
-
-    p.add_argument("--a", type=float, default=1.0)
-    p.add_argument("--b", type=float, default=1.5)
-    p.add_argument("--c", type=float, default=2.3)
-    p.add_argument("--mesh-h", type=float, default=0.06)
-    p.add_argument("--order", type=int, default=2)
-
-    p.add_argument("--lambda-lo", type=float, default=0.0,
-                   help="lower end of the interval; must be BELOW the "
-                        "smallest eigenvalue or inside a spectral gap")
-    p.add_argument("--lambda-hi", type=float, required=True)
-    p.add_argument("--partitions", type=int, default=1,
-                   help="number of MPI sub-communicators SLEPc uses to "
-                        "process slices concurrently (spectrum "
-                        "partitioning); requires MPI size divisible by it")
-    p.add_argument("--tol", type=float, default=1e-10)
-    p.add_argument("--mpd", type=int, default=None,
-                   help="maximum projected dimension per slice; SLEPc "
-                        "picks a default when omitted")
-    args = p.parse_args()
-
-    run_label = (f"a{args.a:g}_b{args.b:g}_c{args.c:g}"
-                 f"_P{args.order}_h{args.mesh_h:g}_slepc_slicing")
-    if rank == 0:
-        args.out_dir.mkdir(parents=True, exist_ok=True)
-        print("Run label:", run_label, flush=True)
-        print("Arguments:", vars(args), flush=True)
-
-    # ---- identical discretization as every other FEM-based run -------
-    from hearing_ellipsoid_bench.fem.assembly import load_or_create_problem
-
-    t_assemble = time.perf_counter()
-    mesh, K, M, fem_meta = load_or_create_problem(
-        args.data_root, a=args.a, b=args.b, c=args.c,
-        mesh_size=args.mesh_h, order=args.order, force_remesh=False,
+    parser.add_argument("--data-root", type=Path, required=True)
+    parser.add_argument("--out-dir", type=Path, required=True)
+    parser.add_argument("--a", type=float, default=1.0)
+    parser.add_argument("--b", type=float, default=1.5)
+    parser.add_argument("--c", type=float, default=2.3)
+    parser.add_argument("--mesh-h", type=float, default=0.06)
+    parser.add_argument("--order", type=int, default=2)
+    parser.add_argument("--lambda-lo", type=float, default=0.0)
+    parser.add_argument(
+        "--lambda-hi",
+        type=float,
+        default=None,
+        help="override the Weyl-derived upper edge; use 100 for a smoke test",
     )
-    t_assemble = time.perf_counter() - t_assemble
-    n_dofs = K.shape[0]
-    if rank == 0:
-        print(f"dofs: {n_dofs}  (assembly/load {t_assemble:.1f}s)",
-              flush=True)
+    parser.add_argument("--n-target", type=float, default=2050.0)
+    parser.add_argument("--n-tiles", type=int, default=64)
+    parser.add_argument("--tol", type=float, default=1e-10)
+    parser.add_argument("--max-it", type=int, default=100_000)
+    parser.add_argument("--local-nev", type=int, default=80)
+    parser.add_argument("--local-ncv", type=int, default=160)
+    args, _petsc_options = parser.parse_known_args()
+    return args
 
-    A = to_petsc_aij(sp.csr_matrix(K), comm)
-    B = to_petsc_aij(sp.csr_matrix(M), comm)
 
-    # ---- SLEPc: all eigenvalues in an interval, inertia-based --------
-    eps = SLEPc.EPS().create(comm=comm)
-    eps.setOperators(A, B)
-    eps.setProblemType(SLEPc.EPS.ProblemType.GHEP)
-    eps.setWhichEigenpairs(SLEPc.EPS.Which.ALL)
-    eps.setInterval(args.lambda_lo, args.lambda_hi)
-    eps.setTolerances(tol=args.tol)
-    if args.mpd:
-        eps.setDimensions(mpd=args.mpd)
+def main() -> None:
+    args = parse_args()
+    args.out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Krylov-Schur with spectrum slicing; inertia comes from the
-    # LDL^T factorization performed by MUMPS through the ST object.
-    eps.setType(SLEPc.EPS.Type.KRYLOVSCHUR)
-    eps.setKrylovSchurPartitions(max(1, args.partitions))
+    volume = true_ellipsoid_volume(args.a, args.b, args.c)
+    surface = ellipsoid_surface_area(args.a, args.b, args.c)
+    curvature = ellipsoid_integrated_mean_curvature(args.a, args.b, args.c)
+    edges, n_expected = weyl_equal_count_edges(
+        args.n_tiles,
+        volume,
+        surface,
+        curvature,
+        n_target=args.n_target,
+    )
+    lambda_hi = float(args.lambda_hi if args.lambda_hi is not None else edges[-1])
+    if args.lambda_hi is not None:
+        n_expected = weyl_counting_function(lambda_hi, volume, surface, curvature)
 
-    st = eps.getST()
-    st.setType(SLEPc.ST.Type.SINVERT)
-    ksp = st.getKSP()
-    ksp.setType("preonly")
-    pc = ksp.getPC()
-    pc.setType("cholesky")
-    pc.setFactorSolverType("mumps")
-    # MUMPS must be allowed to handle a factorization with negative
-    # pivots; ICNTL(13)=1 turns off ScaLAPACK on the root node, which
-    # SLEPc requires in order to read the inertia reliably.
-    PETSc.Options().setValue("-mat_mumps_icntl_13", "1")
-    PETSc.Options().setValue("-mat_mumps_icntl_24", "1")
-    PETSc.Options().setValue("-mat_mumps_cntl_3", "1e-12")
-    eps.setFromOptions()
+    run_label = (
+        f"a{args.a:g}_b{args.b:g}_c{args.c:g}"
+        f"_P{args.order}_h{args.mesh_h:g}"
+        f"_top{lambda_hi:.12g}_slepc_slicing"
+    )
+    print("Run label:", run_label, flush=True)
+    print(f"lambda interval = [{args.lambda_lo}, {lambda_hi:.17g}]", flush=True)
+    print(f"Weyl expected N = {n_expected:.6f}", flush=True)
 
-    t0 = time.perf_counter()
-    eps.solve()
-    wall = time.perf_counter() - t0
+    _, K, M, fem_meta = load_or_create_problem(
+        args.data_root,
+        a=args.a,
+        b=args.b,
+        c=args.c,
+        mesh_size=args.mesh_h,
+        order=args.order,
+        force_remesh=False,
+    )
+    print(f"Free DOFs: {K.shape[0]}", flush=True)
+    print(f"K nnz: {K.nnz}; M nnz: {M.nnz}", flush=True)
+    print("FEM meta:", fem_meta, flush=True)
 
-    nconv = eps.getConverged()
-    if rank == 0:
-        print(f"converged: {nconv} eigenvalues in "
-              f"[{args.lambda_lo}, {args.lambda_hi}]  "
-              f"({wall:.1f}s)", flush=True)
+    result = solve_slepc_spectrum_slicing(
+        K,
+        M,
+        lambda_min=args.lambda_lo,
+        lambda_max=lambda_hi,
+        tol=args.tol,
+        max_it=args.max_it,
+        local_nev=args.local_nev,
+        local_ncv=args.local_ncv,
+    )
+    print(result, flush=True)
+    if not result.success:
+        raise RuntimeError(result.message)
 
-    vals = np.empty(nconv, dtype=float)
-    xr = A.createVecRight()
-    xi = A.createVecRight()
-    res = np.empty(nconv, dtype=float)
-    for i in range(nconv):
-        vals[i] = eps.getEigenpair(i, xr, xi).real
-        res[i] = eps.computeError(i, SLEPc.EPS.ErrorType.RELATIVE)
-    order = np.argsort(vals)
-    vals, res = vals[order], res[order]
+    eig_path = args.out_dir / f"{run_label}_eigs.txt"
+    np.savetxt(eig_path, result.eigs, fmt="%.17e")
 
-    if rank == 0:
-        eig_path = args.out_dir / f"{run_label}_eigs.txt"
-        np.savetxt(eig_path, vals, fmt="%.17e")
+    meta = {
+        "algorithm": result.algorithm,
+        "a": args.a,
+        "b": args.b,
+        "c": args.c,
+        "mesh_h": args.mesh_h,
+        "order": args.order,
+        "free_dofs": int(K.shape[0]),
+        "K_nnz": int(K.nnz),
+        "M_nnz": int(M.nnz),
+        "lambda_min": args.lambda_lo,
+        "lambda_max": lambda_hi,
+        "n_target": args.n_target,
+        "n_tiles": args.n_tiles,
+        "weyl_expected_count": float(n_expected),
+        "n_found": result.n_found,
+        "runtime_sec": float(result.runtime_sec),
+        "fem_meta": {k: str(v) for k, v in (fem_meta or {}).items()},
+        "solver_meta": result.meta,
+    }
+    meta_path = args.out_dir / f"{run_label}_meta.json"
+    meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
-        try:
-            inertia_lo, inertia_hi = eps.getKrylovSchurInertias()[:2]
-        except Exception:
-            inertia_lo = inertia_hi = None
-
-        meta = {
-            "solver": "slepc EPS krylovschur, spectrum slicing",
-            "which": "EPS_ALL",
-            "interval": [args.lambda_lo, args.lambda_hi],
-            "partitions": args.partitions,
-            "tol": args.tol,
-            "mpd": args.mpd,
-            "n_dofs": int(n_dofs),
-            "n_converged": int(nconv),
-            "wall_sec": wall,
-            "assemble_sec": t_assemble,
-            "mpi_size": int(comm.getSize()),
-            "lambda_min": float(vals[0]) if nconv else None,
-            "lambda_max": float(vals[-1]) if nconv else None,
-            "residual_rel_max": float(res.max()) if nconv else None,
-            "residual_rel_median": float(np.median(res)) if nconv else None,
-            "inertia_endpoints": [inertia_lo, inertia_hi],
-            "fem_meta": {k: v for k, v in (fem_meta or {}).items()
-                         if isinstance(v, (int, float, str, bool))},
-        }
-        (args.out_dir / f"{run_label}_meta.json").write_text(
-            json.dumps(meta, indent=2), encoding="utf-8")
-        print(json.dumps(meta, indent=2))
-        print(f"wrote {eig_path}")
-
-    eps.destroy()
+    count_matches = result.meta["count_matches_inertia"]
+    print("Eigenvalues:", eig_path, flush=True)
+    print("Metadata:", meta_path, flush=True)
+    print(
+        f"SLEPc returned {result.n_found} eigenvalues; "
+        f"inertia count = {result.meta['inertia_count']}; "
+        f"match = {count_matches}",
+        flush=True,
+    )
+    if count_matches is not True:
+        raise RuntimeError("SLEPc eigenvalue count does not match endpoint inertia")
 
 
 if __name__ == "__main__":
