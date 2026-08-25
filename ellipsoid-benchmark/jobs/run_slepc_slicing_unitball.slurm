@@ -30,12 +30,16 @@ mkdir -p /home/esul01/data/outputs/logs
 
 export PYTHONPATH="$PWD/src:${PYTHONPATH:-}"
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+export OMP_PROC_BIND=spread
+export OMP_PLACES=cores
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+export MKL_DYNAMIC=FALSE
 export NUMEXPR_NUM_THREADS=1
 
 echo "started=$(date)"
 echo "node=$(hostname)"
+echo "OMP_NUM_THREADS=${OMP_NUM_THREADS}"
 
 python scripts/run_slepc_slicing_unitball.py \
   --data-root /home/esul01/data \

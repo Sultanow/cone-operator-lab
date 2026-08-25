@@ -47,8 +47,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--tol", type=float, default=1e-10)
     parser.add_argument("--max-it", type=int, default=100_000)
-    parser.add_argument("--local-nev", type=int, default=80)
-    parser.add_argument("--local-ncv", type=int, default=160)
+    parser.add_argument("--local-nev", type=int, default=120)
+    parser.add_argument("--local-ncv", type=int, default=300)
     args, _petsc_options = parser.parse_known_args()
     return args
 
