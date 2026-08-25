@@ -19,7 +19,7 @@
 source /home/jupyter/anaconda3/etc/profile.d/conda.sh
 conda activate slepc-env
 
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 cd /home/esul01/hearing-ellipsoid-bench
 mkdir -p /home/esul01/data/outputs/logs
 

@@ -29,7 +29,7 @@ cd /home/esul01/hearing-ellipsoid-bench
 mkdir -p /home/esul01/data/outputs/logs
 
 export PYTHONPATH="$PWD/src:${PYTHONPATH:-}"
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export NUMEXPR_NUM_THREADS=1
@@ -41,7 +41,7 @@ python scripts/run_slepc_slicing_unitball.py \
   --data-root /home/esul01/data \
   --out-dir   /home/esul01/data/outputs/slepc_slicing_unitball \
   --mesh-h 0.06 --order 2 --n-target 2050 --n-tiles 64 \
-  --tol 1e-10 \
+  --tol 1e-10 --local-nev 120 --local-ncv 300 \
   -st_type sinvert \
   -st_ksp_type preonly \
   -st_pc_type cholesky \
