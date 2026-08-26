@@ -33,3 +33,12 @@ from hearing_ellipsoid_bench.validation.sphere import compare_to_truth
 ```
 
 The notebooks should become thin orchestration layers. The reusable logic lives in `src/hearing_ellipsoid_bench`.
+
+## Reverse-geometry fit window
+
+The exhaustive stable selection of `FIT_START` and `FIT_END_MAX` is documented in
+[`FIT_WINDOW_OPTIMIZATION.md`](FIT_WINDOW_OPTIMIZATION.md). Reproduce it with:
+
+```bash
+python scripts/optimize_reverse_geometry_window.py --dry-run
+```
