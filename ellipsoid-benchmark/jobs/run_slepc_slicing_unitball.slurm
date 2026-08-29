@@ -23,7 +23,7 @@
 #   module load petsc slepc mumps    # or: conda activate slepc-env
 
 source /home/jupyter/anaconda3/etc/profile.d/conda.sh
-conda activate slepc-env
+conda activate slepc
 
 cd /home/esul01/hearing-ellipsoid-bench
 mkdir -p /home/esul01/data/outputs/logs
