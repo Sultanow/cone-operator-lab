@@ -1,0 +1,526 @@
+{
+  "run_label": "a1_b1_c1_P2_h0.06_top1018.07_tiles64_band05_seed55",
+  "algorithm": "gapfree_tile_parallel_resolvent_block_hankel",
+  "a": 1.0,
+  "b": 1.0,
+  "c": 1.0,
+  "mesh_h": 0.06,
+  "order": 2,
+  "fem_meta": {
+    "mesh_path": "/home/esul01/data/ellipsoid_a1_b1_c1_h0.06.msh",
+    "assembly_sec": "2.756439222022891"
+  },
+  "free_dofs": 109491,
+  "volume": 4.1887902047863905,
+  "surface": 12.566370614359172,
+  "mean_curvature_integral": 12.56637061435919,
+  "lambda_top": 1018.0667210468118,
+  "n_total_expected": 2049.999999999999,
+  "n_tiles": 64,
+  "n_bands": 6,
+  "tile_edges": [
+    0.0,
+    79.32146159814748,
+    118.64336405225721,
+    150.98586890165873,
+    179.53828981754106,
+    205.58567141157786,
+    229.80598735345083,
+    252.61118934654155,
+    274.2748277279739,
+    294.99005815324114,
+    314.89957342773664,
+    334.11250881039774,
+    352.7146617552798,
+    370.77500753493814,
+    388.3500350656933,
+    405.48673576240174,
+    422.2247257164038,
+    438.59779091474655,
+    454.6350370305902,
+    470.36176129392004,
+    485.8001246900865,
+    500.969677896465,
+    515.8877782201922,
+    530.569924047469,
+    545.0300259946221,
+    559.2806288756117,
+    573.3330950145704,
+    587.197756860658,
+    600.8840449907983,
+    614.4005962054881,
+    627.7553453923423,
+    640.9556040540292,
+    654.0081278035408,
+    666.9191746731923,
+    679.6945557268936,
+    692.3396791888907,
+    704.8595890801658,
+    717.2589991797569,
+    729.5423229875836,
+    741.7137002522892,
+    753.7770205357864,
+    765.7359442112673,
+    777.5939212299434,
+    789.3542079410465,
+    801.0198822075836,
+    812.5938570252983,
+    824.0788928230072,
+    835.4776085978513,
+    846.792492018251,
+    858.0259086097607,
+    869.1801101240821,
+    880.2572421787515,
+    891.2593512441027,
+    902.1883910447516,
+    913.0462284347797,
+    923.834648798825,
+    934.5553610252641,
+    945.2100020924148,
+    955.8001413041341,
+    966.3272842071942,
+    976.7928762193351,
+    987.1983059938199,
+    997.544908543645,
+    1007.8339681461653,
+    1018.0667210468118
+  ],
+  "band_index": 5,
+  "tile_lo": 54,
+  "tile_hi": 64,
+  "seed": 55,
+  "cli_args": {
+    "data_root": "/home/esul01/data",
+    "out_dir": "/home/esul01/data/outputs/hankel_full_spectrum_unitball",
+    "a": 1.0,
+    "b": 1.0,
+    "c": 1.0,
+    "mesh_h": 0.06,
+    "order": 2,
+    "lambda_top": null,
+    "n_target": 2050.0,
+    "n_tiles": 64,
+    "n_bands": 6,
+    "band_index": 5,
+    "seed": 55,
+    "n_moments": 0,
+    "resolution_factor": 0.6,
+    "l_max": 41000,
+    "n_probes": 64,
+    "hankel_blocks": 110,
+    "max_rank": 500,
+    "rank_tol": 1e-10,
+    "transition_frac": 0.1,
+    "pad_frac": 0.75,
+    "sigma": null,
+    "sigma_floor": 5.0,
+    "circle_tol": 0.08,
+    "checkpoint_every": 2000,
+    "angle_cluster_frac": 0.12
+  },
+  "runtime_sec": 81467.47648928314,
+  "solver_info": {
+    "algorithm": "gapfree_tile_parallel_resolvent_block_hankel",
+    "wall_seconds": 81464.41230099788,
+    "sigma": 963.4571169217852,
+    "n_moments": 34000,
+    "band_lambda": [
+      913.0462284347797,
+      1018.0667210468118
+    ],
+    "band_lambda_padded": [
+      904.9549131617457,
+      1025.7412857222967
+    ],
+    "tile_lo": 54,
+    "tile_hi": 64,
+    "n_probes": 64,
+    "seed": 55,
+    "n_candidates": 148,
+    "n_candidates_with_mult": 267,
+    "tiles": [
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 70,
+            "rank": 105,
+            "rank_auto": 3867,
+            "n_on_circle": 105,
+            "decimation": 157,
+            "n_decoded": 29
+          },
+          {
+            "hankel_blocks_used": 87,
+            "rank": 105,
+            "rank_auto": 4543,
+            "n_on_circle": 105,
+            "decimation": 126,
+            "n_decoded": 29
+          },
+          {
+            "hankel_blocks_used": 110,
+            "rank": 105,
+            "rank_auto": 5308,
+            "n_on_circle": 105,
+            "decimation": 97,
+            "n_decoded": 29
+          }
+        ],
+        "match_tol_theta": 1.751471474715029e-05,
+        "n_final": 29,
+        "tile": 54,
+        "tile_core": [
+          913.0462284347797,
+          923.834648798825
+        ],
+        "n_core": 0,
+        "n_core_with_mult": 0
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 69,
+            "rank": 105,
+            "rank_auto": 1874,
+            "n_on_circle": 105,
+            "decimation": 160,
+            "n_decoded": 24
+          },
+          {
+            "hankel_blocks_used": 87,
+            "rank": 105,
+            "rank_auto": 1949,
+            "n_on_circle": 105,
+            "decimation": 127,
+            "n_decoded": 24
+          },
+          {
+            "hankel_blocks_used": 110,
+            "rank": 105,
+            "rank_auto": 2012,
+            "n_on_circle": 105,
+            "decimation": 99,
+            "n_decoded": 24
+          }
+        ],
+        "match_tol_theta": 1.7228297145427047e-05,
+        "n_final": 24,
+        "tile": 55,
+        "tile_core": [
+          923.834648798825,
+          934.5553610252641
+        ],
+        "n_core": 24,
+        "n_core_with_mult": 66
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 67,
+            "rank": 105,
+            "rank_auto": 4170,
+            "n_on_circle": 105,
+            "decimation": 163,
+            "n_decoded": 44
+          },
+          {
+            "hankel_blocks_used": 84,
+            "rank": 105,
+            "rank_auto": 4656,
+            "n_on_circle": 105,
+            "decimation": 130,
+            "n_decoded": 44
+          },
+          {
+            "hankel_blocks_used": 109,
+            "rank": 105,
+            "rank_auto": 5663,
+            "n_on_circle": 105,
+            "decimation": 101,
+            "n_decoded": 44
+          }
+        ],
+        "match_tol_theta": 1.6950738410078863e-05,
+        "n_final": 44,
+        "tile": 56,
+        "tile_core": [
+          934.5553610252641,
+          945.2100020924148
+        ],
+        "n_core": 0,
+        "n_core_with_mult": 0
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 66,
+            "rank": 105,
+            "rank_auto": 3886,
+            "n_on_circle": 105,
+            "decimation": 165,
+            "n_decoded": 19
+          },
+          {
+            "hankel_blocks_used": 84,
+            "rank": 105,
+            "rank_auto": 4750,
+            "n_on_circle": 105,
+            "decimation": 131,
+            "n_decoded": 19
+          },
+          {
+            "hankel_blocks_used": 109,
+            "rank": 105,
+            "rank_auto": 5855,
+            "n_on_circle": 105,
+            "decimation": 101,
+            "n_decoded": 19
+          }
+        ],
+        "match_tol_theta": 1.6681631592924525e-05,
+        "n_final": 19,
+        "tile": 57,
+        "tile_core": [
+          945.2100020924148,
+          955.8001413041341
+        ],
+        "n_core": 19,
+        "n_core_with_mult": 41
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 65,
+            "rank": 105,
+            "rank_auto": 2907,
+            "n_on_circle": 105,
+            "decimation": 168,
+            "n_decoded": 50
+          },
+          {
+            "hankel_blocks_used": 84,
+            "rank": 105,
+            "rank_auto": 3231,
+            "n_on_circle": 105,
+            "decimation": 131,
+            "n_decoded": 50
+          },
+          {
+            "hankel_blocks_used": 107,
+            "rank": 105,
+            "rank_auto": 3495,
+            "n_on_circle": 105,
+            "decimation": 103,
+            "n_decoded": 50
+          }
+        ],
+        "match_tol_theta": 1.6420594543151855e-05,
+        "n_final": 50,
+        "tile": 58,
+        "tile_core": [
+          955.8001413041341,
+          966.3272842071942
+        ],
+        "n_core": 13,
+        "n_core_with_mult": 13
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 64,
+            "rank": 105,
+            "rank_auto": 3828,
+            "n_on_circle": 105,
+            "decimation": 171,
+            "n_decoded": 31
+          },
+          {
+            "hankel_blocks_used": 80,
+            "rank": 105,
+            "rank_auto": 4651,
+            "n_on_circle": 105,
+            "decimation": 137,
+            "n_decoded": 31
+          },
+          {
+            "hankel_blocks_used": 104,
+            "rank": 105,
+            "rank_auto": 5770,
+            "n_on_circle": 105,
+            "decimation": 106,
+            "n_decoded": 31
+          }
+        ],
+        "match_tol_theta": 1.6167268029487368e-05,
+        "n_final": 31,
+        "tile": 59,
+        "tile_core": [
+          966.3272842071942,
+          976.7928762193351
+        ],
+        "n_core": 18,
+        "n_core_with_mult": 23
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 63,
+            "rank": 105,
+            "rank_auto": 3866,
+            "n_on_circle": 105,
+            "decimation": 174,
+            "n_decoded": 62
+          },
+          {
+            "hankel_blocks_used": 79,
+            "rank": 105,
+            "rank_auto": 4755,
+            "n_on_circle": 105,
+            "decimation": 139,
+            "n_decoded": 62
+          },
+          {
+            "hankel_blocks_used": 103,
+            "rank": 105,
+            "rank_auto": 6003,
+            "n_on_circle": 105,
+            "decimation": 107,
+            "n_decoded": 62
+          }
+        ],
+        "match_tol_theta": 1.5921314031781646e-05,
+        "n_final": 62,
+        "tile": 60,
+        "tile_core": [
+          976.7928762193351,
+          987.1983059938199
+        ],
+        "n_core": 17,
+        "n_core_with_mult": 32
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 62,
+            "rank": 105,
+            "rank_auto": 3663,
+            "n_on_circle": 104,
+            "decimation": 176,
+            "n_decoded": 72
+          },
+          {
+            "hankel_blocks_used": 78,
+            "rank": 105,
+            "rank_auto": 4457,
+            "n_on_circle": 105,
+            "decimation": 141,
+            "n_decoded": 73
+          },
+          {
+            "hankel_blocks_used": 101,
+            "rank": 105,
+            "rank_auto": 5472,
+            "n_on_circle": 105,
+            "decimation": 109,
+            "n_decoded": 74
+          }
+        ],
+        "match_tol_theta": 1.5682414184328704e-05,
+        "n_final": 70,
+        "tile": 61,
+        "tile_core": [
+          987.1983059938199,
+          997.544908543645
+        ],
+        "n_core": 25,
+        "n_core_with_mult": 35
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 61,
+            "rank": 105,
+            "rank_auto": 3394,
+            "n_on_circle": 105,
+            "decimation": 179,
+            "n_decoded": 48
+          },
+          {
+            "hankel_blocks_used": 77,
+            "rank": 105,
+            "rank_auto": 4036,
+            "n_on_circle": 105,
+            "decimation": 143,
+            "n_decoded": 48
+          },
+          {
+            "hankel_blocks_used": 99,
+            "rank": 105,
+            "rank_auto": 4736,
+            "n_on_circle": 105,
+            "decimation": 111,
+            "n_decoded": 48
+          }
+        ],
+        "match_tol_theta": 1.545026835532785e-05,
+        "n_final": 48,
+        "tile": 62,
+        "tile_core": [
+          997.544908543645,
+          1007.8339681461653
+        ],
+        "n_core": 31,
+        "n_core_with_mult": 56
+      },
+      {
+        "decimations": [
+          {
+            "hankel_blocks_used": 60,
+            "rank": 105,
+            "rank_auto": 3696,
+            "n_on_circle": 105,
+            "decimation": 182,
+            "n_decoded": 65
+          },
+          {
+            "hankel_blocks_used": 76,
+            "rank": 105,
+            "rank_auto": 4629,
+            "n_on_circle": 105,
+            "decimation": 145,
+            "n_decoded": 65
+          },
+          {
+            "hankel_blocks_used": 97,
+            "rank": 105,
+            "rank_auto": 5719,
+            "n_on_circle": 105,
+            "decimation": 113,
+            "n_decoded": 65
+          }
+        ],
+        "match_tol_theta": 1.5224593348709614e-05,
+        "n_final": 65,
+        "tile": 63,
+        "tile_core": [
+          1007.8339681461653,
+          1018.0667210468118
+        ],
+        "n_core": 1,
+        "n_core_with_mult": 1
+      }
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.35",
+    "python": "3.12.1",
+    "cwd": "/home/esul01/hearing-ellipsoid-bench",
+    "logical_cpus": 128,
+    "physical_cpus": 128,
+    "ram_gb": 251.55,
+    "cpu_model": "AMD EPYC 9554 64-Core Processor",
+    "kernel": "Linux n33 6.8.0-124-generic #124~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue May 26 21:05:19 UTC  x86_64 x86_64 x86_64 GNU/Linux",
+    "available_logical_cpus": 1,
+    "node_logical_cpus": 128
+  }
+}
