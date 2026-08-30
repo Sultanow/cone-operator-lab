@@ -1,0 +1,3 @@
+JobID|JobName|Elapsed|TotalCPU|AllocCPUS|ReqMem|MaxRSS|State
+142716|slepc-slicing-unitball|00:05:37|01:27:27|16|180G||COMPLETED
+142716.batch|batch|00:05:37|01:27:27|16||3900744K|COMPLETED
