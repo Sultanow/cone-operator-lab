@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 import numpy as np
+import traceback
 
 from hearing_ellipsoid_bench.core.types import AlgorithmResult, clean_eigenvalues
 
@@ -65,6 +66,7 @@ def solve_slepc_spectrum_slicing(
     max_it: int = 100_000,
     local_nev: int = 80,
     local_ncv: int = 160,
+    raise_on_error: bool = False,
 ) -> AlgorithmResult:
     """Compute all generalized Hermitian eigenvalues in an interval.
 
@@ -80,6 +82,11 @@ def solve_slepc_spectrum_slicing(
         from petsc4py import PETSc
         from slepc4py import SLEPc
 
+        try:
+            PETSc.Sys.pushErrorHandler("traceback")
+        except Exception:
+            pass
+        
         if PETSc.COMM_WORLD.getSize() != 1:
             raise RuntimeError(
                 "Minimal spectrum-slicing implementation supports one MPI rank only."
@@ -170,10 +177,42 @@ def solve_slepc_spectrum_slicing(
             },
         )
     except Exception as e:
+        detail = traceback.format_exc()
+
+        # PETSc-Fehler tragen einen numerischen Code, der die Ursache
+        # benennt (z.B. 76 = Fehler in externer Bibliothek wie MUMPS,
+        # 55 = zu wenig Speicher). Cython verpackt das gelegentlich in
+        # einen generischen SystemError, dann steht die eigentliche
+        # Ursache in der Exception-Kette.
+        parts = [repr(e)]
+        ierr = getattr(e, "ierr", None)
+        if ierr is not None:
+            parts.append(f"PETSc error code {ierr}")
+        cause = e.__cause__ or e.__context__
+        while cause is not None:
+            parts.append(f"caused by: {cause!r}")
+            c_ierr = getattr(cause, "ierr", None)
+            if c_ierr is not None:
+                parts.append(f"PETSc error code {c_ierr}")
+            cause = cause.__cause__ or cause.__context__
+
+        message = " | ".join(parts) + "\n" + detail
+
+        if raise_on_error:
+            raise RuntimeError(message) from e
+
         return AlgorithmResult(
             name,
             clean_eigenvalues([]),
             time.perf_counter() - t0,
             False,
-            repr(e),
+            message,
+            meta={
+                "lambda_min": float(lambda_min),
+                "lambda_max": float(lambda_max),
+                "local_nev": local_nev,
+                "local_ncv": local_ncv,
+                "traceback": detail,
+            },
         )
+
