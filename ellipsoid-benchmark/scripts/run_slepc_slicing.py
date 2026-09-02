@@ -92,6 +92,7 @@ def main() -> None:
         f"a{args.a:g}_b{args.b:g}_c{args.c:g}"
         f"_P{args.order}_h{args.mesh_h:g}"
         f"_top{lambda_hi:.12g}_slepc_slicing"
+        f"_n{PETSc.COMM_WORLD.getSize()}p{args.partitions}"
     )
     p("Run label:", run_label, flush=True)
     p(f"lambda interval = [{args.lambda_lo}, {lambda_hi:.17g}]", flush=True)
