@@ -16,15 +16,52 @@ def check_slepc() -> bool:
         return False
 
 
-def scipy_to_petsc_aij(A):
+def scipy_to_petsc_aij(A, comm=None):
+    """Convert a SciPy sparse matrix to a PETSc AIJ matrix.
+
+    Under MPI every rank holds the full SciPy matrix (the finite-element
+    assembly is repeated redundantly on each rank) but contributes only
+    its own row block to the PETSc matrix, as PETSc requires.
+    """
     from petsc4py import PETSc
     from scipy.sparse import csr_matrix
+    import numpy as np
 
     A = csr_matrix(A)
-    mat = PETSc.Mat().createAIJ(size=A.shape, csr=(A.indptr, A.indices, A.data))
+    A.sort_indices()
+    n = A.shape[0]
+    comm = comm if comm is not None else PETSc.COMM_WORLD
+
+    if comm.getSize() == 1:
+        mat = PETSc.Mat().createAIJ(
+            size=A.shape,
+            csr=(A.indptr.astype(PETSc.IntType),
+                 A.indices.astype(PETSc.IntType),
+                 A.data),
+            comm=comm,
+        )
+        mat.assemble()
+        return mat
+
+    # determine this rank's row ownership from an empty matrix of the
+    # same global size, then rebuild with the local CSR block only
+    probe = PETSc.Mat().createAIJ(size=(n, n), comm=comm)
+    probe.setUp()
+    rstart, rend = probe.getOwnershipRange()
+    probe.destroy()
+
+    p0, p1 = A.indptr[rstart], A.indptr[rend]
+    loc_indptr = (A.indptr[rstart:rend + 1] - p0).astype(PETSc.IntType)
+    loc_indices = A.indices[p0:p1].astype(PETSc.IntType)
+    loc_data = np.asarray(A.data[p0:p1], dtype=PETSc.ScalarType)
+
+    mat = PETSc.Mat().createAIJ(
+        size=((rend - rstart, n), (rend - rstart, n)),
+        csr=(loc_indptr, loc_indices, loc_data),
+        comm=comm,
+    )
     mat.assemble()
     return mat
-
 
 def solve_slepc_krylov_schur(K, M, n_eigs: int, tol=1e-8, max_it=100_000) -> AlgorithmResult:
     name = "slepc_krylov_schur_lowest"
@@ -66,6 +103,7 @@ def solve_slepc_spectrum_slicing(
     max_it: int = 100_000,
     local_nev: int = 80,
     local_ncv: int = 160,
+    partitions: int = 1,
     raise_on_error: bool = False,
 ) -> AlgorithmResult:
     """Compute all generalized Hermitian eigenvalues in an interval.
@@ -87,10 +125,13 @@ def solve_slepc_spectrum_slicing(
         except Exception:
             pass
         
-        if PETSc.COMM_WORLD.getSize() != 1:
-            raise RuntimeError(
-                "Minimal spectrum-slicing implementation supports one MPI rank only."
-            )
+        size = PETSc.COMM_WORLD.getSize()
+        if partitions < 1 or partitions > size:
+            raise ValueError(
+                f"partitions must satisfy 1 <= partitions <= {size}")
+        if size % partitions != 0:
+            raise ValueError(
+                f"MPI size {size} is not divisible by partitions {partitions}")
         if not lambda_min < lambda_max:
             raise ValueError("lambda_min must be smaller than lambda_max")
         if local_nev < 1 or local_ncv <= local_nev:
@@ -113,6 +154,8 @@ def solve_slepc_spectrum_slicing(
         # slicing subsolve.  They are large enough for the unit-ball
         # multiplicities in the interval used in the paper.
         eps.setKrylovSchurDimensions(nev=local_nev, ncv=local_ncv)
+        if partitions > 1:
+            eps.setKrylovSchurPartitions(partitions)
 
         st = eps.getST()
         st.setType(SLEPc.ST.Type.SINVERT)
@@ -174,6 +217,8 @@ def solve_slepc_spectrum_slicing(
                 ),
                 "slicing_shifts": shifts.tolist(),
                 "slicing_inertias": inertias.tolist(),
+                "mpi_size": int(size),
+                "partitions": int(partitions),
             },
         )
     except Exception as e:

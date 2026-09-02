@@ -1,8 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=slepc-slicing-h003
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
+#SBATCH --nodes=1
+#SBATCH --ntasks=32
+#SBATCH --cpus-per-task=2
 #SBATCH --mem=700G
+#SBATCH --job-name=slepc-slicing-h003-i64
 #SBATCH --time=36:00:00
 #SBATCH --output=/home/esul01/data/outputs/logs/slepc_triaxial_slicing_%j.out
 #SBATCH --error=/home/esul01/data/outputs/logs/slepc_triaxial_slicing_%j.err
@@ -10,11 +11,18 @@
 # Inertia-based spectrum slicing (SLEPc + MUMPS) on the SAME matrices
 # as the FEM-ARPACK, block-Hankel, and certification runs.
 #
-# This reference is deliberately serial.  The SciPy CSR matrices are passed
-# directly to PETSc, so MPI spectrum partitions must not be enabled here.
+# Runs under MPI with spectrum partitioning: 32 ranks are split into 8
+# partitions of 4 ranks each, so eight slices are processed concurrently
+# and the MUMPS factorization is distributed within each partition.
+# Every rank assembles the full SciPy matrices redundantly but hands only
+# its own row block to PETSc.
 #
-# Environment (adapt to the cluster):
-#   module load petsc slepc mumps    # or: conda activate slepc-env
+# Requires PETSc/SLEPc built with 64-bit indices: at h=0.03 the factors
+# hold about 6.3e9 entries, well beyond the 2^31 limit of a 32-bit build,
+# which manifests as a segmentation fault mid-run.
+#
+# Environment:
+#   conda activate /home/esul01/envs/slepc64
 
 source /home/jupyter/anaconda3/etc/profile.d/conda.sh
 conda activate /home/esul01/envs/slepc64
@@ -38,12 +46,13 @@ echo "started=$(date)"
 echo "node=$(hostname)"
 echo "OMP_NUM_THREADS=${OMP_NUM_THREADS}"
 
-python scripts/run_slepc_slicing.py \
+mpirun -n ${SLURM_NTASKS} python scripts/run_slepc_slicing.py \
   --data-root /home/esul01/data \
   --out-dir   /home/esul01/data/outputs/slepc_slicing_triaxial_h003_i64 \
   --a 1.0 --b 1.5 --c 2.3 --mesh-h 0.03 --order 2 \
   --lambda-lo 0.0 --n-target 2050 --n-tiles 64 \
   --tol 1e-10 --local-nev 80 --local-ncv 160 \
+  --partitions 8 \
   -st_type sinvert \
   -st_ksp_type preonly \
   -st_pc_type cholesky \
