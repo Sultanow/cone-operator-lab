@@ -1,0 +1,3 @@
+JobID|JobName|Elapsed|TotalCPU|AllocCPUS|ReqMem|MaxRSS|State
+143375|slepc-slicing-h003-i64|05:41:08|7-12:41:54|64|700G||COMPLETED
+143375.batch|batch|05:41:08|7-12:41:54|64||558232088K|COMPLETED
