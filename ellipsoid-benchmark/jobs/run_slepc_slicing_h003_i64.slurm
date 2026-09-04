@@ -52,7 +52,7 @@ mpirun -n ${SLURM_NTASKS} python scripts/run_slepc_slicing.py \
   --a 1.0 --b 1.5 --c 2.3 --mesh-h 0.03 --order 2 \
   --lambda-lo 0.0 --n-target 2050 --n-tiles 64 \
   --tol 1e-10 --local-nev 80 --local-ncv 160 \
-  --partitions 8 \
+  --partitions 2 \
   -st_type sinvert \
   -st_ksp_type preonly \
   -st_pc_type cholesky \
