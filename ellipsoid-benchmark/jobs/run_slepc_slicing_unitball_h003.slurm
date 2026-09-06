@@ -48,7 +48,7 @@ echo "OMP_NUM_THREADS=${OMP_NUM_THREADS}"
 
 mpirun -n ${SLURM_NTASKS} python scripts/run_slepc_slicing.py \
   --data-root /home/esul01/data \
-  --out-dir   /home/esul01/data/outputs/slepc_slicing_unitball_h003 \
+  --out-dir   /home/esul01/data/outputs/slepc_slicing_unitball_h003_i64 \
   --a 1.0 --b 1.0 --c 1.0 --mesh-h 0.03 --order 2 \
   --lambda-lo 0.0 --n-target 2050 --n-tiles 64 \
   --tol 1e-10 --local-nev 120 --local-ncv 300 \
