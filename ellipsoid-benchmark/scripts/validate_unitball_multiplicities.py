@@ -74,6 +74,13 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--spectrum", required=True,
                    help="one eigenvalue per line, multiplicities expanded")
+    p.add_argument("--cluster-tol", type=float, default=1e-9,
+                   help="relative tolerance for grouping the input levels "
+                        "into clusters before the multiplicity comparison. "
+                        "The default suits an already-clustered consensus "
+                        "spectrum; a solver that returns individually "
+                        "converged eigenvalues splits each degenerate level "
+                        "numerically and needs a wider value (e.g. 1e-6).")
     p.add_argument("--clusters", default=None,
                    help="optional full_spectrum_accepted.csv for a "
                         "per-cluster multiplicity comparison")
@@ -110,7 +117,9 @@ def main():
         i = 0
         while i < len(obs):
             j = i + 1
-            while j < len(obs) and abs(obs[j] - obs[i]) <= 1e-9 * max(obs[i], 1):
+            while (j < len(obs)
+                   and abs(obs[j] - obs[i])
+                       <= args.cluster_tol * max(obs[i], 1.0)):
                 j += 1
             pos.append(float(np.median(obs[i:j])))
             mult.append(j - i)
@@ -118,7 +127,9 @@ def main():
         obs_pos, obs_mult = np.array(pos), np.array(mult)
     order = np.argsort(obs_pos)
     obs_pos, obs_mult = obs_pos[order], obs_mult[order]
-    print(f"observed distinct clusters: {len(obs_pos)}")
+    print(f"observed distinct clusters: {len(obs_pos)}"
+          + ("" if args.clusters
+             else f"  (cluster-tol {args.cluster_tol:g})"))
 
     rows, used = [], np.zeros(len(obs_pos), bool)
     for _, e in exact.iterrows():
