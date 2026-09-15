@@ -32,7 +32,9 @@ Non-Backtracking-Spektrum, Taillenweite, einfache Zyklen und Tangle-Proxy
 **Längenspektrum** der gecuspten Fläche über die L/R-Cutting-Sequence-Wörter in
 PSL(2,ℤ) (ℓ = 2 arccosh(tr(w)/2), vollständig unterhalb ℓ_cut = 2 arccosh((W+2)/2)).
 `graph_scan.py` screent 10⁵–10⁷ Seeds und exportiert Extremfälle als Parameterdatei
-für die FEM-Stufe; die Features landen auch in jedem `run_bm.py`-JSON (`graph`).
+für die FEM-Stufe; die Features landen auch in jedem `run_bm.py`-JSON (`graph`) —
+neu berechnet oder mit `--graph-from scan.csv` aus Stufe 1 übernommen
+(Konsistenzcheck über V und Geschlecht, Feld `graph_source`).
 Experiment-Matrix und Hypothesen H1–H6: `EXPERIMENTS.md`.
 
 ## Installation und Aufruf

@@ -10,6 +10,8 @@ Per sample (JSON):
   lambda1_compact  first eigenvalues of the uniformized compactification S^bar
   liouville        Newton diagnostics, discrete Gauss-Bonnet, conformal factor phi per cusp
   weyl             slope of the counting function of S^bar (Weyl: Area/4pi = g-1)
+  graph            combinatorial stage: cycles, tangles, adjacency / non-backtracking spectra,
+                   cusp statistics, combinatorial length spectrum (see bmgraph.py)
 
 Usage:  python run_bm.py --n 16 --seed 3 --h 0.1 --L0 1.0 --neig 40 --out results/x.json
 """
@@ -22,6 +24,7 @@ import time
 import numpy as np
 
 from bmsurf import BMSurface, build_mesh
+from bmgraph import graph_features
 from bmfem import (CuspDtN, FOUR_PI, curvature_source, cusp_eigs_dtn, lumped, mass,
                    neumann_eigs, lowest, restrict, solve_liouville, stiffness, weyl_fit)
 
@@ -34,6 +37,27 @@ def log(msg):
         print("[%7.1fs] %s" % (time.time() - T0, msg), flush=True)
 
 
+def load_scan_row(path, n, seed):
+    """Row of a graph_scan.py CSV for (n, seed), with types restored; None if absent."""
+    import csv
+    with open(path, newline="") as fh:
+        for r in csv.DictReader(fh):
+            if int(r["n"]) == n and int(r["seed"]) == seed:
+                out = {}
+                for k, v in r.items():
+                    if v in ("", "None"):
+                        out[k] = None
+                    elif v in ("True", "False"):
+                        out[k] = v == "True"
+                    else:
+                        try:
+                            out[k] = int(v)
+                        except ValueError:
+                            out[k] = float(v)
+                return out
+    return None
+
+
 def main():
     global VERBOSE
     ap = argparse.ArgumentParser()
@@ -43,6 +67,9 @@ def main():
     ap.add_argument("--L0", type=float, default=1.0, help="cusp cut-off horocycle length")
     ap.add_argument("--T-ext", type=float, default=6.0, help="depth of the cusp extension (DtN)")
     ap.add_argument("--neig", type=int, default=40, help="eigenvalues of S^bar for the Weyl fit")
+    ap.add_argument("--W", type=int, default=10, help="max word length for cycles / length spectrum")
+    ap.add_argument("--graph-from", type=str, default=None,
+                    help="scan CSV from graph_scan.py; reuse its row for (n, seed) instead of recomputing")
     ap.add_argument("--out", type=str, default=None)
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
@@ -55,6 +82,18 @@ def main():
     if surf.g < 2:
         log("genus < 2: compactification is not hyperbolic, aborting")
         sys.exit(2)
+    gf = load_scan_row(args.graph_from, surf.n, args.seed) if args.graph_from else None
+    if gf is not None:
+        assert gf["V"] == surf.V and gf["genus"] == surf.g, "scan row does not match the generated surface"
+        gf["graph_source"] = "scan:%s" % args.graph_from
+        gf.setdefault("simple_cycles", {l: gf.pop("c%d" % l) for l in range(1, 7) if "c%d" % l in gf})
+    else:
+        gf = graph_features(surf, W=args.W)
+        gf["graph_source"] = "computed"
+    log("graph [%s]: girth=%s cycles<=6=%s tangles=%s systole=%s mu2=%.4f nb_rho2=%.4f Ramanujan(adj)=%s"
+        % (gf["graph_source"], gf.get("girth"), {k: v for k, v in gf["simple_cycles"].items() if int(k) <= 6},
+           gf.get("n_tangle_walks"), gf.get("systole"), gf.get("mu2", float("nan")), gf.get("nb_rho2", float("nan")),
+           gf.get("ramanujan_adj")))
 
     mesh = build_mesh(surf, h=args.h, L0=args.L0, T_ext=args.T_ext)
     nn, tag = mesh.nnodes, mesh.tag
@@ -134,6 +173,7 @@ def main():
                        min_phi=float(phi_b.min()), max_phi=float(phi_b.max()),
                        phi_per_cusp=phi_cusp),
         weyl=weyl,
+        graph=gf,
         delta_compact_minus_cusped=(None if lam_c is None else float(vals_C[1] - lam_c)),
         delta_compact_minus_thick=float(vals_C[1] - vals_T[1]),
         wallclock_s=time.time() - T0,
