@@ -1,0 +1,119 @@
+# Experiment-Matrix: Endliche Brooks-Makover-Flächen
+
+Rahmen: Shen–Wu (arXiv:2511.02517) beweisen λ₁(S̄) > 1/4 − n^{−1/221} w.h.p. für die
+kompaktifizierte Fläche, Hide–Magee (Ann. Math. 2023) „keine neuen Eigenwerte unter
+1/4 − ε" für die gecuspte. Beides sagt nichts über endliche n, Fluktuationen,
+Extremwerte, den Mechanismus (Cusps → Kompaktifizierung) oder die Spektralstatistik.
+Genau das ist der Gegenstand.
+
+## Pipeline (Funnel)
+
+```
+graph_scan.py  ──►  10^5–10^7 Ribbon-Graphen, ~0.07 s/Graph bei n=64      (Stufe 1)
+      │               Features: Zyklen, Tangles, Cusps, μ₂, ρ₂(NB), Längenspektrum
+      ▼  --select <feature> --top/--bottom
+run_bm.py      ──►  10^2–10^3 Flächen, FEM: λ₁(S) via Cusp-DtN, Liouville → S̄   (Stufe 2)
+      ▼
+aggregate.py   ──►  summary.csv, Richardson, Korrelationen                       (Stufe 3)
+```
+
+Der Seed bestimmt den Graphen deterministisch (gleicher RNG in beiden Stufen), die
+Auswahl in Stufe 1 ist also exakt reproduzierbar in Stufe 2.
+
+## Gespeicherte Größen pro Sample
+
+| Nr. | Größe | Quelle | Kosten |
+|---|---|---|---|
+| 1 | V, Cusp-Längen k_c, g, Anteil k_max/6n, #Cusps mit k ≤ 2 | Kombinatorik | ~0 |
+| 2 | Taillenweite, einfache Zyklen c₁…c_W, Tangle-Proxy (nicht-einfache geschlossene NB-Wege ≤ W) | Enumeration, exakt (gegen tr B^ℓ verifiziert) | ms |
+| 3 | μ₂(G), 3 − μ₂, μ_min, Ramanujan-Flag; NB-Spektrum ρ₂ | dense/sparse eig | ms–s |
+| 4 | Längenspektrum von S unterhalb ℓ_cut = 2 arccosh((W+2)/2) über L/R-Wörter: Systole, #Geodäten < 2, < 3, Worttypen (#L, #R) | Kombinatorik, exakt | ms |
+| 5 | λ₁(S_Y) (dicker Teil, Neumann) | FEM | s–min |
+| 6 | λ₁(S): kleinster L²-Eigenwert < 1/4, exakte Cusp-DtN-Bedingung (oder „keiner") | FEM + Wurzelsuche | s–min |
+| 7 | λ₁…λ_neig(S̄) nach Liouville-Uniformisierung, Gauß-Bonnet-Check | FEM | s–min |
+| 8 | φ auf Höhe-1-Horozyklus je Cusp (Metrikverzerrung durch Kompaktifizierung) | Liouville | inklusive |
+| 9 | Weyl-Steigung (Geschlecht hören) | Fit | inklusive |
+| 10 | h und Richardson-Extrapolation (0.1, 0.07) auf einer Teilmenge | 2 Läufe | ×2 |
+
+## Plan für n und Stichproben
+
+| n | 2n Dreiecke | ⟨g⟩ ≈ n/2 | Knoten (h=0.1) | Zeit/Sample | Samples FEM | Samples Scan |
+|---|---|---|---|---|---|---|
+| 16 | 32 | 7 | 17k | 5 s | 500 | 10⁶ |
+| 32 | 64 | 15 | 34k | 15 s | 500 | 10⁶ |
+| 64 | 128 | 30 | 70k | 1 min | 300 | 10⁶ |
+| 128 | 256 | 62 | 150k | 5 min | 200 | 10⁵ |
+| 256 | 512 | 126 | 300k | ~20 min | 100 | 10⁵ |
+| 512 | 1024 | 254 | 600k | ~1 h (SLEPc ab hier sinnvoll) | 30 | 10⁴ |
+
+Grob 200 CPU-Stunden für die FEM-Stufe, gut im SLURM-Array parallelisierbar.
+Für Paper 3 (Spektralstatistik) zusätzlich P2-Elemente oder h ≈ 0.03 auf 20–50
+Flächen mit 10³–10⁴ Eigenwerten.
+
+## Hypothesen
+
+**H1 (Finite-Size-Gesetz).** median(λ₁(S̄)) − 1/4 =: Δ_n skaliert wie C·n^{−α} mit
+α ∈ (0, 1) oder wie C/log n. Test: Datenkollaps von n^α Δ_n bzw. log(n)·Δ_n über
+n ∈ {16…512}; α per Fit mit Bootstrap-Konfidenzintervall. Erste Punkte (n=32:
+0.39, n=128: 0.31) liegen *oberhalb* 1/4, also kommt Δ_n von oben. Falsifiziert,
+wenn keine der beiden Familien kollabiert oder Δ_n das Vorzeichen wechselt.
+Nur S̄ ist das richtige Objekt: für gecusptes S ist λ₁ ≤ 1/4 trivial.
+
+**H2 (Fluktuationen).** Die Verteilung von (λ₁(S̄) − median)/IQR ist bei festem n
+linksschief (Tracy-Widom-artig, Analogie zu Huang–McKenzie–Yau für μ₂ regulärer
+Graphen), nicht gaußsch. Test: Schiefe, Kurtosis, KS-Abstand zu TW₁ und zu N(0,1).
+Nebenfrage: Anteil P(λ₁(S̄) > 1/4) als Funktion von n (Analogon zur 69 %-Frage).
+
+**H3 (Graph → Fläche).** λ₁(S̄) − 1/4 wird durch kurze Zyklen, Tangle-Proxy und
+Anzahl kurzer Cusps besser vorhergesagt als durch 3 − μ₂(G). Test: Regression auf
+Trainings-n, Vorhersage auf ausgelassenem n; partielle Korrelationen. Begründung:
+Friedman-Tangles und die Friedman-Ramanujan-Funktionen von Anantharaman–Monk
+identifizieren Tangles, nicht die Graphenlücke, als Mechanismus der Abweichung.
+Falsifiziert, wenn μ₂ allein die gleiche Vorhersagegüte erreicht.
+
+**H4 (Kompaktifizierungs-Mechanismus).** φ(k) := Mittel von φ auf dem
+Höhe-1-Horozyklus eines Cusps der Länge k ist eine universelle Funktion von k
+allein (unabhängig von n und vom Rest der Fläche), mit φ(k) → 0 wie c/k oder
+c·log k/k; und λ₁(S̄) − λ₁(S_Y) korreliert mit #Cusps der Länge ≤ 2. Erste Daten:
+φ(1) ≈ −3.8, φ(2) ≈ −1.3, φ(k ≥ 15) ≈ −0.01…−0.3. Das ist der quantitative Kern
+des Kompaktifizierungs-Lemmas („large cusps") und der Teil, der als Theorem
+(Schrohe-Linie) formuliert werden soll.
+
+**H5 (Spektralstatistik).** Für S̄ folgen die entfalteten Abstände GOE
+(Wigner-Surmise, Σ²(L), Δ₃(L) rigide). Für gecusptes S *nicht*: Γ hat endlichen
+Index in PSL(2,ℤ), ist also arithmetisch und meist nicht-kongruent; das Spektrum
+enthält das alte Spektrum des Kongruenzabschlusses (Poisson-Anteil) plus neuen
+Teil. Test: Mischungsanteil als Funktion des Index des Kongruenzabschlusses.
+Falsifiziert, wenn S̄ systematisch von GOE abweicht (dann modellabhängige
+Statistik – auch interessant).
+
+**H6 (Den Graphen hören).** Das Längenspektrum von S unterhalb ℓ_cut (nach Huber
+durch das Laplace-Spektrum bestimmt) bestimmt Taillenweite, c₁…c₆ und die
+Cusp-Längen ≤ W eindeutig; Umkehrung des L/R-Wörterbuchs ℓ = 2 arccosh(tr(w)/2)
+ist bis auf Worttyp-Kollisionen (gleiche Spur, verschiedene Wörter) injektiv.
+Test: Rekonstruktionsrate der Graphgrößen aus dem Längen-Multiset; Vergleich der
+Anzahl kurzer Geodäten mit dem Poisson-Grenzwert (Budzinski–Curien–Petri). Der
+Satz „Längenspektrum = Wortspuren der geschlossenen NB-Wege des Ribbon-Graphen"
+ist rein kombinatorisch und der natürliche Lean-Kandidat (Theorem 2b).
+
+## Was davon Theorem, Formalisierung, Empirie ist
+
+| | rigoros | Lean | empirisch |
+|---|---|---|---|
+| Kompaktifizierungs-Lemma quantitativ (H4) | ✓ Ziel | – | Daten liegen vor |
+| L/R-Wörterbuch Längenspektrum ↔ Ribbon-Graph (H6) | ✓ (klassisch, Cutting Sequences) | ✓ Kandidat | Verifiziert (tr B^ℓ-Check) |
+| Alon-Boppana, Cheeger, Brooks-Makover-Geschlecht | bekannt | ✓ | – |
+| H1, H2, H3, H5 | – | – | ✓ Kernaussagen der Paper 1–3 |
+
+## Extreme suchen (Stufe 1 → 2)
+
+```bash
+python graph_scan.py --n 128 --seeds 0 100000 --out scan_n128.csv \
+       --select gap --top 100 --bottom 100 --params params_extremes.txt
+sbatch --array=1-200%16 slurm_bm.sbatch     # mit params.txt → params_extremes.txt
+```
+
+Ranking-Kandidaten: `gap` (3 − μ₂; NB-ρ₂ ist für Ramanujan-Graphen konstant √2 und
+daher nur als Flag nützlich), `systole`, `n_tangle_walks`, `n_cusps_short`,
+`n_geodesics_below_3`. Benchmark für kleine n: maximales λ₁ in Geschlecht 2 ist die
+Bolza-Fläche (≈ 3.8388, Strohmaier–Uski).

@@ -18,7 +18,11 @@ if not rows:
 cols = ["n", "seed", "h", "V", "genus", "min_cusp_length", "max_cusp_length",
         "lambda1_thick", "lambda1_neumann", "lambda1_cusped", "lambda1_compact",
         "delta_compact_minus_cusped", "delta_compact_minus_thick",
-        "liou_area_err", "weyl_slope", "weyl_slope_expected", "phi_min_at_height1", "wallclock_s"]
+        "liou_area_err", "weyl_slope", "weyl_slope_expected", "phi_min_at_height1",
+        "girth", "n_short_cycles", "n_tangle_walks", "n_cusps_short", "systole",
+        "n_geodesics_below_3", "mu2", "gap", "nb_rho2", "ramanujan_adj", "wallclock_s"]
+GRAPH_COLS = ["girth", "n_short_cycles", "n_tangle_walks", "n_cusps_short", "systole",
+              "n_geodesics_below_3", "mu2", "gap", "nb_rho2", "ramanujan_adj"]
 
 
 def flat(r):
@@ -27,6 +31,8 @@ def flat(r):
     d["weyl_slope"] = r["weyl"]["slope"]
     d["weyl_slope_expected"] = r["weyl"].get("slope_expected")
     d["phi_min_at_height1"] = min(p["phi_height1"] for p in r["liouville"]["phi_per_cusp"])
+    for c in GRAPH_COLS:
+        d[c] = r.get("graph", {}).get(c)
     return d
 
 
@@ -77,3 +83,17 @@ for k in sorted({d["min_cusp_length"] for d in flat_rows}):
     g = [d for d in flat_rows if d["min_cusp_length"] == k]
     print("  k_min=%3d  #=%3d  mean delta=%.4f  mean min phi(height-1)=%.3f" % (
         k, len(g), np.mean([d["delta_compact_minus_thick"] for d in g]), np.mean([d["phi_min_at_height1"] for d in g])))
+
+# ---- graph -> surface transfer: correlations with lambda_1(S^bar) --------------------
+print("\nPearson correlation of lambda_1(S^bar) with graph features (per n, needs >= 8 samples):")
+for n in sorted({d["n"] for d in flat_rows}):
+    g = [d for d in flat_rows if d["n"] == n and d.get("mu2") is not None]
+    if len(g) < 8:
+        continue
+    y = np.array([d["lambda1_compact"] for d in g])
+    out = []
+    for c in ("gap", "systole", "n_short_cycles", "n_tangle_walks", "n_cusps_short", "girth"):
+        x = np.array([float(d[c]) for d in g])
+        if x.std() > 0:
+            out.append("%s:%+.2f" % (c, np.corrcoef(x, y)[0, 1]))
+    print("  n=%4d (#%d): " % (n, len(g)) + "  ".join(out))

@@ -10,6 +10,8 @@ Per sample (JSON):
   lambda1_compact  first eigenvalues of the uniformized compactification S^bar
   liouville        Newton diagnostics, discrete Gauss-Bonnet, conformal factor phi per cusp
   weyl             slope of the counting function of S^bar (Weyl: Area/4pi = g-1)
+  graph            combinatorial stage: cycles, tangles, adjacency / non-backtracking spectra,
+                   cusp statistics, combinatorial length spectrum (see bmgraph.py)
 
 Usage:  python run_bm.py --n 16 --seed 3 --h 0.1 --L0 1.0 --neig 40 --out results/x.json
 """
@@ -22,6 +24,7 @@ import time
 import numpy as np
 
 from bmsurf import BMSurface, build_mesh
+from bmgraph import graph_features
 from bmfem import (CuspDtN, FOUR_PI, curvature_source, cusp_eigs_dtn, lumped, mass,
                    neumann_eigs, lowest, restrict, solve_liouville, stiffness, weyl_fit)
 
@@ -43,6 +46,7 @@ def main():
     ap.add_argument("--L0", type=float, default=1.0, help="cusp cut-off horocycle length")
     ap.add_argument("--T-ext", type=float, default=6.0, help="depth of the cusp extension (DtN)")
     ap.add_argument("--neig", type=int, default=40, help="eigenvalues of S^bar for the Weyl fit")
+    ap.add_argument("--W", type=int, default=10, help="max word length for cycles / length spectrum")
     ap.add_argument("--out", type=str, default=None)
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
@@ -55,6 +59,10 @@ def main():
     if surf.g < 2:
         log("genus < 2: compactification is not hyperbolic, aborting")
         sys.exit(2)
+    gf = graph_features(surf, W=args.W)
+    log("graph: girth=%s cycles<=6=%s tangles=%d systole=%.3f (#geod<%.2f: %d) mu2=%.4f nb_rho2=%.4f Ramanujan(adj)=%s"
+        % (gf["girth"], {k: v for k, v in gf["simple_cycles"].items() if k <= 6}, gf["n_tangle_walks"],
+           gf["systole"] or float("nan"), gf["ell_cut"], gf["n_geodesics_below_cut"], gf["mu2"], gf["nb_rho2"], gf["ramanujan_adj"]))
 
     mesh = build_mesh(surf, h=args.h, L0=args.L0, T_ext=args.T_ext)
     nn, tag = mesh.nnodes, mesh.tag
@@ -134,6 +142,7 @@ def main():
                        min_phi=float(phi_b.min()), max_phi=float(phi_b.max()),
                        phi_per_cusp=phi_cusp),
         weyl=weyl,
+        graph=gf,
         delta_compact_minus_cusped=(None if lam_c is None else float(vals_C[1] - lam_c)),
         delta_compact_minus_thick=float(vals_C[1] - vals_T[1]),
         wallclock_s=time.time() - T0,

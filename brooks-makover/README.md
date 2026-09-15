@@ -24,6 +24,17 @@ jedes P1-Element mit der **euklidischen** Steifigkeit in seiner eigenen Karte
 assembliert (Halbebenen-Karte je Ecke, konforme Scheibenkarte `w = e^{2πi z/k}`
 für die Caps); die Metrik steckt nur in der Massenmatrix (Quadratur Grad 4).
 
+## Graphenstufe (billig) und Funnel
+
+`bmgraph.py` berechnet aus dem Ribbon-Graphen allein: Adjazenz- und
+Non-Backtracking-Spektrum, Taillenweite, einfache Zyklen und Tangle-Proxy
+(exakte Enumeration, gegen tr Bˡ verifiziert), Cusp-Statistik und das
+**Längenspektrum** der gecuspten Fläche über die L/R-Cutting-Sequence-Wörter in
+PSL(2,ℤ) (ℓ = 2 arccosh(tr(w)/2), vollständig unterhalb ℓ_cut = 2 arccosh((W+2)/2)).
+`graph_scan.py` screent 10⁵–10⁷ Seeds und exportiert Extremfälle als Parameterdatei
+für die FEM-Stufe; die Features landen auch in jedem `run_bm.py`-JSON (`graph`).
+Experiment-Matrix und Hypothesen H1–H6: `EXPERIMENTS.md`.
+
 ## Installation und Aufruf
 
 ```bash
@@ -82,6 +93,7 @@ Cusp-Metrik. Die Konstante ε(ℓ_min) ist also real und groß für ℓ_min ~ 1.
 
 ## Dateien
 
-`bmsurf.py` Kombinatorik + Netz · `bmfem.py` Assemblierung, DtN, Liouville,
-Eigenlöser · `run_bm.py` Treiber · `make_params.py`, `slurm_bm.sbatch` Job-Array ·
-`aggregate.py` Auswertung · `results_example/` einige Testläufe.
+`bmsurf.py` Kombinatorik + Netz · `bmgraph.py` Graphenstufe · `bmfem.py` Assemblierung,
+DtN, Liouville, Eigenlöser · `run_bm.py` Treiber · `graph_scan.py` Screening ·
+`make_params.py`, `slurm_bm.sbatch`, `slurm_scan.sbatch` Job-Arrays · `aggregate.py`
+Auswertung · `EXPERIMENTS.md` Experiment-Matrix · `results_example/` Testläufe.
