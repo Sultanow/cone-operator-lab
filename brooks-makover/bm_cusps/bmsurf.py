@@ -156,6 +156,8 @@ class Mesh:
     ext_nodes: np.ndarray = None
     thick_nodes: np.ndarray = None
     height1_rows: dict = field(default_factory=dict)  # cusp -> node ids on its height-1 horocycle
+    cusp_rows: dict = field(default_factory=dict)     # cusp -> [node ids of horocycle row j], j=0..J_c
+    cap_interior_of: dict = field(default_factory=dict)  # cusp -> interior node ids of its cap
     info: dict = field(default_factory=dict)
 
     def nodes_S(self) -> np.ndarray:
@@ -219,7 +221,7 @@ def _merge_rows(bot, top):
 
 
 def build_mesh(surf: BMSurface, h: float = 0.1, L0: float = 1.0, T_ext: float = 6.0,
-               chain_min_nodes: int = 24, central_opts: str | None = None) -> Mesh:
+               chain_min_nodes: int | None = None, central_opts: str | None = None) -> Mesh:
     """Build the P1 mesh: truncated surface S_Y, cusp extensions (for the exact cusp
     DtN of the cusped surface) and conformal caps (for the compactification).
 
@@ -234,6 +236,8 @@ def build_mesh(surf: BMSurface, h: float = 0.1, L0: float = 1.0, T_ext: float = 
     tri, xy, kind, rho_c, tag = [], [], [], [], []
     near_top, central_nodes, cap_interior, ext_nodes = set(), set(), set(), set()
     ntop = int(math.ceil(1.0 / h))
+    if chain_min_nodes is None:                       # cap boundary spacing <= h/2: caps refine with h
+        chain_min_nodes = max(24, int(math.ceil(2.0 * L0 / h)))
 
     J = np.array([max(0, int(round(math.log(k / L0) / h))) for k in surf.k])
     Y = np.exp(J * h)
@@ -260,6 +264,7 @@ def build_mesh(surf: BMSurface, h: float = 0.1, L0: float = 1.0, T_ext: float = 
 
     # ---- corner strips + cusp extensions ------------------------------------------
     bottom_rows, top_rows, dtn_rows = {}, {}, {}
+    cusp_rows = {c: [set() for _ in range(int(J[c]) + 1)] for c in range(surf.V)}
     for d in range(6 * n):
         v, s = divmod(d, 3)
         c = surf.cusp_of[d]
@@ -283,6 +288,8 @@ def build_mesh(surf: BMSurface, h: float = 0.1, L0: float = 1.0, T_ext: float = 
                 near_top.update(ids)
             if j > Jc:
                 ext_nodes.update(ids)
+            else:
+                cusp_rows[c][j].update(ids)
             rows.append((ids, xs, math.exp(j * h)))
         for j in range(Jc):
             add(_merge_rows(rows[j], rows[j + 1]), 0, 0.0, 0)
@@ -334,7 +341,7 @@ def build_mesh(surf: BMSurface, h: float = 0.1, L0: float = 1.0, T_ext: float = 
         return CuspChain(c, k, float(Yc), float(Lc), math.exp(-2 * math.pi / Lc),
                          np.array(node), np.array(xc, dtype=float))
 
-    cap_chains, dtn_chains, height1 = [], [], {}
+    cap_chains, dtn_chains, height1, cap_interior_of = [], [], {}, {}
     from scipy.spatial import Delaunay
     for c, cyc in enumerate(surf.cusps):
         cap_chains.append(chain(top_rows, c, cyc, Y[c]))
@@ -345,7 +352,7 @@ def build_mesh(surf: BMSurface, h: float = 0.1, L0: float = 1.0, T_ext: float = 
         th = 2 * math.pi * ch.x / k
         P = [np.column_stack([r0 * np.cos(th), r0 * np.sin(th)])]
         gid = list(ch.node)
-        R = 3 if Nb >= 8 else 2
+        R = max(2, int(round(Nb / (2 * math.pi))))     # radial ~ angular spacing: refines with h
         for r in range(1, R):
             nr = max(4, int(round(Nb * (R - r) / R)))
             tr = 2 * math.pi * (np.arange(nr) + 0.5) / nr
@@ -354,6 +361,7 @@ def build_mesh(surf: BMSurface, h: float = 0.1, L0: float = 1.0, T_ext: float = 
             gid.extend(reg.get(("K", c, r, i)) for i in range(nr))
         P.append(np.zeros((1, 2))); gid.append(reg.get(("K", c, 0, 0)))
         cap_interior.update(gid[Nb:])
+        cap_interior_of[c] = np.array(sorted(gid[Nb:]))
         P = np.vstack(P)
         dens_c = (ch.L / (2 * math.pi * r0)) ** 2
         tris = []
@@ -377,5 +385,7 @@ def build_mesh(surf: BMSurface, h: float = 0.1, L0: float = 1.0, T_ext: float = 
                 ext_nodes=np.array(sorted(ext_nodes)),
                 thick_nodes=np.nonzero(thick)[0],
                 height1_rows=height1,
+                cap_interior_of=cap_interior_of,
+                cusp_rows={c: [np.array(sorted(r_)) for r_ in rows_] for c, rows_ in cusp_rows.items()},
                 info=dict(h=h, L0=L0, T_ext=T_ext, J=J.tolist(), Y=Y.tolist(), L=L.tolist(),
                           n_elements=int(len(tri)), n_ext=int((tag == 1).sum()), n_cap=int((tag == 2).sum())))

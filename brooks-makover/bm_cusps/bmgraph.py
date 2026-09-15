@@ -21,7 +21,10 @@ Features
   constant; with L = [[1,1],[0,1]], R = [[1,0],[1,1]] the geodesic length is
   2 arccosh(tr(word)/2).  Constant words go once around a face = a cusp (trace 2).
   Words up to length W give the COMPLETE length spectrum below
-  ell_cut = 2 arccosh((W+2)/2)  (a word of length w has trace >= w+2).
+  ell_cut = 2 arccosh((W+1)/2): a mixed word of length w has trace >= w+1
+  (minimum L^{w-1} R, verified exhaustively for w <= 12), so every geodesic
+  with trace <= W+1 has a word of length <= W.  Longer geodesics also appear
+  among the enumerated words but are NOT complete and are reported separately.
 """
 from __future__ import annotations
 
@@ -139,7 +142,7 @@ def closed_nb_walks(surf: BMSurface, W: int):
 
 def cycle_and_length_features(surf: BMSurface, W: int = 10):
     """Girth, simple-cycle counts, tangle proxy and the combinatorial length spectrum
-    (complete below ell_cut = 2 arccosh((W+2)/2))."""
+    (complete below ell_cut = 2 arccosh((W+1)/2))."""
     simple = Counter()      # length -> number of simple cycles (unoriented)
     nonsimple = Counter()   # length -> closed NB walks that revisit a vertex (unoriented)
     lengths = []            # geodesic lengths (unoriented, each once)
@@ -167,7 +170,8 @@ def cycle_and_length_features(surf: BMSurface, W: int = 10):
     simple = {k: v // 2 for k, v in sorted(simple.items())}
     nonsimple = {k: v // 2 for k, v in sorted(nonsimple.items())}
     lengths = np.sort(np.array(lengths))[::2] if lengths else np.array([])
-    ell_cut = 2.0 * math.acosh((W + 2) / 2.0)
+    ell_cut = 2.0 * math.acosh((W + 1) / 2.0)
+    below = lengths[lengths < ell_cut]
     girth = min(simple) if simple else None
     # cusps of length <= W must have been seen once per orientation... (faces of the ribbon graph)
     n_faces_short = int(sum(1 for k in surf.k if k <= W))
@@ -179,10 +183,11 @@ def cycle_and_length_features(surf: BMSurface, W: int = 10):
         tangle_walks={int(k): int(v) for k, v in nonsimple.items()},
         n_tangle_walks=int(sum(nonsimple.values())),
         systole=(float(lengths[0]) if len(lengths) else None),
-        n_geodesics_below_cut=int(len(lengths)),
+        n_geodesics_below_cut=int(len(below)),               # complete count below ell_cut
         n_geodesics_below_2=int((lengths < 2.0).sum()),
         n_geodesics_below_3=int((lengths < 3.0).sum()),
-        length_spectrum=[float(x) for x in lengths[:200]],
+        length_spectrum=[float(x) for x in below],           # complete part of the length spectrum
+        n_geodesics_from_words=int(len(lengths)),            # all enumerated (incomplete above ell_cut)
         word_types={"%d,%d" % k: int(v // 2) for k, v in sorted(words.items())},
     )
 

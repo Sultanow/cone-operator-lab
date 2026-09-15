@@ -18,7 +18,7 @@ if not rows:
 cols = ["n", "seed", "h", "V", "genus", "min_cusp_length", "max_cusp_length",
         "lambda1_thick", "lambda1_neumann", "lambda1_cusped", "lambda1_compact",
         "delta_compact_minus_cusped", "delta_compact_minus_thick",
-        "liou_area_err", "weyl_slope", "weyl_slope_expected", "phi_min_at_height1",
+        "liou_area_err", "weyl_slope", "weyl_slope_expected", "u_min_at_height1", "eps_central",
         "girth", "n_short_cycles", "n_tangle_walks", "n_cusps_short", "systole",
         "n_geodesics_below_3", "mu2", "gap", "nb_rho2", "ramanujan_adj", "wallclock_s"]
 GRAPH_COLS = ["girth", "n_short_cycles", "n_tangle_walks", "n_cusps_short", "systole",
@@ -30,7 +30,8 @@ def flat(r):
     d["liou_area_err"] = abs(r["liouville"]["area_compact"] - r["liouville"]["area_compact_exact"]) / r["liouville"]["area_compact_exact"]
     d["weyl_slope"] = r["weyl"]["slope"]
     d["weyl_slope_expected"] = r["weyl"].get("slope_expected")
-    d["phi_min_at_height1"] = min(p["phi_height1"] for p in r["liouville"]["phi_per_cusp"])
+    d["u_min_at_height1"] = min(p["u_height1_mean"] for p in r["liouville"]["u_per_cusp"])
+    d["eps_central"] = r["liouville"].get("eps_central")
     for c in GRAPH_COLS:
         d[c] = r.get("graph", {}).get(c)
     return d
@@ -65,7 +66,7 @@ if rich:
 
 # ---- summary per n ---------------------------------------------------------------------
 print("%5s %4s | %6s %6s | %9s %9s %9s | %8s %8s | %7s %7s" % (
-    "n", "#", "V", "genus", "lam1_thk", "lam1_S", "lam1_Sbar", "P(<1/4)", "d(Sbar-S)", "minphi", "t[s]"))
+    "n", "#", "V", "genus", "lam1_thk", "lam1_S", "lam1_Sbar", "P(<1/4)", "d(Sbar-S)", "min u", "t[s]"))
 for n in sorted({d["n"] for d in flat_rows}):
     g = [d for d in flat_rows if d["n"] == n]
     S = [d["lambda1_cusped"] for d in g if d["lambda1_cusped"] is not None]
@@ -74,15 +75,15 @@ for n in sorted({d["n"] for d in flat_rows}):
         n, len(g), np.mean([d["V"] for d in g]), np.mean([d["genus"] for d in g]),
         np.mean([d["lambda1_thick"] for d in g]), np.mean(S) if S else float("nan"),
         np.mean([d["lambda1_compact"] for d in g]), len(S) / len(g),
-        np.mean(dl) if dl else float("nan"), np.mean([d["phi_min_at_height1"] for d in g]),
+        np.mean(dl) if dl else float("nan"), np.mean([d["u_min_at_height1"] for d in g]),
         np.mean([d["wallclock_s"] for d in g])))
 
 # ---- dependence on the shortest cusp -------------------------------------------------
 print("\nlambda_1(S^bar) - lambda_1(S_thick) grouped by shortest cusp length k_min:")
 for k in sorted({d["min_cusp_length"] for d in flat_rows}):
     g = [d for d in flat_rows if d["min_cusp_length"] == k]
-    print("  k_min=%3d  #=%3d  mean delta=%.4f  mean min phi(height-1)=%.3f" % (
-        k, len(g), np.mean([d["delta_compact_minus_thick"] for d in g]), np.mean([d["phi_min_at_height1"] for d in g])))
+    print("  k_min=%3d  #=%3d  mean delta=%.4f  mean min u(height-1)=%.3f" % (
+        k, len(g), np.mean([d["delta_compact_minus_thick"] for d in g]), np.mean([d["u_min_at_height1"] for d in g])))
 
 # ---- graph -> surface transfer: correlations with lambda_1(S^bar) --------------------
 print("\nPearson correlation of lambda_1(S^bar) with graph features (per n, needs >= 8 samples):")

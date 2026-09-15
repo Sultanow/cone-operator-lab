@@ -182,6 +182,10 @@ def cusp_eigs_dtn(K, M, dtn: CuspDtN, lam_start=None, tol=1e-10, log=None):
     g(lam) = lambda_1(K - D(nu(lam)), M) - lam,  g is decreasing (D grows with lam), so the
     L^2 eigenvalue is the unique root of g on (0, 1/4), which exists iff g(1/4^-) < 0.
     The spurious constant-like mode of the frozen operator is filtered out.
+    Everything here is a converging FEM approximation (P1, O(h^2)); the Fourier truncation
+    at the DtN boundary Y'' is not the limiting error (non-zero modes are ~exp(-2 pi Y''/k)
+    there).  A 'None' result means: no discrete eigenvalue below 1/4 was found -- it is a
+    numerical statement, not a certificate (that would need validated numerics).
     """
     ones = np.ones(K.shape[0])
     ones_M = M @ ones
@@ -207,8 +211,9 @@ def cusp_eigs_dtn(K, M, dtn: CuspDtN, lam_start=None, tol=1e-10, log=None):
     hi = 0.25 - 1e-9
     g_hi = g(hi)
     if g_hi >= 0:
-        return None, dict(note="no L2 eigenvalue below 1/4 (frozen nu=0 value %.6f)" % cache[hi],
-                          frozen_nu0=float(cache[hi]), evaluations=len(cache))
+        return None, dict(note="no L2 eigenvalue below 1/4 detected in the discretisation "
+                               "(frozen nu=0 value %.6f); numerical statement, not a certificate" % cache[hi],
+                          frozen_nu0=float(cache[hi]), evaluations=len(cache), certified=False)
     lo = 1e-6
     g_lo = g(lo)
     if g_lo <= 0:

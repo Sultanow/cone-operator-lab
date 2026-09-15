@@ -13,9 +13,9 @@ Pro Stichprobe (`n`, `seed`):
 |---|---|
 | `V`, `cusp_lengths`, `genus` | Kombinatorik des zufälligen kubischen Ribbon-Graphen (Konfigurationsmodell) |
 | `lambda1_thick` | λ₁ des dicken Teils `S_Y` (Cusps an Horozyklen der Länge `L0` abgeschnitten, Neumann) |
-| `lambda1_cusped` | kleinster **L²-Eigenwert von S unterhalb 1/4** über die exakte Cusp-DtN-Bedingung (Moden `y^{1/2−ν}`, `√y K_ν`), oder `null`, wenn keiner existiert |
+| `lambda1_cusped` | kleinster **L²-Eigenwert von S unterhalb 1/4** über die exakte Cusp-DtN-Bedingung (Moden `y^{1/2−ν}`, `√y K_ν`); `null` = in der Diskretisierung keiner gefunden (numerische Aussage, kein Zertifikat) |
 | `lambda1_compact` | λ₁ der **uniformisierten** Kompaktifizierung: Liouville-Gleichung `Δ₀φ = K₀ + e^{2φ}` (Newton), dann `K u = λ M(ρ₀ e^{2φ}) u` |
-| `liouville.phi_per_cusp` | Mittel von φ auf dem Höhe-1-Horozyklus jedes Cusps — die Größe, die im Theorem als ε(ℓ_min) auftaucht |
+| `liouville.u_per_cusp`, `eps_*` | konformer Faktor u (ḡ = e^{2u} g₀): Mittel und sup auf Höhe-1- und Länge-ℓ-Horozyklen je Cusp; ε_central/ε_outside(ℓ)/ε_long(ℓ) = sup|u| auf dem jeweiligen Vergleichsgebiet, also die Konstante in e^{−2ε} g ≤ ḡ ≤ e^{2ε} g |
 | `weyl` | Steigung der Zählfunktion von S̄; Weyl: Area/4π = g − 1 („Geschlecht hören") |
 | Checks | diskretes Gauß-Bonnet (Σc = 2πχ, Area(S̄) = 4π(g−1)), Flächeninhalt von S_Y vs. exakt |
 
@@ -77,10 +77,12 @@ Konvergenz sauber O(h²); Richardson (0.1, 0.07): λ₁(S̄) → 0.38794, λ₁(
 Liouville-Newton konvergiert in 5–6 Schritten auf |R| ~ 1e-13, Gauß-Bonnet stimmt
 bis auf den O(h²)-Geometriefehler.
 
-Beobachtung, die direkt das Theorem füttert: φ auf dem Höhe-1-Horozyklus ist
+Beobachtung, die direkt das Theorem füttert: u auf dem Höhe-1-Horozyklus ist
 ≈ −0.01 … −0.3 für lange Cusps (k ≥ 15), aber ≈ −1.3 für k = 2 und ≈ −3.8 für
-k = 1 — die Kompaktifizierung ist nur außerhalb kurzer Cusps nahe an der
-Cusp-Metrik. Die Konstante ε(ℓ_min) ist also real und groß für ℓ_min ~ 1.
+k = 1. Auf Horozyklen fester *Länge* ℓ ist u dagegen fast k-unabhängig und folgt
+einer expliziten Scheibenformel mit einer Konstante c₀ je Cusp (EXPERIMENTS.md, H4).
+Die Kappen sind über die Kettenauflösung (Knotenabstand ≤ h/2, Ringzahl ∝ Knotenzahl)
+an h gekoppelt; ihr Beitrag zu λ₁ liegt bei den getesteten h unter 10⁻⁶ relativ.
 
 ## Bekannte Einschränkungen
 
@@ -88,7 +90,9 @@ Cusp-Metrik. Die Konstante ε(ℓ_min) ist also real und groß für ℓ_min ~ 1.
   vermascht (Sehne statt Bogen): geometrischer Fehler O(h²), gleicher Ordnung wie
   der P1-Fehler; wird durch Richardson mit extrapoliert.
 * Keine Zertifizierung der Eigenwerte (das wäre die Strohmaier–Uski-Linie aus
-  Punkt 1); die Zahlen sind konvergente FEM-Näherungen.
+  Punkt 1); die Zahlen sind konvergente FEM-Näherungen. Insbesondere ist
+  `lambda1_cusped: null` („keiner unter 1/4") eine Aussage über das diskrete
+  Problem, kein Ausschlusszertifikat.
 * Modell ist Brooks–Makover (Belyi-Flächen), nicht Weil–Petersson.
 * Der Weyl-Fit braucht `--neig` ≳ 5·g, um das Geschlecht verlässlich zu „hören";
   für große n ist er mit 60 Eigenwerten nur grob (P1 überschätzt hohe Eigenwerte).

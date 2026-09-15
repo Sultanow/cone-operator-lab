@@ -33,9 +33,9 @@ in jedem Sample dasselbe Schema hat – ob übernommen oder neu berechnet.
 | 3 | μ₂(G), 3 − μ₂, μ_min, Ramanujan-Flag; NB-Spektrum ρ₂ | dense/sparse eig | ms–s |
 | 4 | Längenspektrum von S unterhalb ℓ_cut = 2 arccosh((W+2)/2) über L/R-Wörter: Systole, #Geodäten < 2, < 3, Worttypen (#L, #R) | Kombinatorik, exakt | ms |
 | 5 | λ₁(S_Y) (dicker Teil, Neumann) | FEM | s–min |
-| 6 | λ₁(S): kleinster L²-Eigenwert < 1/4, exakte Cusp-DtN-Bedingung (oder „keiner") | FEM + Wurzelsuche | s–min |
+| 6 | λ₁(S): kleinster L²-Eigenwert < 1/4, exakte Cusp-DtN-Bedingung; „keiner" ist eine numerische Aussage der Diskretisierung, kein Zertifikat (Feld `certified: false`) | FEM + Wurzelsuche | s–min |
 | 7 | λ₁…λ_neig(S̄) nach Liouville-Uniformisierung, Gauß-Bonnet-Check | FEM | s–min |
-| 8 | φ auf Höhe-1-Horozyklus je Cusp (Metrikverzerrung durch Kompaktifizierung) | Liouville | inklusive |
+| 8 | u je Cusp: Mittel/sup auf Höhe-1- und Länge-ℓ-Horozyklen, c₀ (konforme Dichte an der Punktierung); ε_central, ε_outside(ℓ), ε_long(ℓ) je Fläche | Liouville | inklusive |
 | 9 | Weyl-Steigung (Geschlecht hören) | Fit | inklusive |
 | 10 | h und Richardson-Extrapolation (0.1, 0.07) auf einer Teilmenge | 2 Läufe | ×2 |
 
@@ -78,22 +78,35 @@ Friedman-Tangles und die Friedman-Ramanujan-Funktionen von Anantharaman–Monk
 identifizieren Tangles, nicht die Graphenlücke, als Mechanismus der Abweichung.
 Falsifiziert, wenn μ₂ allein die gleiche Vorhersagegüte erreicht.
 
-**H4 (Kompaktifizierungs-Mechanismus, Lokalität).** Datenbasis ist die
-Cusp-Punktwolke (k_c, φ_c(1)) aus allen FEM-Läufen – eine Fläche mit V Cusps liefert
-V Beobachtungen, einige hundert Flächen also Tausende. Schritte:
-(i) μ_k = E[φ_c(1) | k_c = k], σ_k² = Var[φ_c(1) | k_c = k], nach n eingefärbt; der
-Traumplot sind übereinanderliegende Farben, d. h. φ_c(1) ≈ F(k_c) statt
-F(k_c, n, Restgeometrie). (ii) Residual-Regression
-φ_c(1) = F(k_c) + β₁·girth + β₂·gap + β₃·n_tangles + β₄·n_cusps_short mit F(k)
-nichtparametrisch (Zentrierung innerhalb der k-Bins) und Test β_i ≈ 0. Die
-Cusps einer Fläche sind nicht unabhängig, daher **Cluster-Bootstrap über ganze
-Flächen**, nie über einzelne Cusps. Lokalitätsaussage bei Erfolg: *conditional on
-cusp length, global graph geometry adds essentially no predictive information to
-the local compactification distortion* – die numerische Form eines Locality
-Lemma und der Kern des Theorems (Schrohe-Linie). Erste Werte (12 Flächen,
-h = 0.15): μ₁ = −3.99 ± 0.48, μ₂ = −1.36 ± 0.12, μ₃ = −0.74, μ₄ = −0.43,
-μ₆ = −0.19; kleine n liegen bei festem k etwas tiefer – genau das entscheidet die
-Kampagne. Werkzeug: `python analyze.py h4 --plot h4_phi_vs_k.png`.
+**H4 (Kompaktifizierungs-Mechanismus, Lokalität).** Notation: u ist der konforme
+Faktor, ḡ = e^{2u} g₀ (φ bleibt Eigenfunktionen vorbehalten). Gespeichert wird pro
+Cusp nicht nur der Mittelwert, sondern Mittel *und* sup|u| auf dem Höhe-1-Horozyklus
+sowie auf den Horozyklen fester **Länge** ℓ ∈ {1,2,4,…,64} (Höhe k_c/ℓ, tatsächliche
+Länge mitgespeichert), und pro Fläche die Vergleichskonstanten ε_central = sup|u|
+außerhalb der Höhe-1-Horobälle, ε_outside(ℓ) und ε_long(ℓ) (letztere mit
+herausgeschnittenen kurzen Cusps k_c < ℓ). Für P1 wird das Supremum an den Knoten
+angenommen, ε ist also exakt die Konstante in e^{−2ε} g ≤ ḡ ≤ e^{2ε} g auf dem
+jeweiligen Gebiet – ein Mittelwert wäre das nicht.
+
+Befund aus der ersten Fläche (n=32, alle 10 Cusps, k von 1 bis 118), noch zu
+erhärten: u hängt auf Horozyklen fester Länge praktisch nicht von k ab, und das
+gesamte Profil wird durch **eine Zahl pro Cusp** beschrieben. Mit der kanonischen
+Koordinate w = e^{2πi z/k} des Cusps und ḡ ≈ c₀|dw|² an der gefüllten Punktierung gilt
+u(ℓ) = ½ log c₀ + log(2π/ℓ) − 2π/ℓ + O(e^{−4π/ℓ}); genauer: die exakte Scheibenformel
+u(ℓ) = log((4π/ℓ)·r₀ρ/(ρ² − r₀²)), r₀ = e^{−2π/ℓ}, ρ = 2/√c₀, sagt u bei ℓ = 2, 4, 8, 16
+aus dem Wert bei ℓ = 1 auf 10⁻³ voraus (Mittel −10⁻⁴ … −7·10⁻⁴). Die Cusp-Umgebung
+ist in ḡ also eine hyperbolische Scheibe mit konformem Radius ρ ≈ 1.03 (c₀ = 3.80 ±
+0.09; Einheitskreis: c₀ = 4). Schwarz–Pick liefert sofort c₀ ≤ 4e^{4π/k}; die untere
+Schranke ist der Theorem-Teil (Schrohe-Linie).
+
+Damit lautet H4 in scharfer Form: (i) c₀(c) ist universell (≈ 4 − δ, unabhängig von
+k und n); (ii) Residual-Regression c₀ = const + β₁·girth + β₂·gap + β₃·n_tangles +
+β₄·n_cusps_short mit Test β_i ≈ 0 – *conditional on the cusp itself, the global graph
+geometry adds essentially no information to the compactification distortion* (die
+numerische Form eines Locality Lemma). Cusps einer Fläche sind abhängig, daher
+**Cluster-Bootstrap über ganze Flächen**, nie über einzelne Cusps. Werkzeug:
+`python analyze.py h4 --plot h4_u_vs_k.png` (gibt μ_k, σ_k, c₀ je k-Bin und n, die
+Scheibenformel-Fehler und die β mit Bootstrap-CIs aus).
 
 **H5 (Spektralstatistik).** Für S̄ folgen die entfalteten Abstände GOE
 (Wigner-Surmise, Σ²(L), Δ₃(L) rigide). Für gecusptes S *nicht*: Γ hat endlichen
@@ -116,7 +129,7 @@ ist rein kombinatorisch und der natürliche Lean-Kandidat (Theorem 2b).
 
 | | rigoros | Lean | empirisch |
 |---|---|---|---|
-| Kompaktifizierungs-Lemma quantitativ (H4) | ✓ Ziel | – | Daten liegen vor |
+| Kompaktifizierungs-Lemma quantitativ (H4): c₀-Schranken, Scheibenformel | ✓ Ziel (obere Schranke via Schwarz–Pick sofort) | – | Scheibenformel auf 10⁻³ bestätigt (1 Fläche) |
 | L/R-Wörterbuch Längenspektrum ↔ Ribbon-Graph (H6) | ✓ (klassisch, Cutting Sequences) | ✓ Kandidat | Verifiziert (tr B^ℓ-Check) |
 | Alon-Boppana, Cheeger, Brooks-Makover-Geschlecht | bekannt | ✓ | – |
 | H1, H2, H3, H5 | – | – | ✓ Kernaussagen der Paper 1–3 |

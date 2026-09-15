@@ -8,7 +8,9 @@ Per sample (JSON):
   lambda1_neumann  same with cusps extended by T_ext (Neumann far out in the cusps)
   lambda1_cusped   smallest L^2 eigenvalue of S below 1/4 (exact cusp DtN), or null
   lambda1_compact  first eigenvalues of the uniformized compactification S^bar
-  liouville        Newton diagnostics, discrete Gauss-Bonnet, conformal factor phi per cusp
+  liouville        Newton diagnostics, discrete Gauss-Bonnet, conformal factor u per cusp
+                   (mean and sup on the height-1 horocycle) and eps_central = sup|u| outside
+                   the height-1 horoball neighbourhoods (bi-Lipschitz constant of g vs g_bar there)
   weyl             slope of the counting function of S^bar (Weyl: Area/4pi = g-1)
   graph            combinatorial stage: cycles, tangles, adjacency / non-backtracking spectra,
                    cusp statistics, combinatorial length spectrum (see bmgraph.py)
@@ -139,14 +141,48 @@ def main():
     M_gb = restrict(M_g, nB)
     area_g = float(lumped(M_gb).sum())
     area_g_exact = FOUR_PI * (surf.g - 1)
-    phi_cusp = []
+    # u = conformal factor, g_bar = e^{2u} g_0 (phi is reserved for eigenfunctions in the papers).
+    # For a P1 function the sup over a region is attained at nodes, so max|u| over the central
+    # regions is exactly the constant eps in  e^{-2 eps} g <= g_bar <= e^{2 eps} g  on the
+    # complement of the height-1 horoball neighbourhoods of all cusps.
+    # Per cusp: u on the horocycle of HEIGHT 1 (length k_c, the maximal embedded one) and on the
+    # horocycles of fixed LENGTH ell (height k_c/ell), the natural parametrisation for a comparison
+    # lemma "outside horoballs of length ell".  eps_outside(ell) = sup|u| off all length-ell
+    # horoballs (cusps with k < ell have none: their whole neighbourhood incl. cap counts as
+    # outside); eps_long(ell) = the same with those short ("bad") cusps cut out at height 1.
+    ELLS = (1, 2, 4, 8, 16, 32, 64)
+    u_cusp = []
+    outside = {ell: set(mesh.central_nodes.tolist()) for ell in ELLS}
+    longonly = {ell: set(mesh.central_nodes.tolist()) for ell in ELLS}
     for ch in mesh.cap_chains:
-        phi_cusp.append(dict(cusp=int(ch.cusp), k=int(ch.k),
-                             phi_height1=float(phi[mesh.height1_rows[ch.cusp]].mean()),
-                             phi_cap_boundary=float(phi[ch.node].mean())))
+        c, k, rows = ch.cusp, ch.k, mesh.cusp_rows[ch.cusp]
+        h1 = phi[mesh.height1_rows[c]]
+        rec = dict(cusp=int(c), k=int(k),
+                   u_height1_mean=float(h1.mean()), u_height1_sup=float(np.abs(h1).max()),
+                   u_cap_boundary_mean=float(phi[ch.node].mean()), u_at_length={})
+        for ell in ELLS:
+            if ell <= k:
+                j = min(len(rows) - 1, max(0, int(round(math.log(k / ell) / args.h))))
+                vals = phi[rows[j]]
+                ell_act = k / math.exp(j * args.h)          # the row's actual horocycle length
+                rec["u_at_length"][str(ell)] = [float(vals.mean()), float(np.abs(vals).max()), ell_act]
+                ids = np.concatenate(rows[:j + 1])
+                outside[ell].update(ids.tolist()); longonly[ell].update(ids.tolist())
+            else:                                       # no embedded horoball of length ell:
+                outside[ell].update(np.concatenate(rows).tolist())   # whole strip counts as outside
+                outside[ell].update(ch.node.tolist())                 # (cap interior: see below)
+        u_cusp.append(rec)
+    for ch in mesh.cap_chains:                          # cap interiors of short cusps are outside too
+        for ell in ELLS:
+            if ell > ch.k:
+                outside[ell].update(mesh.cap_interior_of[ch.cusp].tolist())
+    eps_central = float(np.abs(phi[mesh.central_nodes]).max())
+    eps_outside = {str(ell): float(np.abs(phi[np.array(sorted(outside[ell]))]).max()) for ell in ELLS}
+    eps_long = {str(ell): float(np.abs(phi[np.array(sorted(longonly[ell]))]).max()) for ell in ELLS}
     log("Liouville: %d its, |R|=%.1e ; area(S^bar) %.6f vs 4pi(g-1)=%.6f ; sum c/2pi=%.5f vs chi=%d"
         % (liou["iterations"], liou["residual"], area_g, area_g_exact, chi_discrete, surf.chi))
-    log("phi on height-1 horocycles: " + "  ".join("k=%d:%.3f" % (p["k"], p["phi_height1"]) for p in phi_cusp))
+    log("u on height-1 horocycles (mean): " + "  ".join("k=%d:%.3f" % (p["k"], p["u_height1_mean"]) for p in u_cusp))
+    log("eps_central = %.4f ; eps_long(ell) = %s" % (eps_central, {e: round(v, 3) for e, v in eps_long.items()}))
     vals_C, _ = lowest(K_b, M_gb, args.neig + 1, sigma=-0.02)
     log("S^bar: lam_1=%.6f  lam_2=%.6f  lam_3=%.6f" % (vals_C[1], vals_C[2], vals_C[3]))
     weyl = weyl_fit(vals_C, area_expected=area_g_exact)
@@ -167,9 +203,12 @@ def main():
         liouville=dict(iterations=int(liou["iterations"]), residual=float(liou["residual"]),
                        note=liou.get("note", ""), area_compact=area_g, area_compact_exact=area_g_exact,
                        chi_discrete=float(chi_discrete),
-                       max_abs_phi_thick=float(np.abs(phi[mesh.thick_nodes]).max()),
-                       min_phi=float(phi_b.min()), max_phi=float(phi_b.max()),
-                       phi_per_cusp=phi_cusp),
+                       eps_central=eps_central,          # sup|u| on complement of height-1 horoballs
+                       eps_outside=eps_outside,          # sup|u| off all length-ell horoballs (short cusps fully inside)
+                       eps_long=eps_long,                # same, cusps with k < ell cut out at height 1
+                       max_abs_u_thick=float(np.abs(phi[mesh.thick_nodes]).max()),
+                       min_u=float(phi_b.min()), max_u=float(phi_b.max()),
+                       u_per_cusp=u_cusp),
         weyl=weyl,
         graph=gf,
         delta_compact_minus_cusped=(None if lam_c is None else float(vals_C[1] - lam_c)),

@@ -8,9 +8,9 @@ analyze.py -- statistical evaluation of the FEM runs (results/*.json).
       within each n) gives CIs for L, C, alpha; then the test H0: L = 1/4 is reported as a
       z-score.  1/4 is never built into the fit.
 
-  python analyze.py h4 [--glob 'results/*.json'] [--boot 2000] [--plot h4_phi_vs_k.png]
-      Cusp-level point cloud (k_c, phi_c(1)): conditional mean / variance per k, coloured
-      by n; residual regression  phi = F(k) + beta . (girth, gap, n_tangle_walks, n_cusps_short)
+  python analyze.py h4 [--glob 'results/*.json'] [--boot 2000] [--plot h4_u_vs_k.png]
+      Cusp-level point cloud (k_c, u_c(1)): conditional mean / variance per k, coloured
+      by n; residual regression  u = F(k) + beta . (girth, gap, n_tangle_walks, n_cusps_short)
       with F(k) nonparametric (per-k means); cluster bootstrap BY SURFACE for the betas.
       Locality reading: beta ~ 0  <=>  global graph geometry adds nothing once k is known.
 
@@ -88,13 +88,13 @@ FEATS = ("girth", "gap", "n_tangle_walks", "n_cusps_short")
 
 
 def cusp_table(rows):
-    """One record per cusp: n, surface id, k, phi(height 1), phi(cap), surface-level graph features."""
+    """One record per cusp: n, surface id, k, mean u and sup|u| on the height-1 horocycle, graph features."""
     T = []
     for sid, r in enumerate(rows):
         g = r.get("graph", {})
         feats = [float(g.get(f) if g.get(f) is not None else np.nan) for f in FEATS]
-        for p in r["liouville"]["phi_per_cusp"]:
-            T.append([r["n"], sid, p["k"], p["phi_height1"], p["phi_cap_boundary"]] + feats)
+        for p in r["liouville"]["u_per_cusp"]:
+            T.append([r["n"], sid, p["k"], p["u_height1_mean"], p["u_height1_sup"]] + feats)
     return np.array(T, dtype=float)
 
 
@@ -106,27 +106,67 @@ def _kbin(k):
 
 
 def _regress(T):
-    """phi = F(k) + beta . feats  with F(k) = per-k-bin mean (absorbed by centring within bins)."""
+    """u = F(k) + beta . feats  with F(k) = per-k-bin mean (absorbed by centring within bins)."""
     k = _kbin(T[:, 2])
-    phi = T[:, 3].copy()
+    u = T[:, 3].copy()
     X = T[:, 5:].copy()
     ok = ~np.isnan(X).any(axis=1)
-    k, phi, X = k[ok], phi[ok], X[ok]
+    k, u, X = k[ok], u[ok], X[ok]
     for kk in np.unique(k):                       # within-k centring removes F(k) exactly
         m = k == kk
-        phi[m] -= phi[m].mean()
+        u[m] -= u[m].mean()
         X[m] -= X[m].mean(axis=0)
-    beta = np.linalg.lstsq(X, phi, rcond=None)[0]
-    r2 = 1 - np.sum((phi - X @ beta) ** 2) / max(np.sum(phi ** 2), 1e-300)
+    beta = np.linalg.lstsq(X, u, rcond=None)[0]
+    r2 = 1 - np.sum((u - X @ beta) ** 2) / max(np.sum(u ** 2), 1e-300)
     return beta, r2
+
+
+def c0_table(rows):
+    """Per cusp: the density c0 of g_bar at the filled puncture in the cusp's canonical coordinate
+    w = exp(2 pi i z / k), inferred from u on the horocycle of (actual) length ell via
+        u(ell) = 1/2 log c0 + log(2 pi / ell) - 2 pi / ell + O(exp(-4 pi / ell)),
+    i.e. g_bar ~ c0 |dw|^2 near w = 0 (Poincare unit disc: c0 = 4).  Uses the row with the
+    smallest ell (>= 1) where the correction is negligible; also returns the prediction error
+    at the other stored ell from the exact disc formula with conformal radius rho = 2/sqrt(c0):
+        u(ell) = log( (4 pi / ell) r0 rho / (rho^2 - r0^2) ),  r0 = exp(-2 pi / ell)."""
+    out = []
+    for sid, r in enumerate(rows):
+        for p in r["liouville"]["u_per_cusp"]:
+            ual = p.get("u_at_length", {})
+            if not ual:
+                continue
+            ell1, (u1, _, la1) = min(((float(e), v) for e, v in ual.items()), key=lambda t: t[0])
+            half_log_c0 = u1 - np.log(2 * np.pi / la1) + 2 * np.pi / la1
+            c0 = float(np.exp(2 * half_log_c0))
+            rho = 2 / np.sqrt(c0)
+            errs = {}
+            for e, (u, _, la) in ual.items():
+                r0 = np.exp(-2 * np.pi / la)
+                pred = np.log((4 * np.pi / la) * r0 * rho / (rho ** 2 - r0 ** 2)) if rho > r0 else np.nan
+                errs[e] = u - pred
+            out.append(dict(n=r["n"], sid=sid, k=p["k"], c0=c0, rho=float(rho), pred_err=errs))
+    return out
 
 
 def h4(args):
     rows = load(args.glob)
     T = cusp_table(rows)
+    C = c0_table(rows)
+    if C:
+        c0 = np.array([c["c0"] for c in C]); kk = np.array([c["k"] for c in C]); nn_ = np.array([c["n"] for c in C])
+        print("\nconformal density c0 at the filled punctures (unit-disc value 4):  mean %.3f  sd %.3f  [%d cusps]"
+              % (c0.mean(), c0.std(), len(c0)))
+        for kb in np.unique(_kbin(kk)):
+            m = _kbin(kk) == kb
+            print("  %-14s c0 = %.3f +- %.3f   (per n: %s)" % ("k=%d" % kb if kb <= 8 else "k in [%d,%d)" % (kb, 2 * kb),
+                  c0[m].mean(), c0[m].std(), "  ".join("%d:%.3f" % (n, c0[m & (nn_ == n)].mean()) for n in np.unique(nn_) if (m & (nn_ == n)).any())))
+        for e in ("2", "4", "8", "16"):
+            errs = np.array([c["pred_err"][e] for c in C if e in c["pred_err"] and np.isfinite(c["pred_err"][e])])
+            if len(errs):
+                print("  disc-formula prediction error at ell=%s: mean %+.4f  sd %.4f  [%d cusps]" % (e, errs.mean(), errs.std(), len(errs)))
     ns = np.unique(T[:, 0]).astype(int)
     print("%d surfaces, %d cusp observations, n in %s" % (len(rows), len(T), ns.tolist()))
-    print("\nconditional moments of phi_c(1) given k (all n pooled; per-n means in brackets):")
+    print("\nconditional moments of u_c(1) given k (all n pooled; per-n means in brackets):")
     kb = _kbin(T[:, 2])
     ks = np.unique(kb)
     for kk in ks:
@@ -147,7 +187,7 @@ def h4(args):
         except np.linalg.LinAlgError:
             pass
     B = np.array(B)
-    print("\nresidual regression  phi_c(1) - F(k) = beta . (%s)   [cluster bootstrap by surface, %d resamples]"
+    print("\nresidual regression  u_c(1) - F(k) = beta . (%s)   [cluster bootstrap by surface, %d resamples]"
           % (", ".join(FEATS), len(B)))
     for i, f in enumerate(FEATS):
         lo, hi = np.percentile(B[:, i], [2.5, 97.5]) if len(B) else (np.nan, np.nan)
@@ -163,8 +203,8 @@ def h4(args):
             m = T[:, 0] == n
             ax.scatter(T[m, 2], T[m, 3], s=14, alpha=0.6, label="n=%d" % n)
         mu = [T[kb == kk, 3].mean() for kk in ks]
-        ax.plot([kk if kk <= 8 else kk * np.sqrt(2) for kk in ks], mu, "k-", lw=1, label="E[phi | k-bin]")
-        ax.set_xscale("log"); ax.set_xlabel("cusp length k_c"); ax.set_ylabel("phi_c on the height-1 horocycle")
+        ax.plot([kk if kk <= 8 else kk * np.sqrt(2) for kk in ks], mu, "k-", lw=1, label="E[u | k-bin]")
+        ax.set_xscale("log"); ax.set_xlabel("cusp length k_c"); ax.set_ylabel("u_c (conformal factor) on the height-1 horocycle")
         ax.set_title("Compactification distortion vs cusp length (H4)")
         ax.legend(fontsize=8); ax.grid(alpha=0.3)
         fig.tight_layout(); fig.savefig(args.plot, dpi=150)
