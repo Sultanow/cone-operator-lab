@@ -18,7 +18,11 @@ aggregate.py   ──►  summary.csv, Richardson, Korrelationen                
 ```
 
 Der Seed bestimmt den Graphen deterministisch (gleicher RNG in beiden Stufen), die
-Auswahl in Stufe 1 ist also exakt reproduzierbar in Stufe 2.
+Auswahl in Stufe 1 ist also exakt reproduzierbar in Stufe 2. Stufe 1 schreibt zwei
+Dateien: `scan_n*.csv` (flach, für Ranking/pandas) und `scan_n*.jsonl` (das komplette
+`graph_features()`-Dictionary je Seed, verlustfreie Rohdatenquelle). `run_bm.py
+--graph-from scan_n*.jsonl` übernimmt genau diesen Datensatz, so dass der `graph`-Block
+in jedem Sample dasselbe Schema hat – ob übernommen oder neu berechnet.
 
 ## Gespeicherte Größen pro Sample
 
@@ -52,12 +56,15 @@ Flächen mit 10³–10⁴ Eigenwerten.
 
 ## Hypothesen
 
-**H1 (Finite-Size-Gesetz).** median(λ₁(S̄)) − 1/4 =: Δ_n skaliert wie C·n^{−α} mit
-α ∈ (0, 1) oder wie C/log n. Test: Datenkollaps von n^α Δ_n bzw. log(n)·Δ_n über
-n ∈ {16…512}; α per Fit mit Bootstrap-Konfidenzintervall. Erste Punkte (n=32:
-0.39, n=128: 0.31) liegen *oberhalb* 1/4, also kommt Δ_n von oben. Falsifiziert,
-wenn keine der beiden Familien kollabiert oder Δ_n das Vorzeichen wechselt.
-Nur S̄ ist das richtige Objekt: für gecusptes S ist λ₁ ≤ 1/4 trivial.
+**H1 (Finite-Size-Gesetz).** m(n) := median(λ₁(S̄)) wird mit *freiem* Grenzwert L
+gefittet: m(n) = L + C·n^{−α} bzw. m(n) = L + C/log n; erst danach der Test
+H₀: L = 1/4 (z-Score aus dem Cluster-Bootstrap über Flächen je n). 1/4 wird nie in
+den Fit eingebaut – ein Ergebnis wie L = 0.2517 ± 0.0041 ist beweiskräftiger als
+ein erzwungenes L. Falsifiziert, wenn keine der beiden Familien die Mediane
+beschreibt (RMS-Residuum ≫ Bootstrap-Streuung) oder L signifikant ≠ 1/4 (dann ist
+das selbst das Resultat). Erste Punkte liegen oberhalb 1/4 (n=32: 0.39, n=128:
+0.31); nur S̄ ist das richtige Objekt, für gecusptes S ist λ₁ ≤ 1/4 trivial.
+Werkzeug: `python analyze.py h1`.
 
 **H2 (Fluktuationen).** Die Verteilung von (λ₁(S̄) − median)/IQR ist bei festem n
 linksschief (Tracy-Widom-artig, Analogie zu Huang–McKenzie–Yau für μ₂ regulärer
@@ -71,13 +78,22 @@ Friedman-Tangles und die Friedman-Ramanujan-Funktionen von Anantharaman–Monk
 identifizieren Tangles, nicht die Graphenlücke, als Mechanismus der Abweichung.
 Falsifiziert, wenn μ₂ allein die gleiche Vorhersagegüte erreicht.
 
-**H4 (Kompaktifizierungs-Mechanismus).** φ(k) := Mittel von φ auf dem
-Höhe-1-Horozyklus eines Cusps der Länge k ist eine universelle Funktion von k
-allein (unabhängig von n und vom Rest der Fläche), mit φ(k) → 0 wie c/k oder
-c·log k/k; und λ₁(S̄) − λ₁(S_Y) korreliert mit #Cusps der Länge ≤ 2. Erste Daten:
-φ(1) ≈ −3.8, φ(2) ≈ −1.3, φ(k ≥ 15) ≈ −0.01…−0.3. Das ist der quantitative Kern
-des Kompaktifizierungs-Lemmas („large cusps") und der Teil, der als Theorem
-(Schrohe-Linie) formuliert werden soll.
+**H4 (Kompaktifizierungs-Mechanismus, Lokalität).** Datenbasis ist die
+Cusp-Punktwolke (k_c, φ_c(1)) aus allen FEM-Läufen – eine Fläche mit V Cusps liefert
+V Beobachtungen, einige hundert Flächen also Tausende. Schritte:
+(i) μ_k = E[φ_c(1) | k_c = k], σ_k² = Var[φ_c(1) | k_c = k], nach n eingefärbt; der
+Traumplot sind übereinanderliegende Farben, d. h. φ_c(1) ≈ F(k_c) statt
+F(k_c, n, Restgeometrie). (ii) Residual-Regression
+φ_c(1) = F(k_c) + β₁·girth + β₂·gap + β₃·n_tangles + β₄·n_cusps_short mit F(k)
+nichtparametrisch (Zentrierung innerhalb der k-Bins) und Test β_i ≈ 0. Die
+Cusps einer Fläche sind nicht unabhängig, daher **Cluster-Bootstrap über ganze
+Flächen**, nie über einzelne Cusps. Lokalitätsaussage bei Erfolg: *conditional on
+cusp length, global graph geometry adds essentially no predictive information to
+the local compactification distortion* – die numerische Form eines Locality
+Lemma und der Kern des Theorems (Schrohe-Linie). Erste Werte (12 Flächen,
+h = 0.15): μ₁ = −3.99 ± 0.48, μ₂ = −1.36 ± 0.12, μ₃ = −0.74, μ₄ = −0.43,
+μ₆ = −0.19; kleine n liegen bei festem k etwas tiefer – genau das entscheidet die
+Kampagne. Werkzeug: `python analyze.py h4 --plot h4_phi_vs_k.png`.
 
 **H5 (Spektralstatistik).** Für S̄ folgen die entfalteten Abstände GOE
 (Wigner-Surmise, Σ²(L), Δ₃(L) rigide). Für gecusptes S *nicht*: Γ hat endlichen

@@ -7,6 +7,9 @@ for every seed the ribbon graph is generated exactly as run_bm.py does (same rng
 its graph features are written to a CSV, and optionally the seeds with the most
 extreme values of a feature are exported as a params file for slurm_bm.sbatch.
 
+Writes two files: <out>.csv (flat, for ranking / pandas) and <out>.jsonl (the complete
+graph_features() dictionary per seed -- the lossless raw record that run_bm.py reuses).
+
 Usage:
   python graph_scan.py --n 128 --seeds 0 100000 --W 10 --out scan_n128.csv
   python graph_scan.py --n 128 --seeds 0 100000 --out scan_n128.csv \\
@@ -14,6 +17,7 @@ Usage:
 """
 import argparse
 import csv
+import json
 import sys
 import time
 
@@ -52,7 +56,8 @@ def main():
     a = ap.parse_args()
 
     rows, t0 = [], time.time()
-    with open(a.out, "w", newline="") as fh:
+    jsonl_path = a.out[:-4] + ".jsonl" if a.out.endswith(".csv") else a.out + ".jsonl"
+    with open(a.out, "w", newline="") as fh, open(jsonl_path, "w") as fj:
         w = csv.DictWriter(fh, fieldnames=COLS)
         w.writeheader()
         for i, seed in enumerate(range(a.seeds[0], a.seeds[1])):
@@ -60,12 +65,14 @@ def main():
             if surf.g < 2:
                 continue
             f = graph_features(surf, W=a.W, spectra=not a.no_spectra)
+            f["seed"] = seed
+            fj.write(json.dumps(f) + "\n")           # lossless raw record (schema = graph_features)
             r = row_of(f, seed)
             rows.append(r)
             w.writerow(r)
             if (i + 1) % 100 == 0:
                 print("%d samples, %.1f s" % (i + 1, time.time() - t0), file=sys.stderr, flush=True)
-    print("wrote %s (%d rows, %.1f s)" % (a.out, len(rows), time.time() - t0))
+    print("wrote %s (%d rows, %.1f s) and %s" % (a.out, len(rows), time.time() - t0, jsonl_path))
 
     if a.select:
         vals = np.array([r[a.select] if r[a.select] is not None else np.nan for r in rows], dtype=float)

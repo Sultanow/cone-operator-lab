@@ -33,8 +33,8 @@ Non-Backtracking-Spektrum, Taillenweite, einfache Zyklen und Tangle-Proxy
 PSL(2,ℤ) (ℓ = 2 arccosh(tr(w)/2), vollständig unterhalb ℓ_cut = 2 arccosh((W+2)/2)).
 `graph_scan.py` screent 10⁵–10⁷ Seeds und exportiert Extremfälle als Parameterdatei
 für die FEM-Stufe; die Features landen auch in jedem `run_bm.py`-JSON (`graph`) —
-neu berechnet oder mit `--graph-from scan.csv` aus Stufe 1 übernommen
-(Konsistenzcheck über V und Geschlecht, Feld `graph_source`).
+neu berechnet oder mit `--graph-from scan_n*.jsonl` aus Stufe 1 übernommen (identisches
+Schema in beiden Fällen, Konsistenzcheck über V und Geschlecht, Feld `graph_source`).
 Experiment-Matrix und Hypothesen H1–H6: `EXPERIMENTS.md`.
 
 ## Installation und Aufruf
@@ -98,4 +98,5 @@ Cusp-Metrik. Die Konstante ε(ℓ_min) ist also real und groß für ℓ_min ~ 1.
 `bmsurf.py` Kombinatorik + Netz · `bmgraph.py` Graphenstufe · `bmfem.py` Assemblierung,
 DtN, Liouville, Eigenlöser · `run_bm.py` Treiber · `graph_scan.py` Screening ·
 `make_params.py`, `slurm_bm.sbatch`, `slurm_scan.sbatch` Job-Arrays · `aggregate.py`
-Auswertung · `EXPERIMENTS.md` Experiment-Matrix · `results_example/` Testläufe.
+Auswertung · `analyze.py` H1-Fit (freies L) und H4-Cusp-Statistik mit Cluster-Bootstrap ·
+`EXPERIMENTS.md` Experiment-Matrix · `results_example/` Testläufe.

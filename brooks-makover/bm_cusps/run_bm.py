@@ -38,23 +38,22 @@ def log(msg):
 
 
 def load_scan_row(path, n, seed):
-    """Row of a graph_scan.py CSV for (n, seed), with types restored; None if absent."""
-    import csv
-    with open(path, newline="") as fh:
-        for r in csv.DictReader(fh):
-            if int(r["n"]) == n and int(r["seed"]) == seed:
-                out = {}
-                for k, v in r.items():
-                    if v in ("", "None"):
-                        out[k] = None
-                    elif v in ("True", "False"):
-                        out[k] = v == "True"
-                    else:
-                        try:
-                            out[k] = int(v)
-                        except ValueError:
-                            out[k] = float(v)
-                return out
+    """Full graph_features() record for (n, seed) from a graph_scan.py JSONL file
+    (a .csv path is mapped to its sibling .jsonl).  None if absent, so the schema of the
+    'graph' block is identical whether it is reused or recomputed."""
+    import os
+    if path.endswith(".csv"):
+        path = path[:-4] + ".jsonl"
+    if not os.path.exists(path):
+        return None
+    with open(path) as fh:
+        for line in fh:
+            rec = json.loads(line)
+            if rec.get("n") == n and rec.get("seed") == seed:
+                rec.pop("seed", None)
+                rec["simple_cycles"] = {int(k): v for k, v in rec["simple_cycles"].items()}
+                rec["tangle_walks"] = {int(k): v for k, v in rec["tangle_walks"].items()}
+                return rec
     return None
 
 
@@ -69,7 +68,7 @@ def main():
     ap.add_argument("--neig", type=int, default=40, help="eigenvalues of S^bar for the Weyl fit")
     ap.add_argument("--W", type=int, default=10, help="max word length for cycles / length spectrum")
     ap.add_argument("--graph-from", type=str, default=None,
-                    help="scan CSV from graph_scan.py; reuse its row for (n, seed) instead of recomputing")
+                    help="scan .jsonl (or .csv -> sibling .jsonl) from graph_scan.py; reuse the full record for (n, seed)")
     ap.add_argument("--out", type=str, default=None)
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
@@ -86,7 +85,6 @@ def main():
     if gf is not None:
         assert gf["V"] == surf.V and gf["genus"] == surf.g, "scan row does not match the generated surface"
         gf["graph_source"] = "scan:%s" % args.graph_from
-        gf.setdefault("simple_cycles", {l: gf.pop("c%d" % l) for l in range(1, 7) if "c%d" % l in gf})
     else:
         gf = graph_features(surf, W=args.W)
         gf["graph_source"] = "computed"
