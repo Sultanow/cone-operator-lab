@@ -35,7 +35,7 @@ in jedem Sample dasselbe Schema hat – ob übernommen oder neu berechnet.
 | 5 | λ₁(S_Y) (dicker Teil, Neumann) | FEM | s–min |
 | 6 | λ₁(S): kleinster L²-Eigenwert < 1/4, exakte Cusp-DtN-Bedingung; „keiner" ist eine numerische Aussage der Diskretisierung, kein Zertifikat (Feld `certified: false`) | FEM + Wurzelsuche | s–min |
 | 7 | λ₁…λ_neig(S̄) nach Liouville-Uniformisierung, Gauß-Bonnet-Check | FEM | s–min |
-| 8 | u je Cusp: Mittel/sup auf Höhe-1- und Länge-ℓ-Horozyklen, c₀ (konforme Dichte an der Punktierung); ε_central, ε_outside(ℓ), ε_long(ℓ) je Fläche | Liouville | inklusive |
+| 8 | u_h je Cusp: Mittel/sup auf Höhe-1- und Länge-ℓ-Horozyklen, c₀ (konforme Dichte an der Punktierung); ε_h,central, ε_h,outside(ℓ), ε_h,long(ℓ) je Fläche (diskret, nur auf S_Y) | Liouville | inklusive |
 | 9 | Weyl-Steigung (Geschlecht hören) | Fit | inklusive |
 | 10 | h und Richardson-Extrapolation (0.1, 0.07) auf einer Teilmenge | 2 Läufe | ×2 |
 
@@ -82,11 +82,17 @@ Falsifiziert, wenn μ₂ allein die gleiche Vorhersagegüte erreicht.
 Faktor, ḡ = e^{2u} g₀ (φ bleibt Eigenfunktionen vorbehalten). Gespeichert wird pro
 Cusp nicht nur der Mittelwert, sondern Mittel *und* sup|u| auf dem Höhe-1-Horozyklus
 sowie auf den Horozyklen fester **Länge** ℓ ∈ {1,2,4,…,64} (Höhe k_c/ℓ, tatsächliche
-Länge mitgespeichert), und pro Fläche die Vergleichskonstanten ε_central = sup|u|
-außerhalb der Höhe-1-Horobälle, ε_outside(ℓ) und ε_long(ℓ) (letztere mit
-herausgeschnittenen kurzen Cusps k_c < ℓ). Für P1 wird das Supremum an den Knoten
-angenommen, ε ist also exakt die Konstante in e^{−2ε} g ≤ ḡ ≤ e^{2ε} g auf dem
-jeweiligen Gebiet – ein Mittelwert wäre das nicht.
+Länge mitgespeichert), und pro Fläche die diskreten Vergleichskonstanten ε_h,central = sup|u_h|
+auf den zentralen Bereichen (S_Y ohne Höhe-1-Horobälle), ε_h,outside(ℓ) (S_Y ohne
+Länge-ℓ-Horobälle; kurze Cusps k_c < ℓ tragen ihren Streifen bis zum L0-Horozyklus bei)
+und ε_h,long(ℓ) (kurze Cusps bei Höhe 1 herausgeschnitten). Alle Gebiete liegen in S_Y,
+wo g₀ = g ist – Kappen gehen nie ein, denn dort bezieht sich u_h auf die flache
+Hilfsmetrik, und über den ganzen ursprünglichen Cusp gibt es keinen beidseitigen
+Vergleich (ḡ ist an der Punktierung glatt, u → −∞ relativ zu g). Für P1 wird das
+Supremum an Knoten angenommen; ε_h ist damit die Konstante in e^{−2ε_h} g ≤ ḡ_h ≤
+e^{2ε_h} g für die *berechnete* Metrik auf dem genannten Gebiet. Für den exakten
+Uniformisierungsfaktor fehlt eine abgesicherte Fehlerschranke (O(h²), Richardson
+schätzt sie) – ein Mittelwert wäre nicht einmal das.
 
 Befund aus der ersten Fläche (n=32, alle 10 Cusps, k von 1 bis 118), noch zu
 erhärten: u hängt auf Horozyklen fester Länge praktisch nicht von k ab, und das
@@ -99,8 +105,10 @@ ist in ḡ also eine hyperbolische Scheibe mit konformem Radius ρ ≈ 1.03 (c�
 0.09; Einheitskreis: c₀ = 4). Schwarz–Pick liefert sofort c₀ ≤ 4e^{4π/k}; die untere
 Schranke ist der Theorem-Teil (Schrohe-Linie).
 
-Damit lautet H4 in scharfer Form: (i) c₀(c) ist universell (≈ 4 − δ, unabhängig von
-k und n); (ii) Residual-Regression c₀ = const + β₁·girth + β₂·gap + β₃·n_tangles +
+Damit lautet H4 in scharfer Form: (i) c₀(c) → 4 für lange Cusps (Schwarz–Pick:
+c₀ ≤ 4e^{4π/k}, für kurze Cusps ist c₀ > 4 erlaubt und bei n=128 auch beobachtet:
+4.20 bei k=1, 4.05 bei k=2), und c₀ hängt bei festem k für große n nicht mehr von n ab
+(bei n=16 streut es stark nach unten); (ii) Residual-Regression c₀ = const + β₁·girth + β₂·gap + β₃·n_tangles +
 β₄·n_cusps_short mit Test β_i ≈ 0 – *conditional on the cusp itself, the global graph
 geometry adds essentially no information to the compactification distortion* (die
 numerische Form eines Locality Lemma). Cusps einer Fläche sind abhängig, daher

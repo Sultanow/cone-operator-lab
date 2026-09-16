@@ -24,6 +24,7 @@ import time
 import numpy as np
 
 from bmgraph import graph_features
+from version import __version__
 from bmsurf import BMSurface
 
 COLS = ["n", "seed", "V", "genus", "k_max_fraction", "n_cusps_len1", "n_cusps_len2", "n_cusps_short",
@@ -55,6 +56,7 @@ def main():
     ap.add_argument("--params", default="params_extremes.txt")
     a = ap.parse_args()
 
+    print("bm_cusps %s" % __version__, file=sys.stderr)
     rows, t0 = [], time.time()
     jsonl_path = a.out[:-4] + ".jsonl" if a.out.endswith(".csv") else a.out + ".jsonl"
     with open(a.out, "w", newline="") as fh, open(jsonl_path, "w") as fj:

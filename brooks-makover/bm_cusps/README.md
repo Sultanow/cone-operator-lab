@@ -1,5 +1,10 @@
 # Cusps und Kompaktifizierung: Brooks-Makover-Flächen numerisch
 
+**Version 0.3.0 — dies ist der einzige kanonische Stand.** Vor dem Start auf dem Cluster
+`python selftest.py` im Arbeitsverzeichnis ausführen; der Test schlägt fehl, wenn dort ein
+älterer Code-Stand liegt (Root-Duplikate früherer Lieferungen bitte löschen). Änderungen:
+`CHANGELOG.md`.
+
 Code zu **Punkt 3** (Schrohe-Linie): Vergleich der Spektrallücke einer zufälligen
 Brooks-Makover-Fläche `S` (2n ideale Dreiecke, V Cusps) mit der ihrer
 Poincaré-Koebe-Kompaktifizierung `S̄` (Geschlecht g = n/2 + 1 − V/2), plus der
@@ -15,7 +20,7 @@ Pro Stichprobe (`n`, `seed`):
 | `lambda1_thick` | λ₁ des dicken Teils `S_Y` (Cusps an Horozyklen der Länge `L0` abgeschnitten, Neumann) |
 | `lambda1_cusped` | kleinster **L²-Eigenwert von S unterhalb 1/4** über die exakte Cusp-DtN-Bedingung (Moden `y^{1/2−ν}`, `√y K_ν`); `null` = in der Diskretisierung keiner gefunden (numerische Aussage, kein Zertifikat) |
 | `lambda1_compact` | λ₁ der **uniformisierten** Kompaktifizierung: Liouville-Gleichung `Δ₀φ = K₀ + e^{2φ}` (Newton), dann `K u = λ M(ρ₀ e^{2φ}) u` |
-| `liouville.u_per_cusp`, `eps_*` | konformer Faktor u (ḡ = e^{2u} g₀): Mittel und sup auf Höhe-1- und Länge-ℓ-Horozyklen je Cusp; ε_central/ε_outside(ℓ)/ε_long(ℓ) = sup|u| auf dem jeweiligen Vergleichsgebiet, also die Konstante in e^{−2ε} g ≤ ḡ ≤ e^{2ε} g |
+| `liouville.u_per_cusp`, `eps_h_*` | diskreter konformer Faktor u_h (ḡ_h = e^{2u_h} g₀): Mittel und sup auf Höhe-1- und Länge-ℓ-Horozyklen je Cusp; `eps_h_central/outside(ℓ)/long(ℓ)` = sup|u_h| auf Teilmengen von S_Y (dort g₀ = g). Vergleichskonstanten der *berechneten* Metrik auf dem genannten Gebiet, nicht zertifiziert; Kappen gehen nie ein, über den ganzen ursprünglichen Cusp gibt es keinen beidseitigen Vergleich (u → −∞ an der Punktierung) |
 | `weyl` | Steigung der Zählfunktion von S̄; Weyl: Area/4π = g − 1 („Geschlecht hören") |
 | Checks | diskretes Gauß-Bonnet (Σc = 2πχ, Area(S̄) = 4π(g−1)), Flächeninhalt von S_Y vs. exakt |
 
@@ -93,6 +98,9 @@ an h gekoppelt; ihr Beitrag zu λ₁ liegt bei den getesteten h unter 10⁻⁶ r
   Punkt 1); die Zahlen sind konvergente FEM-Näherungen. Insbesondere ist
   `lambda1_cusped: null` („keiner unter 1/4") eine Aussage über das diskrete
   Problem, kein Ausschlusszertifikat.
+* Die `eps_h_*` sind Suprema des P1-Faktors, keine Schranken für den exakten
+  Uniformisierungsfaktor; der Abstand ist der Diskretisierungsfehler O(h²)
+  (Richardson schätzt ihn, beweist ihn nicht).
 * Modell ist Brooks–Makover (Belyi-Flächen), nicht Weil–Petersson.
 * Der Weyl-Fit braucht `--neig` ≳ 5·g, um das Geschlecht verlässlich zu „hören";
   für große n ist er mit 60 Eigenwerten nur grob (P1 überschätzt hohe Eigenwerte).
@@ -103,4 +111,5 @@ an h gekoppelt; ihr Beitrag zu λ₁ liegt bei den getesteten h unter 10⁻⁶ r
 DtN, Liouville, Eigenlöser · `run_bm.py` Treiber · `graph_scan.py` Screening ·
 `make_params.py`, `slurm_bm.sbatch`, `slurm_scan.sbatch` Job-Arrays · `aggregate.py`
 Auswertung · `analyze.py` H1-Fit (freies L) und H4-Cusp-Statistik mit Cluster-Bootstrap ·
-`EXPERIMENTS.md` Experiment-Matrix · `results_example/` Testläufe.
+`selftest.py` Regressionstest · `version.py` · `CHANGELOG.md` · `EXPERIMENTS.md`
+Experiment-Matrix · `results_example/` Testläufe.

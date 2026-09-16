@@ -26,10 +26,20 @@ import numpy as np
 
 
 def load(pattern):
-    rows = [json.load(open(f)) for f in sorted(glob.glob(pattern))]
+    files = sorted(glob.glob(pattern))
+    rows = [json.load(open(f)) for f in files]
     if not rows:
         sys.exit("no result files for %s" % pattern)
+    check_schema(rows, files)
     return rows
+
+def check_schema(rows, files):
+    from version import SCHEMA_VERSION
+    old = [f for f, r in zip(files, rows) if r.get("schema_version", 0) < SCHEMA_VERSION]
+    if old:
+        sys.exit("%d result file(s) have an old schema (< %d) and must be regenerated with the current "
+                 "run_bm.py, e.g. %s" % (len(old), SCHEMA_VERSION, old[0]))
+
 
 
 # ----------------------------------------------------------------------------

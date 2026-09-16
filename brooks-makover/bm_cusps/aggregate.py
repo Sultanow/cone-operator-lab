@@ -14,11 +14,16 @@ files = sorted(glob.glob(sys.argv[1] if len(sys.argv) > 1 else "results/*.json")
 rows = [json.load(open(f)) for f in files]
 if not rows:
     sys.exit("no result files")
+from version import SCHEMA_VERSION
+old = [f for f, r in zip(files, rows) if r.get("schema_version", 0) < SCHEMA_VERSION]
+if old:
+    sys.exit("%d result file(s) have an old schema (< %d); regenerate with the current run_bm.py, e.g. %s"
+             % (len(old), SCHEMA_VERSION, old[0]))
 
 cols = ["n", "seed", "h", "V", "genus", "min_cusp_length", "max_cusp_length",
         "lambda1_thick", "lambda1_neumann", "lambda1_cusped", "lambda1_compact",
         "delta_compact_minus_cusped", "delta_compact_minus_thick",
-        "liou_area_err", "weyl_slope", "weyl_slope_expected", "u_min_at_height1", "eps_central",
+        "liou_area_err", "weyl_slope", "weyl_slope_expected", "u_min_at_height1", "eps_h_central",
         "girth", "n_short_cycles", "n_tangle_walks", "n_cusps_short", "systole",
         "n_geodesics_below_3", "mu2", "gap", "nb_rho2", "ramanujan_adj", "wallclock_s"]
 GRAPH_COLS = ["girth", "n_short_cycles", "n_tangle_walks", "n_cusps_short", "systole",
@@ -31,7 +36,7 @@ def flat(r):
     d["weyl_slope"] = r["weyl"]["slope"]
     d["weyl_slope_expected"] = r["weyl"].get("slope_expected")
     d["u_min_at_height1"] = min(p["u_height1_mean"] for p in r["liouville"]["u_per_cusp"])
-    d["eps_central"] = r["liouville"].get("eps_central")
+    d["eps_h_central"] = r["liouville"].get("eps_h_central")
     for c in GRAPH_COLS:
         d[c] = r.get("graph", {}).get(c)
     return d
