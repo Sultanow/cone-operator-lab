@@ -1,5 +1,5 @@
 {
- "schema_version": 3,
+ "schema_version": 4,
  "code_version": "0.3.0",
  "n": 16,
  "seed": 1,
@@ -287,6 +287,7 @@
  },
  "graph": {
   "n": 16,
+  "graph_feature_version": 2,
   "V": 6,
   "genus": 6,
   "cusp_lengths": [
@@ -394,9 +395,11 @@
    1.4142135623730994,
    1.4142135623730983
   ],
-  "graph_source": "computed"
+  "graph_source": "revalidated:0.4.0",
+  "migration_note": "graph block recomputed from (n,seed,W) with graph_feature_version=2; FEM/Liouville values unchanged"
  },
  "delta_compact_minus_cusped": 0.24938229625373284,
  "delta_compact_minus_thick": 0.1972404152793495,
- "wallclock_s": 2.2356832027435303
+ "wallclock_s": 2.2356832027435303,
+ "schema_migrated_by": "0.4.0"
 }

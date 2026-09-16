@@ -1,5 +1,5 @@
 {
- "schema_version": 3,
+ "schema_version": 4,
  "code_version": "0.3.0",
  "n": 32,
  "seed": 2,
@@ -263,6 +263,7 @@
  },
  "graph": {
   "n": 32,
+  "graph_feature_version": 2,
   "V": 4,
   "genus": 15,
   "cusp_lengths": [
@@ -351,16 +352,18 @@
   "nb_rho2": 1.4142135623731038,
   "ramanujan_nb": true,
   "nb_top_moduli": [
-   2.0000000000000044,
+   2.000000000000009,
    1.4142135623731038,
    1.4142135623731038,
-   1.414213562373102,
-   1.414213562373102,
-   1.4142135623731007
+   1.4142135623731031,
+   1.4142135623731031,
+   1.4142135623731027
   ],
-  "graph_source": "computed"
+  "graph_source": "revalidated:0.4.0",
+  "migration_note": "graph block recomputed from (n,seed,W) with graph_feature_version=2; FEM/Liouville values unchanged"
  },
  "delta_compact_minus_cusped": 0.1786818129624984,
  "delta_compact_minus_thick": 0.09473398302336689,
- "wallclock_s": 11.579126596450806
+ "wallclock_s": 11.579126596450806,
+ "schema_migrated_by": "0.4.0"
 }

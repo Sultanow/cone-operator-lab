@@ -38,8 +38,9 @@ Non-Backtracking-Spektrum, Taillenweite, einfache Zyklen und Tangle-Proxy
 PSL(2,ℤ) (ℓ = 2 arccosh(tr(w)/2), vollständig unterhalb ℓ_cut = 2 arccosh((W+2)/2)).
 `graph_scan.py` screent 10⁵–10⁷ Seeds und exportiert Extremfälle als Parameterdatei
 für die FEM-Stufe; die Features landen auch in jedem `run_bm.py`-JSON (`graph`) —
-neu berechnet oder mit `--graph-from scan_n*.jsonl` aus Stufe 1 übernommen (identisches
-Schema in beiden Fällen, Konsistenzcheck über V und Geschlecht, Feld `graph_source`).
+neu berechnet oder mit `--graph-from scan_n*.jsonl` aus Stufe 1 übernommen. Scan-Schema,
+Graph-Feature-Semantik und `W` werden dabei hart geprüft; alte Scans werden abgelehnt statt
+stillschweigend in ein aktuelles Ergebnis übernommen. Konsistenzcheck zusätzlich über V und Geschlecht.
 Experiment-Matrix und Hypothesen H1–H6: `EXPERIMENTS.md`.
 
 ## Installation und Aufruf
@@ -110,6 +111,6 @@ an h gekoppelt; ihr Beitrag zu λ₁ liegt bei den getesteten h unter 10⁻⁶ r
 `bmsurf.py` Kombinatorik + Netz · `bmgraph.py` Graphenstufe · `bmfem.py` Assemblierung,
 DtN, Liouville, Eigenlöser · `run_bm.py` Treiber · `graph_scan.py` Screening ·
 `make_params.py`, `slurm_bm.sbatch`, `slurm_scan.sbatch` Job-Arrays · `aggregate.py`
-Auswertung · `analyze.py` H1-Fit (freies L) und H4-Cusp-Statistik mit Cluster-Bootstrap ·
+Auswertung · `analyze.py` H1-Fit (freies L) und H4-`c0`-Lokalität mit Cluster-Bootstrap; pro `(n,seed)` nur feinste Netzweite ·
 `selftest.py` Regressionstest · `version.py` · `CHANGELOG.md` · `EXPERIMENTS.md`
 Experiment-Matrix · `results_example/` Testläufe.

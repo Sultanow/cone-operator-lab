@@ -27,7 +27,7 @@ import numpy as np
 
 from bmsurf import BMSurface, build_mesh
 from bmgraph import graph_features
-from version import SCHEMA_VERSION, __version__
+from version import GRAPH_FEATURE_VERSION, SCAN_SCHEMA_VERSION, SCHEMA_VERSION, __version__
 from bmfem import (CuspDtN, FOUR_PI, curvature_source, cusp_eigs_dtn, lumped, mass,
                    neumann_eigs, lowest, restrict, solve_liouville, stiffness, weyl_fit)
 
@@ -40,24 +40,46 @@ def log(msg):
         print("[%7.1fs] %s" % (time.time() - T0, msg), flush=True)
 
 
-def load_scan_row(path, n, seed):
-    """Full graph_features() record for (n, seed) from a graph_scan.py JSONL file
-    (a .csv path is mapped to its sibling .jsonl).  None if absent, so the schema of the
-    'graph' block is identical whether it is reused or recomputed."""
+def load_scan_row(path, n, seed, W):
+    """Load a *current* lossless graph_scan JSONL record for (n, seed).
+
+    An explicitly supplied --graph-from is a provenance contract: missing files/rows,
+    old scan schemas, old graph-feature semantics, or a mismatching W are fatal.  We
+    never silently recompute, because that could make a current result-schema wrapper
+    contain stale combinatorial counts.
+    """
     import os
     if path.endswith(".csv"):
         path = path[:-4] + ".jsonl"
     if not os.path.exists(path):
-        return None
+        raise FileNotFoundError("scan JSONL not found: %s (regenerate with current graph_scan.py)" % path)
+    found = None
     with open(path) as fh:
-        for line in fh:
+        for lineno, line in enumerate(fh, 1):
+            if not line.strip():
+                continue
             rec = json.loads(line)
             if rec.get("n") == n and rec.get("seed") == seed:
-                rec.pop("seed", None)
-                rec["simple_cycles"] = {int(k): v for k, v in rec["simple_cycles"].items()}
-                rec["tangle_walks"] = {int(k): v for k, v in rec["tangle_walks"].items()}
-                return rec
-    return None
+                found = (lineno, rec)
+                break
+    if found is None:
+        raise KeyError("scan %s has no record for (n=%d, seed=%d)" % (path, n, seed))
+    lineno, rec = found
+    ss = rec.get("scan_schema_version")
+    gv = rec.get("graph_feature_version")
+    if ss != SCAN_SCHEMA_VERSION or gv != GRAPH_FEATURE_VERSION:
+        raise ValueError(
+            "stale/incompatible scan record %s:%d: scan_schema=%r (need %d), "
+            "graph_feature_version=%r (need %d). Regenerate the scan with bm_cusps %s."
+            % (path, lineno, ss, SCAN_SCHEMA_VERSION, gv, GRAPH_FEATURE_VERSION, __version__))
+    if int(rec.get("W", -1)) != int(W):
+        raise ValueError("scan %s:%d used W=%r but this run requests W=%d; regenerate or use matching --W"
+                         % (path, lineno, rec.get("W"), W))
+    rec.pop("seed", None)
+    rec["simple_cycles"] = {int(k): v for k, v in rec["simple_cycles"].items()}
+    rec["tangle_walks"] = {int(k): v for k, v in rec["tangle_walks"].items()}
+    rec["scan_source"] = path
+    return rec
 
 
 def main():
@@ -85,7 +107,7 @@ def main():
     if surf.g < 2:
         log("genus < 2: compactification is not hyperbolic, aborting")
         sys.exit(2)
-    gf = load_scan_row(args.graph_from, surf.n, args.seed) if args.graph_from else None
+    gf = load_scan_row(args.graph_from, surf.n, args.seed, args.W) if args.graph_from else None
     if gf is not None:
         assert gf["V"] == surf.V and gf["genus"] == surf.g, "scan row does not match the generated surface"
         gf["graph_source"] = "scan:%s" % args.graph_from

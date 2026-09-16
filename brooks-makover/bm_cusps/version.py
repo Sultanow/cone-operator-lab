@@ -1,7 +1,13 @@
-"""Single source of truth for code and result-schema versions.
+"""Single source of truth for code, result, scan, and graph-feature versions.
 
 SCHEMA_VERSION is written into every run_bm.py JSON; analyze.py and aggregate.py refuse
-older schemas with a clear message instead of failing on a missing key.  Bump
-SCHEMA_VERSION whenever a JSON key is renamed or its meaning changes."""
-__version__ = "0.3.0"
-SCHEMA_VERSION = 3
+older result schemas. SCAN_SCHEMA_VERSION and GRAPH_FEATURE_VERSION protect the stage-1
+-> stage-2 boundary: a scan generated with older combinatorial semantics must never be
+silently relabelled as a current result.
+"""
+__version__ = "0.4.0"
+SCHEMA_VERSION = 4
+SCAN_SCHEMA_VERSION = 1
+# Bump whenever graph_features() changes meaning, even if its keys stay the same.
+# Version 2 includes the repaired primitive-geodesic counting/completeness cutoff.
+GRAPH_FEATURE_VERSION = 2

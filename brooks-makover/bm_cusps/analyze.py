@@ -9,8 +9,8 @@ analyze.py -- statistical evaluation of the FEM runs (results/*.json).
       z-score.  1/4 is never built into the fit.
 
   python analyze.py h4 [--glob 'results/*.json'] [--boot 2000] [--plot h4_u_vs_k.png]
-      Cusp-level point cloud (k_c, u_c(1)): conditional mean / variance per k, coloured
-      by n; residual regression  u = F(k) + beta . (girth, gap, n_tangle_walks, n_cusps_short)
+      Cusp-level diagnostics plus the sharp H4 test on puncture density c0: conditional
+      moments per k and residual regression  c0 = F(k) + beta . (girth, gap, n_tangle_walks, n_cusps_short)
       with F(k) nonparametric (per-k means); cluster bootstrap BY SURFACE for the betas.
       Locality reading: beta ~ 0  <=>  global graph geometry adds nothing once k is known.
 
@@ -31,7 +31,41 @@ def load(pattern):
     if not rows:
         sys.exit("no result files for %s" % pattern)
     check_schema(rows, files)
+    for f, r in zip(files, rows):
+        r["_source_file"] = f
     return rows
+
+
+def select_unique_surfaces(rows):
+    """Return one statistically independent record per generated surface.
+
+    A Brooks--Makover surface is determined here by (n, seed).  Multiple h values are
+    discretisations of the same random object, not independent samples.  For H4 we use
+    the finest available mesh (smallest h); controlled extrapolation of c0 is deliberately
+    not attempted until its h-asymptotics have been validated separately.
+    """
+    by = defaultdict(list)
+    for r in rows:
+        by[(int(r["n"]), int(r["seed"]))].append(r)
+    out = []
+    duplicate_groups = []
+    for key, rr in sorted(by.items()):
+        hs = [float(x.get("h", np.inf)) for x in rr]
+        hmin = min(hs)
+        finest = [x for x in rr if float(x.get("h", np.inf)) == hmin]
+        if len(finest) > 1:
+            names = [x.get("_source_file", "?") for x in finest]
+            raise ValueError("duplicate result files at the same finest resolution for surface %s, h=%g: %s"
+                             % (key, hmin, names))
+        out.append(finest[0])
+        if len(rr) > 1:
+            duplicate_groups.append((key, sorted(hs, reverse=True), hmin))
+    if duplicate_groups:
+        print("resolution selection: %d files -> %d independent surfaces; using finest h per (n, seed)"
+              % (len(rows), len(out)))
+        for key, hs, hmin in duplicate_groups:
+            print("  surface n=%d seed=%d: h=%s -> selected h=%g" % (key[0], key[1], hs, hmin))
+    return out
 
 def check_schema(rows, files):
     from version import SCHEMA_VERSION
@@ -59,7 +93,7 @@ def _fit_log(ns, m):
 
 
 def h1(args):
-    rows = load(args.glob)
+    rows = select_unique_surfaces(load(args.glob))
     by_n = defaultdict(list)
     for r in rows:
         by_n[r["n"]].append(r["lambda1_compact"])
@@ -132,15 +166,16 @@ def _regress(T):
 
 
 def c0_table(rows):
-    """Per cusp: the density c0 of g_bar at the filled puncture in the cusp's canonical coordinate
-    w = exp(2 pi i z / k), inferred from u on the horocycle of (actual) length ell via
-        u(ell) = 1/2 log c0 + log(2 pi / ell) - 2 pi / ell + O(exp(-4 pi / ell)),
-    i.e. g_bar ~ c0 |dw|^2 near w = 0 (Poincare unit disc: c0 = 4).  Uses the row with the
-    smallest ell (>= 1) where the correction is negligible; also returns the prediction error
-    at the other stored ell from the exact disc formula with conformal radius rho = 2/sqrt(c0):
-        u(ell) = log( (4 pi / ell) r0 rho / (rho^2 - r0^2) ),  r0 = exp(-2 pi / ell)."""
+    """Per cusp: puncture density c0 plus the global graph covariates used by H4.
+
+    c0 is inferred from the smallest stored fixed-length horocycle.  The surface id is
+    assigned *after* resolution selection, so all cusps from one random surface form one
+    bootstrap cluster.
+    """
     out = []
     for sid, r in enumerate(rows):
+        g = r.get("graph", {})
+        feats = {f: float(g.get(f)) if g.get(f) is not None else np.nan for f in FEATS}
         for p in r["liouville"]["u_per_cusp"]:
             ual = p.get("u_at_length", {})
             if not ual:
@@ -154,12 +189,34 @@ def c0_table(rows):
                 r0 = np.exp(-2 * np.pi / la)
                 pred = np.log((4 * np.pi / la) * r0 * rho / (rho ** 2 - r0 ** 2)) if rho > r0 else np.nan
                 errs[e] = u - pred
-            out.append(dict(n=r["n"], sid=sid, k=p["k"], c0=c0, rho=float(rho), pred_err=errs))
+            out.append(dict(n=r["n"], seed=r["seed"], sid=sid, k=p["k"], c0=c0,
+                            rho=float(rho), pred_err=errs, feats=feats))
     return out
 
 
+def _regress_c0(C):
+    """c0 = F(k) + beta . global_features, with nonparametric F(k-bin)."""
+    if not C:
+        raise ValueError("no c0 observations available")
+    k = _kbin(np.array([c["k"] for c in C], dtype=int))
+    y = np.array([c["c0"] for c in C], dtype=float)
+    X = np.array([[c["feats"][f] for f in FEATS] for c in C], dtype=float)
+    ok = np.isfinite(y) & ~np.isnan(X).any(axis=1)
+    k, y, X = k[ok], y[ok], X[ok]
+    if not len(y):
+        raise ValueError("no c0 observations with complete graph covariates")
+    for kk in np.unique(k):
+        m = k == kk
+        y[m] -= y[m].mean()
+        X[m] -= X[m].mean(axis=0)
+    beta = np.linalg.lstsq(X, y, rcond=None)[0]
+    denom = max(np.sum(y ** 2), 1e-300)
+    r2 = 1 - np.sum((y - X @ beta) ** 2) / denom
+    return beta, r2
+
+
 def h4(args):
-    rows = load(args.glob)
+    rows = select_unique_surfaces(load(args.glob))
     T = cusp_table(rows)
     C = c0_table(rows)
     if C:
@@ -184,38 +241,45 @@ def h4(args):
         per_n = "  ".join("n=%d:%.3f" % (n, T[m & (T[:, 0] == n), 3].mean()) for n in ns if (m & (T[:, 0] == n)).any())
         lab = "k=%3d" % kk if kk <= 8 else "k in [%d,%d)" % (kk, 2 * kk)
         print("  %-14s #=%4d  mu=%+.4f  sigma=%.4f   [%s]" % (lab, m.sum(), T[m, 3].mean(), T[m, 3].std(), per_n))
-    # residual regression + cluster bootstrap by surface
-    beta, r2 = _regress(T)
+    # H4 sharp test: residual regression of puncture density c0, clustered by surface.
+    beta, r2 = _regress_c0(C)
     rng = np.random.default_rng(0)
-    sids = np.unique(T[:, 1]).astype(int)
+    sids = np.array(sorted({int(c["sid"]) for c in C}), dtype=int)
     B = []
     for _ in range(args.boot):
         pick = rng.choice(sids, size=len(sids), replace=True)
-        Tb = np.vstack([T[T[:, 1] == s] for s in pick])
+        # Duplicated clusters are intentionally duplicated in the bootstrap sample.
+        Cb = []
+        for s0 in pick:
+            Cb.extend(c for c in C if int(c["sid"]) == int(s0))
         try:
-            B.append(_regress(Tb)[0])
-        except np.linalg.LinAlgError:
+            B.append(_regress_c0(Cb)[0])
+        except (np.linalg.LinAlgError, ValueError):
             pass
     B = np.array(B)
-    print("\nresidual regression  u_c(1) - F(k) = beta . (%s)   [cluster bootstrap by surface, %d resamples]"
+    print("\nresidual regression  c0 - F(k) = beta . (%s)   [cluster bootstrap by surface, %d resamples]"
           % (", ".join(FEATS), len(B)))
     for i, f in enumerate(FEATS):
         lo, hi = np.percentile(B[:, i], [2.5, 97.5]) if len(B) else (np.nan, np.nan)
         flag = "" if lo <= 0 <= hi else "  <-- differs from 0"
         print("  beta[%-14s] = %+.4f   95%% CI [%+.4f, %+.4f]%s" % (f, beta[i], lo, hi, flag))
-    print("  R^2 of the residual regression = %.4f   (locality <=> ~0)" % r2)
+    print("  R^2 of the c0 residual regression = %.4f   (locality <=> ~0)" % r2)
     if args.plot:
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots(figsize=(7, 4.5))
-        for n in ns:
-            m = T[:, 0] == n
-            ax.scatter(T[m, 2], T[m, 3], s=14, alpha=0.6, label="n=%d" % n)
-        mu = [T[kb == kk, 3].mean() for kk in ks]
-        ax.plot([kk if kk <= 8 else kk * np.sqrt(2) for kk in ks], mu, "k-", lw=1, label="E[u | k-bin]")
-        ax.set_xscale("log"); ax.set_xlabel("cusp length k_c"); ax.set_ylabel("u_c (conformal factor) on the height-1 horocycle")
-        ax.set_title("Compactification distortion vs cusp length (H4)")
+        cc0 = np.array([c["c0"] for c in C]); ck = np.array([c["k"] for c in C]); cn = np.array([c["n"] for c in C])
+        ckb = _kbin(ck)
+        cks = np.unique(ckb)
+        for n in np.unique(cn):
+            m = cn == n
+            ax.scatter(ck[m], cc0[m], s=14, alpha=0.6, label="n=%d" % n)
+        mu = [cc0[ckb == kk].mean() for kk in cks]
+        ax.plot([kk if kk <= 8 else kk * np.sqrt(2) for kk in cks], mu, "k-", lw=1, label="E[c0 | k-bin]")
+        ax.axhline(4.0, color="0.5", ls="--", lw=1, label="unit-disc c0=4")
+        ax.set_xscale("log"); ax.set_xlabel("cusp length k_c"); ax.set_ylabel("puncture density c0")
+        ax.set_title("Puncture density vs cusp length (H4 locality test)")
         ax.legend(fontsize=8); ax.grid(alpha=0.3)
         fig.tight_layout(); fig.savefig(args.plot, dpi=150)
         print("plot -> %s" % args.plot)

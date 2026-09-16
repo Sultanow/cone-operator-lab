@@ -24,7 +24,7 @@ import time
 import numpy as np
 
 from bmgraph import graph_features
-from version import __version__
+from version import GRAPH_FEATURE_VERSION, SCAN_SCHEMA_VERSION, __version__
 from bmsurf import BMSurface
 
 COLS = ["n", "seed", "V", "genus", "k_max_fraction", "n_cusps_len1", "n_cusps_len2", "n_cusps_short",
@@ -56,7 +56,7 @@ def main():
     ap.add_argument("--params", default="params_extremes.txt")
     a = ap.parse_args()
 
-    print("bm_cusps %s" % __version__, file=sys.stderr)
+    print("bm_cusps %s (scan schema %d, graph features %d)" % (__version__, SCAN_SCHEMA_VERSION, GRAPH_FEATURE_VERSION), file=sys.stderr)
     rows, t0 = [], time.time()
     jsonl_path = a.out[:-4] + ".jsonl" if a.out.endswith(".csv") else a.out + ".jsonl"
     with open(a.out, "w", newline="") as fh, open(jsonl_path, "w") as fj:
@@ -68,6 +68,10 @@ def main():
                 continue
             f = graph_features(surf, W=a.W, spectra=not a.no_spectra)
             f["seed"] = seed
+            # Provenance guard: run_bm.py requires these exact versions before reusing a scan.
+            f["scan_schema_version"] = SCAN_SCHEMA_VERSION
+            f["scan_code_version"] = __version__
+            f["graph_feature_version"] = GRAPH_FEATURE_VERSION
             fj.write(json.dumps(f) + "\n")           # lossless raw record (schema = graph_features)
             r = row_of(f, seed)
             rows.append(r)

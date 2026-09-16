@@ -24,9 +24,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 os.chdir(HERE)
 sys.path.insert(0, HERE)
 
-from version import SCHEMA_VERSION, __version__          # noqa: E402
+from version import GRAPH_FEATURE_VERSION, SCAN_SCHEMA_VERSION, SCHEMA_VERSION, __version__  # noqa: E402
 from bmsurf import BMSurface                              # noqa: E402
 from bmgraph import cycle_and_length_features, nonbacktracking  # noqa: E402
+from analyze import FEATS, _regress_c0, select_unique_surfaces  # noqa: E402
 
 fails = 0
 
@@ -64,28 +65,85 @@ subprocess.run([sys.executable, "graph_scan.py", "--n", "8", "--seeds", "0", "3"
                check=True, capture_output=True)
 check(os.path.exists(os.path.join(tmp, "scan.csv")) and os.path.exists(os.path.join(tmp, "scan.jsonl")),
       "graph_scan.py writes scan.csv and scan.jsonl")
+first_scan = json.loads(open(os.path.join(tmp, "scan.jsonl")).readline())
+check(first_scan.get("scan_schema_version") == SCAN_SCHEMA_VERSION and
+      first_scan.get("graph_feature_version") == GRAPH_FEATURE_VERSION,
+      "scan JSONL carries current scan/graph-feature provenance")
 
-# 4) run_bm.py schema + reuse of the scan record + analyze.py end to end
+# 3b) stale scan records must be rejected, never wrapped in a current result schema
+stale = os.path.join(tmp, "stale.jsonl")
+with open(os.path.join(tmp, "scan.jsonl")) as fi, open(stale, "w") as fo:
+    for line in fi:
+        x = json.loads(line); x.pop("scan_schema_version", None); x.pop("graph_feature_version", None)
+        fo.write(json.dumps(x) + "\n")
+pstale = subprocess.run([sys.executable, "run_bm.py", "--n", "8", "--seed", "2", "--h", "0.2", "--neig", "6", "--quiet",
+                         "--graph-from", stale, "--out", os.path.join(tmp, "must_not_exist.json")],
+                        capture_output=True, text=True)
+check(pstale.returncode != 0 and "stale/incompatible scan" in (pstale.stderr + pstale.stdout),
+      "run_bm.py rejects stale scan provenance")
+
+# 4) scan reuse guard; full FEM end-to-end if the optional mesher is installed
+from run_bm import load_scan_row  # noqa: E402
+rec = load_scan_row(os.path.join(tmp, "scan.jsonl"), 8, 2, 10)
+check(rec.get("graph_feature_version") == GRAPH_FEATURE_VERSION and rec.get("scan_schema_version") == SCAN_SCHEMA_VERSION,
+      "run_bm.py accepts a current scan record with matching W")
+
 out = os.path.join(tmp, "r.json")
-subprocess.run([sys.executable, "run_bm.py", "--n", "8", "--seed", "2", "--h", "0.2", "--neig", "6", "--quiet",
-                "--graph-from", os.path.join(tmp, "scan.jsonl"), "--out", out], check=True, capture_output=True)
-r = json.load(open(out))
-check(r.get("schema_version") == SCHEMA_VERSION, "run_bm.py output has schema_version %s" % r.get("schema_version"))
-check("u_per_cusp" in r["liouville"] and "eps_h_central" in r["liouville"], "liouville block uses u_per_cusp / eps_h_*")
-check(r["graph"]["graph_source"].startswith("scan:"), "graph features reused from the scan JSONL")
-check(r["dtn"].get("certified") is False, "cusp DtN result carries certified=false")
-p = subprocess.run([sys.executable, "analyze.py", "h4", "--glob", out, "--boot", "5"], capture_output=True, text=True)
-check(p.returncode == 0 and "conformal density" in p.stdout, "analyze.py h4 reads the result")
-# 5) disc formula on this small surface
-errs = []
-for c in r["liouville"]["u_per_cusp"]:
-    ual = c["u_at_length"]
-    if "1" in ual and "2" in ual:
-        u1, _, l1 = ual["1"]; u2, _, l2 = ual["2"]
-        rho = 2 / math.sqrt(math.exp(2 * (u1 - math.log(2 * math.pi / l1) + 2 * math.pi / l1)))
-        r0 = math.exp(-2 * math.pi / l2)
-        errs.append(abs(u2 - math.log((4 * math.pi / l2) * r0 * rho / (rho ** 2 - r0 ** 2))))
-check(bool(errs) and max(errs) < 1e-2, "disc formula predicts u(2) from u(1) within 1e-2 (max err %.1e)" % (max(errs) if errs else float("nan")))
+try:
+    import triangle  # noqa: F401
+    have_triangle = True
+except ImportError:
+    have_triangle = False
+
+if have_triangle:
+    subprocess.run([sys.executable, "run_bm.py", "--n", "8", "--seed", "2", "--h", "0.2", "--neig", "6", "--quiet",
+                    "--graph-from", os.path.join(tmp, "scan.jsonl"), "--out", out], check=True, capture_output=True)
+    r = json.load(open(out))
+    check(r.get("schema_version") == SCHEMA_VERSION, "run_bm.py output has schema_version %s" % r.get("schema_version"))
+    check("u_per_cusp" in r["liouville"] and "eps_h_central" in r["liouville"], "liouville block uses u_per_cusp / eps_h_*")
+    check(r["graph"]["graph_source"].startswith("scan:"), "graph features reused from the scan JSONL")
+    check(r["dtn"].get("certified") is False, "cusp DtN result carries certified=false")
+    p = subprocess.run([sys.executable, "analyze.py", "h4", "--glob", out, "--boot", "5"], capture_output=True, text=True)
+    check(p.returncode == 0 and "conformal density" in p.stdout and "c0 - F(k)" in p.stdout,
+          "analyze.py h4 reads the result and reports the c0 regression")
+else:
+    print("  SKIP full FEM end-to-end (optional package 'triangle' not installed)")
+    r = None
+
+# 5) disc formula on this small surface (when FEM dependency is available)
+if r is not None:
+    errs = []
+    for c in r["liouville"]["u_per_cusp"]:
+        ual = c["u_at_length"]
+        if "1" in ual and "2" in ual:
+            u1, _, l1 = ual["1"]; u2, _, l2 = ual["2"]
+            rho = 2 / math.sqrt(math.exp(2 * (u1 - math.log(2 * math.pi / l1) + 2 * math.pi / l1)))
+            r0 = math.exp(-2 * math.pi / l2)
+            errs.append(abs(u2 - math.log((4 * math.pi / l2) * r0 * rho / (rho ** 2 - r0 ** 2))))
+    check(bool(errs) and max(errs) < 1e-2, "disc formula predicts u(2) from u(1) within 1e-2 (max err %.1e)" % (max(errs) if errs else float("nan")))
+
+
+# 6) statistical surface identity: two resolutions of one (n,seed) are one surface
+fake = [dict(n=32, seed=7, h=0.10), dict(n=32, seed=7, h=0.07), dict(n=32, seed=8, h=0.10)]
+sel = select_unique_surfaces(fake)
+check(len(sel) == 2 and min(x["h"] for x in sel if x["seed"] == 7) == 0.07,
+      "resolution selection counts (n,seed) once and keeps the finest h")
+
+# 7) H4 regression is genuinely on c0: recover known synthetic c0 coefficients
+rng = np.random.default_rng(123)
+truth = np.array([0.7, -1.1, 0.35, 0.2])
+Csynt = []
+sid = 0
+for k in (2, 4):
+    for j in range(20):
+        x = rng.normal(size=4)
+        c0 = (4.0 + 0.1 * k) + float(x @ truth)
+        Csynt.append(dict(n=64, seed=sid, sid=sid, k=k, c0=c0,
+                          feats={f: float(v) for f, v in zip(FEATS, x)}))
+        sid += 1
+bsynt, _ = _regress_c0(Csynt)
+check(np.max(np.abs(bsynt - truth)) < 1e-10,
+      "H4 residual regression uses c0 and recovers synthetic coefficients")
 
 print("\n%s" % ("ALL CHECKS PASSED -- this directory holds bm_cusps %s" % __version__ if fails == 0
                 else "%d CHECK(S) FAILED -- do not launch the campaign from this directory" % fails))

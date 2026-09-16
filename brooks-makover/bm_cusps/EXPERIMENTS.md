@@ -20,9 +20,10 @@ aggregate.py   ──►  summary.csv, Richardson, Korrelationen                
 Der Seed bestimmt den Graphen deterministisch (gleicher RNG in beiden Stufen), die
 Auswahl in Stufe 1 ist also exakt reproduzierbar in Stufe 2. Stufe 1 schreibt zwei
 Dateien: `scan_n*.csv` (flach, für Ranking/pandas) und `scan_n*.jsonl` (das komplette
-`graph_features()`-Dictionary je Seed, verlustfreie Rohdatenquelle). `run_bm.py
---graph-from scan_n*.jsonl` übernimmt genau diesen Datensatz, so dass der `graph`-Block
-in jedem Sample dasselbe Schema hat – ob übernommen oder neu berechnet.
+`graph_features()`-Dictionary je Seed, verlustfreie Rohdatenquelle). Jeder JSONL-Datensatz
+trägt Scan-Schema und Graph-Feature-Version. `run_bm.py --graph-from` akzeptiert nur exakt
+die aktuelle Semantik und ein passendes `W`; alte Scans müssen neu erzeugt werden. So kann
+ein reparierter Zählfehler nicht über historische Stage-1-Daten wieder eingeschleust werden.
 
 ## Gespeicherte Größen pro Sample
 
@@ -112,8 +113,10 @@ c₀ ≤ 4e^{4π/k}, für kurze Cusps ist c₀ > 4 erlaubt und bei n=128 auch be
 β₄·n_cusps_short mit Test β_i ≈ 0 – *conditional on the cusp itself, the global graph
 geometry adds essentially no information to the compactification distortion* (die
 numerische Form eines Locality Lemma). Cusps einer Fläche sind abhängig, daher
-**Cluster-Bootstrap über ganze Flächen**, nie über einzelne Cusps. Werkzeug:
-`python analyze.py h4 --plot h4_u_vs_k.png` (gibt μ_k, σ_k, c₀ je k-Bin und n, die
+**Cluster-Bootstrap über ganze Flächen**, nie über einzelne Cusps. Mehrere Netzweiten derselben `(n,seed)`-Fläche sind **keine** unabhängigen Samples; die
+Ensemble-Auswertung verwendet pro Fläche die feinste vorhandene Netzweite. Eine Richardson-
+Extrapolation von c₀ wird erst eingesetzt, wenn ihre h-Asymptotik separat validiert ist. Werkzeug:
+`python analyze.py h4 --plot h4_c0_vs_k.png` (gibt μ_k, σ_k, c₀ je k-Bin und n, die
 Scheibenformel-Fehler und die β mit Bootstrap-CIs aus).
 
 **H5 (Spektralstatistik).** Für S̄ folgen die entfalteten Abstände GOE

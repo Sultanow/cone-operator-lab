@@ -201,7 +201,8 @@ def cusp_features(surf: BMSurface):
 
 
 def graph_features(surf: BMSurface, W: int = 10, spectra: bool = True) -> dict:
-    f = dict(n=surf.n)
+    from version import GRAPH_FEATURE_VERSION
+    f = dict(n=surf.n, graph_feature_version=GRAPH_FEATURE_VERSION)
     f.update(cusp_features(surf))
     f.update(cycle_and_length_features(surf, W))
     if spectra:

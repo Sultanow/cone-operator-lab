@@ -1,5 +1,5 @@
 {
- "schema_version": 3,
+ "schema_version": 4,
  "code_version": "0.3.0",
  "n": 128,
  "seed": 1,
@@ -418,6 +418,7 @@
  },
  "graph": {
   "n": 128,
+  "graph_feature_version": 2,
   "V": 8,
   "genus": 61,
   "cusp_lengths": [
@@ -500,23 +501,25 @@
    "8,1": 1,
    "8,2": 0
   },
-  "mu2": 2.779346828268542,
-  "mu_min": -2.7992687246401307,
-  "gap": 0.22065317173145793,
+  "mu2": 2.7793468282685434,
+  "mu_min": -2.79926872464013,
+  "gap": 0.2206531717314566,
   "ramanujan_adj": true,
-  "nb_rho2": 1.4142135623731302,
+  "nb_rho2": 1.4142135623731271,
   "ramanujan_nb": true,
   "nb_top_moduli": [
-   1.9999999999999996,
-   1.4142135623731302,
-   1.4142135623731302,
-   1.4142135623731278,
-   1.4142135623731278,
-   1.4142135623731233
+   2.000000000000002,
+   1.4142135623731271,
+   1.4142135623731271,
+   1.4142135623731238,
+   1.4142135623731238,
+   1.4142135623731218
   ],
-  "graph_source": "computed"
+  "graph_source": "revalidated:0.4.0",
+  "migration_note": "graph block recomputed from (n,seed,W) with graph_feature_version=2; FEM/Liouville values unchanged"
  },
  "delta_compact_minus_cusped": null,
  "delta_compact_minus_thick": 0.021262085427202093,
- "wallclock_s": 228.4002342224121
+ "wallclock_s": 228.4002342224121,
+ "schema_migrated_by": "0.4.0"
 }
