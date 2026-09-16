@@ -32,7 +32,7 @@ ein reparierter Zählfehler nicht über historische Stage-1-Daten wieder eingesc
 | 1 | V, Cusp-Längen k_c, g, Anteil k_max/6n, #Cusps mit k ≤ 2 | Kombinatorik | ~0 |
 | 2 | Taillenweite, einfache Zyklen c₁…c_W, Tangle-Proxy (nicht-einfache geschlossene NB-Wege ≤ W) | Enumeration, exakt (gegen tr B^ℓ verifiziert) | ms |
 | 3 | μ₂(G), 3 − μ₂, μ_min, Ramanujan-Flag; NB-Spektrum ρ₂ | dense/sparse eig | ms–s |
-| 4 | Längenspektrum von S unterhalb ℓ_cut = 2 arccosh((W+2)/2) über L/R-Wörter: Systole, #Geodäten < 2, < 3, Worttypen (#L, #R) | Kombinatorik, exakt | ms |
+| 4 | Längenspektrum von S unterhalb ℓ_cut = 2 arccosh((W+1)/2) über L/R-Wörter: Systole, #Geodäten < 2, < 3, Worttypen (#L, #R) | Kombinatorik, exakt | ms |
 | 5 | λ₁(S_Y) (dicker Teil, Neumann) | FEM | s–min |
 | 6 | λ₁(S): kleinster L²-Eigenwert < 1/4, exakte Cusp-DtN-Bedingung; „keiner" ist eine numerische Aussage der Diskretisierung, kein Zertifikat (Feld `certified: false`) | FEM + Wurzelsuche | s–min |
 | 7 | λ₁…λ_neig(S̄) nach Liouville-Uniformisierung, Gauß-Bonnet-Check | FEM | s–min |
@@ -96,28 +96,33 @@ Uniformisierungsfaktor fehlt eine abgesicherte Fehlerschranke (O(h²), Richardso
 schätzt sie) – ein Mittelwert wäre nicht einmal das.
 
 Befund aus der ersten Fläche (n=32, alle 10 Cusps, k von 1 bis 118), noch zu
-erhärten: u hängt auf Horozyklen fester Länge praktisch nicht von k ab, und das
-gesamte Profil wird durch **eine Zahl pro Cusp** beschrieben. Mit der kanonischen
-Koordinate w = e^{2πi z/k} des Cusps und ḡ ≈ c₀|dw|² an der gefüllten Punktierung gilt
-u(ℓ) = ½ log c₀ + log(2π/ℓ) − 2π/ℓ + O(e^{−4π/ℓ}); genauer: die exakte Scheibenformel
+erhärten: u hängt auf den **gesampelten** Horozyklen fester Länge nur schwach von k ab,
+und die beobachteten Profilwerte lassen sich mit **einem effektiven Parameter c₀ pro Cusp**
+sehr gut beschreiben. Mit der kanonischen Koordinate w = e^{2πi z/k} motiviert das lokale
+Scheibenmodell
+u(ℓ) = ½ log c₀ + log(2π/ℓ) − 2π/ℓ + O(e^{−4π/ℓ}); die zugehörige
+Scheibenprofil-Formel
 u(ℓ) = log((4π/ℓ)·r₀ρ/(ρ² − r₀²)), r₀ = e^{−2π/ℓ}, ρ = 2/√c₀, sagt u bei ℓ = 2, 4, 8, 16
-aus dem Wert bei ℓ = 1 auf 10⁻³ voraus (Mittel −10⁻⁴ … −7·10⁻⁴). Die Cusp-Umgebung
-ist in ḡ also eine hyperbolische Scheibe mit konformem Radius ρ ≈ 1.03 (c₀ = 3.80 ±
-0.09; Einheitskreis: c₀ = 4). Schwarz–Pick liefert sofort c₀ ≤ 4e^{4π/k}; die untere
-Schranke ist der Theorem-Teil (Schrohe-Linie).
+aus dem Wert bei ℓ = 1 in diesem Test auf etwa 10⁻³ voraus. **Das identifiziert nicht die
+exakte lokale Metrik:** ein Fit auf endlich vielen Horozyklen ist zunächst nur Evidenz, die
+mit einem radialen hyperbolischen Scheibenprofil konsistent ist. Eine analytische Aussage
+ḡ = c(w)|dw|² mit kontrolliertem Rest bzw. eine Eindeutigkeitsaussage bleibt Teil der
+Theorem-Arbeit. Schwarz–Pick motiviert die obere c₀-Schranke; die quantitative untere
+Schranke ist der Schrohe/Theorem-Teil.
 
-Damit lautet H4 in scharfer Form: (i) c₀(c) → 4 für lange Cusps (Schwarz–Pick:
-c₀ ≤ 4e^{4π/k}, für kurze Cusps ist c₀ > 4 erlaubt und bei n=128 auch beobachtet:
-4.20 bei k=1, 4.05 bei k=2), und c₀ hängt bei festem k für große n nicht mehr von n ab
-(bei n=16 streut es stark nach unten); (ii) Residual-Regression c₀ = const + β₁·girth + β₂·gap + β₃·n_tangles +
-β₄·n_cusps_short mit Test β_i ≈ 0 – *conditional on the cusp itself, the global graph
-geometry adds essentially no information to the compactification distortion* (die
-numerische Form eines Locality Lemma). Cusps einer Fläche sind abhängig, daher
-**Cluster-Bootstrap über ganze Flächen**, nie über einzelne Cusps. Mehrere Netzweiten derselben `(n,seed)`-Fläche sind **keine** unabhängigen Samples; die
-Ensemble-Auswertung verwendet pro Fläche die feinste vorhandene Netzweite. Eine Richardson-
+H4 wird numerisch nun bewusst in zwei Teile zerlegt: (i) die **finite-size Frage**, ob
+c₀(c) bei festem k mit wachsendem n gegen eine k-abhängige Grenzstruktur stabilisiert; und
+(ii) die **Locality-Diagnostik**
+c₀ = F(k-bin) + A_n + β₁·girth + β₂·gap + β₃·n_tangles + β₄·n_cusps_short.
+Die kategorialen Fixed Effects A_n kontrollieren explizit unterschiedliche Oberflächengrößen;
+der berichtete partielle R² misst nur den Zusatznutzen der globalen Graphgrößen nach Kontrolle
+für k **und n**. β_i ≈ 0 bzw. kleines partielles R² ist Evidenz, die mit Lokalität konsistent
+ist, **kein Beweis eines Locality Lemmas**. Cusps einer Fläche sind abhängig, daher wird der
+Cluster-Bootstrap über ganze Flächen und zusätzlich **innerhalb jeder n-Klasse geschichtet**.
+Mehrere Netzweiten derselben `(n,seed)`-Fläche sind keine unabhängigen Samples; Ensemble-
+Auswertungen verwenden pro Fläche die feinste vorhandene Netzweite. Eine Richardson-
 Extrapolation von c₀ wird erst eingesetzt, wenn ihre h-Asymptotik separat validiert ist. Werkzeug:
-`python analyze.py h4 --plot h4_c0_vs_k.png` (gibt μ_k, σ_k, c₀ je k-Bin und n, die
-Scheibenformel-Fehler und die β mit Bootstrap-CIs aus).
+`python analyze.py h4 --plot h4_c0_vs_k.png`.
 
 **H5 (Spektralstatistik).** Für S̄ folgen die entfalteten Abstände GOE
 (Wigner-Surmise, Σ²(L), Δ₃(L) rigide). Für gecusptes S *nicht*: Γ hat endlichen

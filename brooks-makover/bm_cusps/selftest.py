@@ -7,7 +7,10 @@ It fails loudly if the directory holds an old code state (the review regression 
   * closed non-backtracking walk counts agree with the Ihara trace formula (n=8, seed=2)
   * graph_scan.py writes CSV *and* JSONL
   * run_bm.py output carries the current schema (u_per_cusp, eps_h_*), analyze.py reads it
-  * the disc formula reproduces u at ell=2 from ell=1 to < 1e-2 on a small surface
+  * the disc profile reproduces u at ell=2 from ell=1 to < 1e-2 on a small surface
+  * aggregate.py deduplicates mesh resolutions by (n, seed)
+  * SLURM result validation rejects mismatched/stale outputs
+  * H4 n fixed effects remove a synthetic size-confounded signal
 
 Usage:  python selftest.py            (about 30 s)
 """
@@ -141,9 +144,48 @@ for k in (2, 4):
         Csynt.append(dict(n=64, seed=sid, sid=sid, k=k, c0=c0,
                           feats={f: float(v) for f, v in zip(FEATS, x)}))
         sid += 1
-bsynt, _ = _regress_c0(Csynt)
+bsynt, _, _ = _regress_c0(Csynt)
 check(np.max(np.abs(bsynt - truth)) < 1e-10,
       "H4 residual regression uses c0 and recovers synthetic coefficients")
+
+
+# 8) aggregate.py must count independent surfaces, not mesh files
+agg_tmp = tempfile.mkdtemp()
+example_glob = os.path.join(HERE, "results_example", "*.json")
+pagg = subprocess.run([sys.executable, os.path.join(HERE, "aggregate.py"), example_glob],
+                      cwd=agg_tmp, capture_output=True, text=True)
+summary_path = os.path.join(agg_tmp, "summary.csv")
+all_path = os.path.join(agg_tmp, "summary_all_resolutions.csv")
+summary_rows = open(summary_path).read().strip().splitlines() if os.path.exists(summary_path) else []
+all_rows = open(all_path).read().strip().splitlines() if os.path.exists(all_path) else []
+check(pagg.returncode == 0 and len(summary_rows) == 15 and len(all_rows) == 16 and "n=32 seed=1" in pagg.stdout,
+      "aggregate.py reduces 15 files to 14 independent surfaces while retaining all resolutions separately")
+
+# 9) SLURM resume validator accepts only current, matching results
+valid_example = os.path.join(HERE, "results_example", "bm_n16_s1_h0.12.json")
+pvalid = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
+                         "--n", "16", "--seed", "1", "--h", "0.12"], capture_output=True, text=True)
+pbad = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
+                       "--n", "16", "--seed", "1", "--h", "0.11"], capture_output=True, text=True)
+check(pvalid.returncode == 0 and pbad.returncode != 0,
+      "validate_result.py accepts matching current results and rejects parameter mismatches")
+
+# 10) n fixed effects block a spurious size-confounded H4 signal
+rng2 = np.random.default_rng(456)
+Cconf = []
+sid = 0
+for nn in (32, 128):
+    for j in range(60):
+        k = 2 if j % 2 == 0 else 4
+        # Features shift strongly with n, but c0 has only k and n effects, no feature effect.
+        x = rng2.normal(size=4) + (3.0 if nn == 128 else -3.0)
+        c0 = 4.0 + 0.08 * k + (0.9 if nn == 128 else -0.9)
+        Cconf.append(dict(n=nn, seed=sid, sid=sid, k=k, c0=c0,
+                          feats={f: float(v) for f, v in zip(FEATS, x)}))
+        sid += 1
+bconf, pr2conf, _ = _regress_c0(Cconf)
+check(np.max(np.abs(bconf)) < 1e-10 and abs(pr2conf) < 1e-10,
+      "H4 n fixed effects remove a purely size-confounded graph-feature signal")
 
 print("\n%s" % ("ALL CHECKS PASSED -- this directory holds bm_cusps %s" % __version__ if fails == 0
                 else "%d CHECK(S) FAILED -- do not launch the campaign from this directory" % fails))

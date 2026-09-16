@@ -42,16 +42,43 @@ def flat(r):
     return d
 
 
-flat_rows = [flat(r) for r in rows]
-with open("summary.csv", "w") as f:
-    f.write(",".join(cols) + "\n")
-    for d in flat_rows:
-        f.write(",".join("" if d.get(c) is None else str(d[c]) for c in cols) + "\n")
-print("wrote summary.csv (%d rows)\n" % len(flat_rows))
+flat_rows_all = [flat(r) for r in rows]
+
+# Statistical identity is (n, seed), not a mesh width.  Keep all resolutions only
+# for convergence/Richardson diagnostics; ensemble summaries use exactly one record
+# per random surface, namely the finest available mesh.
+by_surface = defaultdict(list)
+for d in flat_rows_all:
+    by_surface[(int(d["n"]), int(d["seed"]))].append(d)
+flat_rows = []
+duplicate_groups = []
+for key, rr in sorted(by_surface.items()):
+    hmin = min(float(x.get("h", np.inf)) for x in rr)
+    finest = [x for x in rr if float(x.get("h", np.inf)) == hmin]
+    if len(finest) != 1:
+        sys.exit("duplicate result files at the same finest resolution for surface %s, h=%g" % (key, hmin))
+    flat_rows.append(finest[0])
+    if len(rr) > 1:
+        duplicate_groups.append((key, sorted(float(x["h"]) for x in rr), hmin))
+
+# Canonical ensemble CSV: one row per independent surface.  Preserve all mesh
+# resolutions separately for convergence studies.
+for name, data in (("summary.csv", flat_rows), ("summary_all_resolutions.csv", flat_rows_all)):
+    with open(name, "w") as f:
+        f.write(",".join(cols) + "\n")
+        for d in data:
+            f.write(",".join("" if d.get(c) is None else str(d[c]) for c in cols) + "\n")
+print("wrote summary.csv (%d independent surfaces) and summary_all_resolutions.csv (%d files)"
+      % (len(flat_rows), len(flat_rows_all)))
+if duplicate_groups:
+    print("resolution selection for ensemble statistics: finest h per (n, seed)")
+    for (n, seed), hs, hmin in duplicate_groups:
+        print("  surface n=%d seed=%d: h=%s -> selected h=%g" % (n, seed, hs, hmin))
+print()
 
 # ---- Richardson extrapolation over mesh sizes (same n, seed) ------------------------
 by = defaultdict(dict)
-for d in flat_rows:
+for d in flat_rows_all:
     by[(d["n"], d["seed"])][d["h"]] = d
 rich = []
 for key, hs in by.items():

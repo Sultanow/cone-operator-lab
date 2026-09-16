@@ -9,10 +9,12 @@ analyze.py -- statistical evaluation of the FEM runs (results/*.json).
       z-score.  1/4 is never built into the fit.
 
   python analyze.py h4 [--glob 'results/*.json'] [--boot 2000] [--plot h4_u_vs_k.png]
-      Cusp-level diagnostics plus the sharp H4 test on puncture density c0: conditional
-      moments per k and residual regression  c0 = F(k) + beta . (girth, gap, n_tangle_walks, n_cusps_short)
-      with F(k) nonparametric (per-k means); cluster bootstrap BY SURFACE for the betas.
-      Locality reading: beta ~ 0  <=>  global graph geometry adds nothing once k is known.
+      Cusp-level diagnostics plus the H4 locality diagnostic on puncture density c0:
+      c0 = F(k) + A_n + beta . (girth, gap, n_tangle_walks, n_cusps_short),
+      with nonparametric k-bin and n fixed effects.  The reported partial R^2 asks how much
+      global graph covariates add after controlling for both cusp length and surface size.
+      Bootstrap resampling is clustered BY SURFACE and stratified within n.  This is a
+      numerical diagnostic, not a proof of locality.
 
 Every bootstrap here resamples whole surfaces, never individual cusps.
 """
@@ -195,24 +197,54 @@ def c0_table(rows):
 
 
 def _regress_c0(C):
-    """c0 = F(k) + beta . global_features, with nonparametric F(k-bin)."""
+    """Fit c0 = F(k-bin) + A_n + beta . global_features.
+
+    k-bin and n are treated as categorical fixed effects.  ``partial_r2`` measures the
+    incremental explanatory power of the global graph covariates beyond those controls.
+    The fitted n coefficients are descriptive finite-size effects relative to the smallest
+    observed n, not evidence for an asymptotic law.
+    """
     if not C:
         raise ValueError("no c0 observations available")
     k = _kbin(np.array([c["k"] for c in C], dtype=int))
+    n = np.array([int(c["n"]) for c in C], dtype=int)
     y = np.array([c["c0"] for c in C], dtype=float)
-    X = np.array([[c["feats"][f] for f in FEATS] for c in C], dtype=float)
-    ok = np.isfinite(y) & ~np.isnan(X).any(axis=1)
-    k, y, X = k[ok], y[ok], X[ok]
+    Xfeat = np.array([[c["feats"][f] for f in FEATS] for c in C], dtype=float)
+    ok = np.isfinite(y) & ~np.isnan(Xfeat).any(axis=1)
+    k, n, y, Xfeat = k[ok], n[ok], y[ok], Xfeat[ok]
     if not len(y):
         raise ValueError("no c0 observations with complete graph covariates")
-    for kk in np.unique(k):
-        m = k == kk
-        y[m] -= y[m].mean()
-        X[m] -= X[m].mean(axis=0)
-    beta = np.linalg.lstsq(X, y, rcond=None)[0]
-    denom = max(np.sum(y ** 2), 1e-300)
-    r2 = 1 - np.sum((y - X @ beta) ** 2) / denom
-    return beta, r2
+
+    # Categorical controls: intercept + all non-baseline k bins + all non-baseline n.
+    kvals = np.unique(k)
+    nvals = np.unique(n)
+    controls = [np.ones(len(y))]
+    control_names = ["intercept"]
+    for kk in kvals[1:]:
+        controls.append((k == kk).astype(float)); control_names.append("k=%s" % kk)
+    for nn in nvals[1:]:
+        controls.append((n == nn).astype(float)); control_names.append("n=%s" % nn)
+    Xctrl = np.column_stack(controls)
+    Xfull = np.column_stack([Xctrl, Xfeat])
+
+    pfull = np.linalg.lstsq(Xfull, y, rcond=None)[0]
+    pctrl = np.linalg.lstsq(Xctrl, y, rcond=None)[0]
+    resid_full = y - Xfull @ pfull
+    resid_ctrl = y - Xctrl @ pctrl
+    sse_full = float(resid_full @ resid_full)
+    sse_ctrl = float(resid_ctrl @ resid_ctrl)
+    # If the controls already explain y to machine precision, there is no residual
+    # variance for graph features to explain; report zero rather than a numerically
+    # meaningless large negative ratio of two round-off-level SSEs.
+    scale = max(float(y @ y), 1.0)
+    partial_r2 = 0.0 if sse_ctrl <= 1e-24 * scale else 1.0 - sse_full / sse_ctrl
+    beta = pfull[-len(FEATS):]
+
+    n_effects = {int(nvals[0]): 0.0}
+    offset = 1 + max(len(kvals) - 1, 0)
+    for j, nn in enumerate(nvals[1:]):
+        n_effects[int(nn)] = float(pfull[offset + j])
+    return beta, partial_r2, n_effects
 
 
 def h4(args):
@@ -241,29 +273,37 @@ def h4(args):
         per_n = "  ".join("n=%d:%.3f" % (n, T[m & (T[:, 0] == n), 3].mean()) for n in ns if (m & (T[:, 0] == n)).any())
         lab = "k=%3d" % kk if kk <= 8 else "k in [%d,%d)" % (kk, 2 * kk)
         print("  %-14s #=%4d  mu=%+.4f  sigma=%.4f   [%s]" % (lab, m.sum(), T[m, 3].mean(), T[m, 3].std(), per_n))
-    # H4 sharp test: residual regression of puncture density c0, clustered by surface.
-    beta, r2 = _regress_c0(C)
+    # H4 diagnostic: control explicitly for both cusp length and surface size n.
+    beta, partial_r2, n_effects = _regress_c0(C)
     rng = np.random.default_rng(0)
-    sids = np.array(sorted({int(c["sid"]) for c in C}), dtype=int)
+    sid_to_n = {int(c["sid"]): int(c["n"]) for c in C}
+    sids_by_n = {nn: np.array(sorted(s for s, n0 in sid_to_n.items() if n0 == nn), dtype=int)
+                 for nn in sorted(set(sid_to_n.values()))}
     B = []
     for _ in range(args.boot):
-        pick = rng.choice(sids, size=len(sids), replace=True)
-        # Duplicated clusters are intentionally duplicated in the bootstrap sample.
         Cb = []
-        for s0 in pick:
-            Cb.extend(c for c in C if int(c["sid"]) == int(s0))
+        # Preserve the observed number of independent surfaces in every n-class.
+        for nn, sids in sids_by_n.items():
+            pick = rng.choice(sids, size=len(sids), replace=True)
+            for s0 in pick:
+                Cb.extend(c for c in C if int(c["sid"]) == int(s0))
         try:
             B.append(_regress_c0(Cb)[0])
         except (np.linalg.LinAlgError, ValueError):
             pass
     B = np.array(B)
-    print("\nresidual regression  c0 - F(k) = beta . (%s)   [cluster bootstrap by surface, %d resamples]"
-          % (", ".join(FEATS), len(B)))
+    print("\nH4 diagnostic: c0 = F(k-bin) + A_n + beta . (%s)" % ", ".join(FEATS))
+    print("  n fixed effects are included; bootstrap is clustered by surface and stratified within n (%d resamples)" % len(B))
     for i, f in enumerate(FEATS):
         lo, hi = np.percentile(B[:, i], [2.5, 97.5]) if len(B) else (np.nan, np.nan)
         flag = "" if lo <= 0 <= hi else "  <-- differs from 0"
         print("  beta[%-14s] = %+.4f   95%% CI [%+.4f, %+.4f]%s" % (f, beta[i], lo, hi, flag))
-    print("  R^2 of the c0 residual regression = %.4f   (locality <=> ~0)" % r2)
+    print("  partial R^2 added by global graph covariates after controlling for k and n = %.4f" % partial_r2)
+    if len(n_effects) > 1:
+        base = min(n_effects)
+        print("  descriptive n fixed effects relative to n=%d: %s" %
+              (base, "  ".join("n=%d:%+.4f" % (nn, a) for nn, a in sorted(n_effects.items()) if nn != base)))
+    print("  interpretation: beta near zero / small partial R^2 is evidence consistent with locality, not a proof.")
     if args.plot:
         import matplotlib
         matplotlib.use("Agg")

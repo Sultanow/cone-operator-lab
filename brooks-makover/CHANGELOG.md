@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.1 (2026-09-16) — Ensemble/H4/Resume hardening
+
+- `aggregate.py` uses one independent surface per `(n, seed)` for ensemble summaries; the finest mesh is selected. `summary.csv` is deduplicated, while `summary_all_resolutions.csv` preserves every mesh for convergence/Richardson diagnostics.
+- H4 now fits `c0 = F(k-bin) + A_n + beta·X` with categorical `n` fixed effects. The reported partial R² is the incremental contribution of global graph covariates after controlling for both cusp length and size. Bootstrap resampling is clustered by surface and stratified within `n`. Output explicitly states that this is locality evidence, not a proof.
+- Scheibenprofil wording tightened: agreement on sampled horocycles is evidence consistent with a radial disc model; it does not identify the exact local metric.
+- Added `validate_result.py`; `slurm_bm.sbatch` skips an existing result only after schema, parameters, graph-feature semantics and required blocks validate. Invalid files are quarantined and recomputed.
+- Repository-root `selftest.py` is now a wrapper around the single canonical `bm_cusps/selftest.py`. New regression tests cover aggregate deduplication, SLURM result validation and removal of a purely `n`-confounded H4 signal.
+- Documentation updated to version 0.4.1 and the repaired completeness cutoff `2 arccosh((W+1)/2)`.
+- 3D print documentation now states explicitly that the STL/OBJ is a topological demonstrator, not a metric/FEM embedding.
+
+
 ## 0.3.0 (2026-09-16) — Review-Fixes, ein kanonischer Stand
 * **Ein Paket, eine Version.** `version.py` (`__version__`, `SCHEMA_VERSION`); jede JSON-Ausgabe
   trägt `schema_version`/`code_version`, `analyze.py`/`aggregate.py` verweigern ältere Schemata mit

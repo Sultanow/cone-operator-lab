@@ -88,3 +88,13 @@ python bmprint3d.py --n 16 --seed 1 --no-cusp-markers --preview
 > isometric embedding of the intrinsic hyperbolic metric.  Tactile bumps encode
 > cusp-cycle lengths of the pre-compactification surface; shorter cycles are
 > represented by larger markers.
+
+## Wissenschaftliche Einordnung
+
+Das exportierte STL/OBJ ist ein **topologisch korrektes Anschauungsmodell** der
+kompaktifizierten Fläche in R^3. Es wird nicht aus dem intrinsischen FEM-Netz eingebettet
+und übernimmt weder punktweise den berechneten Liouville-Faktor noch die hyperbolische
+Metrik. Cusp-Marker codieren kombinatorische Information tastbar. Deshalb darf das Modell
+nicht als metrische 3D-Rekonstruktion oder als punktweise Entsprechung zur H4-Heatmap
+interpretiert werden. Eine solche datengetriebene Einbettung wäre ein separates
+Visualisierungsprojekt.

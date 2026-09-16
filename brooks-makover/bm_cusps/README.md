@@ -1,6 +1,6 @@
 # Cusps und Kompaktifizierung: Brooks-Makover-Flächen numerisch
 
-**Version 0.3.0 — dies ist der einzige kanonische Stand.** Vor dem Start auf dem Cluster
+**Version 0.4.1 — dies ist der einzige kanonische Stand.** Vor dem Start auf dem Cluster
 `python selftest.py` im Arbeitsverzeichnis ausführen; der Test schlägt fehl, wenn dort ein
 älterer Code-Stand liegt (Root-Duplikate früherer Lieferungen bitte löschen). Änderungen:
 `CHANGELOG.md`.
@@ -35,7 +35,7 @@ für die Caps); die Metrik steckt nur in der Massenmatrix (Quadratur Grad 4).
 Non-Backtracking-Spektrum, Taillenweite, einfache Zyklen und Tangle-Proxy
 (exakte Enumeration, gegen tr Bˡ verifiziert), Cusp-Statistik und das
 **Längenspektrum** der gecuspten Fläche über die L/R-Cutting-Sequence-Wörter in
-PSL(2,ℤ) (ℓ = 2 arccosh(tr(w)/2), vollständig unterhalb ℓ_cut = 2 arccosh((W+2)/2)).
+PSL(2,ℤ) (ℓ = 2 arccosh(tr(w)/2), vollständig unterhalb ℓ_cut = 2 arccosh((W+1)/2)).
 `graph_scan.py` screent 10⁵–10⁷ Seeds und exportiert Extremfälle als Parameterdatei
 für die FEM-Stufe; die Features landen auch in jedem `run_bm.py`-JSON (`graph`) —
 neu berechnet oder mit `--graph-from scan_n*.jsonl` aus Stufe 1 übernommen. Scan-Schema,
@@ -62,7 +62,7 @@ Optionen: `--h` hyperbolische Maschenweite, `--L0` Länge des Abschneide-Horozyk
 python make_params.py --n 16 32 64 128 256 --seeds 20 --h 0.1 0.07   # zwei h → Richardson
 mkdir -p logs results
 sbatch --array=1-$(wc -l < params.txt)%16 slurm_bm.sbatch
-python aggregate.py            # summary.csv + Tabellen (auch Richardson-extrapoliert)
+python aggregate.py            # summary.csv: eine Zeile pro (n,seed); alle h separat in summary_all_resolutions.csv
 ```
 
 Ressourcen (1 Kern, SciPy/SuperLU): n=32 ≈ 15 s (34k Knoten), n=128 ≈ 5 min
@@ -85,8 +85,11 @@ bis auf den O(h²)-Geometriefehler.
 
 Beobachtung, die direkt das Theorem füttert: u auf dem Höhe-1-Horozyklus ist
 ≈ −0.01 … −0.3 für lange Cusps (k ≥ 15), aber ≈ −1.3 für k = 2 und ≈ −3.8 für
-k = 1. Auf Horozyklen fester *Länge* ℓ ist u dagegen fast k-unabhängig und folgt
-einer expliziten Scheibenformel mit einer Konstante c₀ je Cusp (EXPERIMENTS.md, H4).
+k = 1. Auf Horozyklen fester *Länge* ℓ ist u in den bisherigen Tests fast k-unabhängig; die
+gesampelten Profilwerte werden sehr gut durch eine Scheibenprofil-Formel mit einer effektiven
+Konstante c₀ je Cusp beschrieben (EXPERIMENTS.md, H4). Ein guter Fit entlang endlich vieler
+Horozyklen identifiziert **nicht** die exakte lokale Metrik und ersetzt keinen analytischen
+Eindeutigkeits- oder Fehlerbeweis.
 Die Kappen sind über die Kettenauflösung (Knotenabstand ≤ h/2, Ringzahl ∝ Knotenzahl)
 an h gekoppelt; ihr Beitrag zu λ₁ liegt bei den getesteten h unter 10⁻⁶ relativ.
 
@@ -110,7 +113,7 @@ an h gekoppelt; ihr Beitrag zu λ₁ liegt bei den getesteten h unter 10⁻⁶ r
 
 `bmsurf.py` Kombinatorik + Netz · `bmgraph.py` Graphenstufe · `bmfem.py` Assemblierung,
 DtN, Liouville, Eigenlöser · `run_bm.py` Treiber · `graph_scan.py` Screening ·
-`make_params.py`, `slurm_bm.sbatch`, `slurm_scan.sbatch` Job-Arrays · `aggregate.py`
-Auswertung · `analyze.py` H1-Fit (freies L) und H4-`c0`-Lokalität mit Cluster-Bootstrap; pro `(n,seed)` nur feinste Netzweite ·
+`make_params.py`, `slurm_bm.sbatch`, `slurm_scan.sbatch` Job-Arrays · `validate_result.py` prüft vorhandene Ergebnisse vor SLURM-Skip · `aggregate.py`
+Auswertung · `analyze.py` H1-Fit (freies L) und H4-`c0`-Diagnostik mit k- und n-Fixed-Effects sowie nach n geschichtetem Cluster-Bootstrap; pro `(n,seed)` nur feinste Netzweite ·
 `selftest.py` Regressionstest · `version.py` · `CHANGELOG.md` · `EXPERIMENTS.md`
 Experiment-Matrix · `results_example/` Testläufe.

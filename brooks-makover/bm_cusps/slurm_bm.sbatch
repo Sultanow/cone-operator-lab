@@ -25,7 +25,15 @@ line=$(sed -n "${SLURM_ARRAY_TASK_ID}p" params.txt)
 read -r n seed h L0 <<< "$line"
 out="results/bm_n${n}_s${seed}_h${h}.json"
 mkdir -p results
-if [ -s "$out" ]; then echo "exists: $out"; exit 0; fi
+if [ -s "$out" ]; then
+  if python validate_result.py "$out" --n "$n" --seed "$seed" --h "$h"; then
+    echo "validated existing result; skip: $out"
+    exit 0
+  fi
+  bad="${out%.json}.invalid.$(date +%Y%m%dT%H%M%S).json"
+  echo "existing result is stale/incomplete/mismatched; moving to $bad and recomputing" >&2
+  mv "$out" "$bad"
+fi
 
 echo "task $SLURM_ARRAY_TASK_ID: n=$n seed=$seed h=$h L0=$L0  ($(hostname), $(date))"
 python run_bm.py --n "$n" --seed "$seed" --h "$h" --L0 "$L0" --neig 60 --out "$out"
