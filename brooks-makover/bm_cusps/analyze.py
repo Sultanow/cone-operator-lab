@@ -27,15 +27,29 @@ from collections import defaultdict
 import numpy as np
 
 
+def _is_quarantine_file(path):
+    b = path.rsplit("/", 1)[-1]
+    return ".invalid." in b or b.endswith(".quarantine") or "/quarantine/" in path.replace("\\", "/")
+
+
 def load(pattern):
-    files = sorted(glob.glob(pattern))
+    files = [f for f in sorted(glob.glob(pattern, recursive=True)) if not _is_quarantine_file(f)]
     rows = [json.load(open(f)) for f in files]
     if not rows:
         sys.exit("no result files for %s" % pattern)
     check_schema(rows, files)
+    kept, dropped = [], []
     for f, r in zip(files, rows):
         r["_source_file"] = f
-    return rows
+        if r.get("quality", {}).get("analysis_eligible") is True:
+            kept.append(r)
+        else:
+            dropped.append(f)
+    if dropped:
+        print("quality filter: excluding %d non-converged/non-eligible result(s), e.g. %s" % (len(dropped), dropped[0]))
+    if not kept:
+        sys.exit("all matching results are non-converged or not analysis-eligible")
+    return kept
 
 
 def select_unique_surfaces(rows):

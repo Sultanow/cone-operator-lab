@@ -213,18 +213,21 @@ def cusp_eigs_dtn(K, M, dtn: CuspDtN, lam_start=None, tol=1e-10, log=None):
     if g_hi >= 0:
         return None, dict(note="no L2 eigenvalue below 1/4 detected in the discretisation "
                                "(frozen nu=0 value %.6f); numerical statement, not a certificate" % cache[hi],
-                          frozen_nu0=float(cache[hi]), evaluations=len(cache), certified=False)
+                          frozen_nu0=float(cache[hi]), evaluations=len(cache), certified=False,
+                          converged=True, status="no_l2_detected")
     lo = 1e-6
     g_lo = g(lo)
     if g_lo <= 0:
-        return None, dict(note="frozen eigenvalue non-positive at lam->0 (surface disconnected?)")
+        return None, dict(note="frozen eigenvalue non-positive at lam->0 (surface disconnected?)",
+                          certified=False, converged=False, status="invalid_lower_endpoint")
     # Illinois (modified regula falsi) on the bracket, reusing the endpoint evaluations
     a, fa, b, fb, side = lo, g_lo, hi, g_hi, 0
     for _ in range(60):
         x = (a * fb - b * fa) / (fb - fa)
         fx = g(x)
         if abs(fx) < tol or abs(b - a) < tol:
-            return float(x), dict(evaluations=len(cache), frozen_nu0=float(cache[hi]))
+            return float(x), dict(evaluations=len(cache), frozen_nu0=float(cache[hi]),
+                                  certified=False, converged=True, status="root_converged")
         if fx * fb < 0:
             a, fa, side_new = b, fb, -1
         else:
@@ -234,7 +237,9 @@ def cusp_eigs_dtn(K, M, dtn: CuspDtN, lam_start=None, tol=1e-10, log=None):
         b, fb, side = x, fx, side_new
         if fx * fa > 0 and side_new == 1:
             pass
-    return float(x), dict(evaluations=len(cache), frozen_nu0=float(cache[hi]), note="root search not converged")
+    return float(x), dict(evaluations=len(cache), frozen_nu0=float(cache[hi]),
+                          certified=False, converged=False, status="root_not_converged",
+                          note="root search not converged")
 
 
 # ----------------------------------------------------------------------------
@@ -266,7 +271,7 @@ def solve_liouville(K, c, ML, tol=1e-11, maxit=60, log=None):
         if log:
             log("  Liouville it %2d: |R|_inf=%.3e  E=%.12f" % (it, rn, E))
         if rn < tol:
-            return phi, dict(iterations=it, residual=rn)
+            return phi, dict(iterations=it, residual=rn, converged=True, status="converged", tol=tol, maxit=maxit)
         H = (K + sp.diags(2 * ML * e2)).tocsc()
         dphi = -spla.splu(H).solve(R)
         t, slope = 1.0, R @ dphi
@@ -277,6 +282,7 @@ def solve_liouville(K, c, ML, tol=1e-11, maxit=60, log=None):
             t *= 0.5
         phi, E = phi + t * dphi, En
     return phi, dict(iterations=maxit, residual=float(np.abs(K @ phi + c + ML * np.exp(2 * phi)).max()),
+                     converged=False, status="max_iterations", tol=tol, maxit=maxit,
                      note="Newton not converged")
 
 

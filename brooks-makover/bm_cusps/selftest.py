@@ -107,7 +107,7 @@ if have_triangle:
     check(r["graph"]["graph_source"].startswith("scan:"), "graph features reused from the scan JSONL")
     check(r["dtn"].get("certified") is False, "cusp DtN result carries certified=false")
     p = subprocess.run([sys.executable, "analyze.py", "h4", "--glob", out, "--boot", "5"], capture_output=True, text=True)
-    check(p.returncode == 0 and "conformal density" in p.stdout and "c0 - F(k)" in p.stdout,
+    check(p.returncode == 0 and "conformal density" in p.stdout and "H4 diagnostic: c0 = F(k-bin)" in p.stdout and "partial R^2" in p.stdout,
           "analyze.py h4 reads the result and reports the c0 regression")
 else:
     print("  SKIP full FEM end-to-end (optional package 'triangle' not installed)")
@@ -164,9 +164,9 @@ check(pagg.returncode == 0 and len(summary_rows) == 15 and len(all_rows) == 16 a
 # 9) SLURM resume validator accepts only current, matching results
 valid_example = os.path.join(HERE, "results_example", "bm_n16_s1_h0.12.json")
 pvalid = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
-                         "--n", "16", "--seed", "1", "--h", "0.12"], capture_output=True, text=True)
+                         "--n", "16", "--seed", "1", "--h", "0.12", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "10"], capture_output=True, text=True)
 pbad = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
-                       "--n", "16", "--seed", "1", "--h", "0.11"], capture_output=True, text=True)
+                       "--n", "16", "--seed", "1", "--h", "0.11", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "10"], capture_output=True, text=True)
 check(pvalid.returncode == 0 and pbad.returncode != 0,
       "validate_result.py accepts matching current results and rejects parameter mismatches")
 
@@ -186,6 +186,25 @@ for nn in (32, 128):
 bconf, pr2conf, _ = _regress_c0(Cconf)
 check(np.max(np.abs(bconf)) < 1e-10 and abs(pr2conf) < 1e-10,
       "H4 n fixed effects remove a purely size-confounded graph-feature signal")
+
+# 11) quarantine files and non-converged results must not enter downstream statistics
+qdir = tempfile.mkdtemp()
+good_src = valid_example
+good_dst = os.path.join(qdir, "good.json")
+open(good_dst, "w").write(open(good_src).read())
+q_dst = os.path.join(qdir, "bad.invalid.20260917.json")
+open(q_dst, "w").write(open(good_src).read())
+badq = json.load(open(good_src)); badq["quality"]["analysis_eligible"] = False
+nonconv = os.path.join(qdir, "nonconv.json")
+json.dump(badq, open(nonconv, "w"))
+pq = subprocess.run([sys.executable, "analyze.py", "h4", "--glob", os.path.join(qdir, "*.json"), "--boot", "2"], capture_output=True, text=True)
+check(pq.returncode == 0 and "excluding 1 non-converged" in pq.stdout,
+      "analysis ignores quarantined filenames and excludes non-converged results")
+
+# 12) resume validation checks all computation parameters and convergence eligibility
+pbadW = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
+                       "--n", "16", "--seed", "1", "--h", "0.12", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "8"], capture_output=True, text=True)
+check(pbadW.returncode != 0, "validate_result.py rejects changed W / computation provenance")
 
 print("\n%s" % ("ALL CHECKS PASSED -- this directory holds bm_cusps %s" % __version__ if fails == 0
                 else "%d CHECK(S) FAILED -- do not launch the campaign from this directory" % fails))

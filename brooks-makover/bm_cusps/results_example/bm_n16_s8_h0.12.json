@@ -1,6 +1,6 @@
 {
- "schema_version": 4,
- "code_version": "0.3.0",
+ "schema_version": 5,
+ "code_version": "0.4.2",
  "n": 16,
  "seed": 8,
  "h": 0.12,
@@ -72,7 +72,10 @@
  "lambda1_cusped": 0.19726828945506958,
  "dtn": {
   "evaluations": 7,
-  "frozen_nu0": 0.19268274887576045
+  "frozen_nu0": 0.19268274887576045,
+  "converged": true,
+  "status": "root_converged",
+  "certified": false
  },
  "lambda1_compact": 0.6061453487851635,
  "eigs_compact": [
@@ -320,7 +323,11 @@
      ]
     }
    }
-  ]
+  ],
+  "converged": true,
+  "status": "converged",
+  "tol": 1e-11,
+  "maxit": 60
  },
  "weyl": {
   "slope": 3.9011560125184213,
@@ -451,5 +458,22 @@
  "delta_compact_minus_cusped": 0.4088770593300939,
  "delta_compact_minus_thick": 0.34547691907621797,
  "wallclock_s": 2.7913050651550293,
- "schema_migrated_by": "0.4.0"
+ "schema_migrated_by": "0.4.0",
+ "run_parameters": {
+  "n": 16,
+  "seed": 8,
+  "h": 0.12,
+  "L0": 1.0,
+  "T_ext": 6.0,
+  "neig": 20,
+  "W": 10
+ },
+ "quality": {
+  "analysis_eligible": true,
+  "compact_solver_converged": true,
+  "full_solver_converged": true,
+  "liouville_converged": true,
+  "dtn_converged": true,
+  "compact_eigs_finite": true
+ }
 }

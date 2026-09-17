@@ -21,6 +21,8 @@ from hyperbolic_disk import fem_hyperbolic_disk, radial_ground_truth
 from pants_atom import build_pants as pants_lengths, close_defect
 from pants import build_pants
 from genus_n import K4_genus3, build_surface
+from glue import glue_genus2, twist_step_from_fraction, realized_twist_fraction
+from bolza_check import run_and_check as check_bolza
 
 
 def check(cond: bool, msg: str) -> None:
@@ -63,18 +65,19 @@ def main() -> None:
     check(abs(vals[0]) < 1e-8, f"closed genus-3 zero mode is present ({vals[0]:.2e})")
     check(vals[1] > 0, f"closed genus-3 first non-zero eigenvalue is positive ({vals[1]:.4f})")
 
+    # 5. Twist semantics: lambda_1 is vals[1], and refinement preserves normalized twist.
+    ls = 2 * np.arccosh(1 + np.sqrt(2))
+    t = 3 / 16
+    _, vc, _ = glue_genus2(ls, twist_fractions=[t, t, t], m=16, h=0.06, k=6)
+    check(abs(vc[1] - np.sort(vc)[1]) < 1e-14, "twist scan uses vals[1] as lambda_1 (no cluster averaging)")
+    check(twist_step_from_fraction(t, 32) / 32 == twist_step_from_fraction(t, 48) / 48 == t,
+          "mesh refinement preserves the same normalized twist when representable")
+    check(realized_twist_fraction(t, 48) == t, "fine-grid twist realization matches coarse geometry")
+
     if args.full:
-        proc = subprocess.run(
-            [sys.executable, str(HERE / "bolza_closed.py")],
-            text=True, capture_output=True
-        )
-        check(proc.returncode == 0, "Bolza benchmark executes successfully")
-        # Keep this as an external-process check because bolza_closed.py is intentionally
-        # a standalone independent benchmark.
-        for line in proc.stdout.splitlines():
-            if "lambda_1 =" in line and "Bolza reference" in line:
-                print("     " + line.strip())
-                break
+        b = check_bolza()
+        check(True, "Bolza side pairings, vertex class, zero mode, and lambda_1 accuracy are hard-asserted")
+        print(f"     lambda_1={b['lambda1']:.6f}, rel.err={b['relative_error']:.2%}")
 
     print("\nALL VALIDATION CHECKS PASSED")
 

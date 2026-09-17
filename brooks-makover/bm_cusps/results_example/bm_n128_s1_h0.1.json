@@ -1,6 +1,6 @@
 {
- "schema_version": 4,
- "code_version": "0.3.0",
+ "schema_version": 5,
+ "code_version": "0.4.2",
  "n": 128,
  "seed": 1,
  "h": 0.1,
@@ -74,7 +74,9 @@
   "note": "no L2 eigenvalue below 1/4 detected in the discretisation (frozen nu=0 value 0.251179); numerical statement, not a certificate",
   "frozen_nu0": 0.2511788693200189,
   "evaluations": 1,
-  "certified": false
+  "certified": false,
+  "converged": true,
+  "status": "no_l2_detected"
  },
  "lambda1_compact": 0.3111249032360925,
  "eigs_compact": [
@@ -407,7 +409,11 @@
      ]
     }
    }
-  ]
+  ],
+  "converged": true,
+  "status": "converged",
+  "tol": 1e-11,
+  "maxit": 60
  },
  "weyl": {
   "slope": 57.701125083596075,
@@ -521,5 +527,22 @@
  "delta_compact_minus_cusped": null,
  "delta_compact_minus_thick": 0.021262085427202093,
  "wallclock_s": 228.4002342224121,
- "schema_migrated_by": "0.4.0"
+ "schema_migrated_by": "0.4.0",
+ "run_parameters": {
+  "n": 128,
+  "seed": 1,
+  "h": 0.1,
+  "L0": 1.0,
+  "T_ext": 6.0,
+  "neig": 60,
+  "W": 10
+ },
+ "quality": {
+  "analysis_eligible": true,
+  "compact_solver_converged": true,
+  "full_solver_converged": true,
+  "liouville_converged": true,
+  "dtn_converged": true,
+  "compact_eigs_finite": true
+ }
 }

@@ -10,7 +10,10 @@ from collections import defaultdict
 
 import numpy as np
 
-files = sorted(glob.glob(sys.argv[1] if len(sys.argv) > 1 else "results/*.json"))
+files = [f for f in sorted(glob.glob(sys.argv[1] if len(sys.argv) > 1 else "results/*.json", recursive=True))
+         if ".invalid." not in f.rsplit("/", 1)[-1]
+         and not f.endswith(".quarantine")
+         and "/quarantine/" not in f.replace("\\", "/")]
 rows = [json.load(open(f)) for f in files]
 if not rows:
     sys.exit("no result files")
@@ -19,6 +22,14 @@ old = [f for f, r in zip(files, rows) if r.get("schema_version", 0) < SCHEMA_VER
 if old:
     sys.exit("%d result file(s) have an old schema (< %d); regenerate with the current run_bm.py, e.g. %s"
              % (len(old), SCHEMA_VERSION, old[0]))
+eligible = [(f, r) for f, r in zip(files, rows) if r.get("quality", {}).get("analysis_eligible") is True]
+dropped = [f for f, r in zip(files, rows) if r.get("quality", {}).get("analysis_eligible") is not True]
+if dropped:
+    print("quality filter: excluding %d non-converged/non-eligible result(s), e.g. %s" % (len(dropped), dropped[0]))
+if not eligible:
+    sys.exit("all matching results are non-converged or not analysis-eligible")
+files = [x[0] for x in eligible]
+rows = [x[1] for x in eligible]
 
 cols = ["n", "seed", "h", "V", "genus", "min_cusp_length", "max_cusp_length",
         "lambda1_thick", "lambda1_neumann", "lambda1_cusped", "lambda1_compact",

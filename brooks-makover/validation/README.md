@@ -85,3 +85,16 @@ Passing these tests validates selected numerical building blocks and known
 reference cases.  It does **not** prove that a Brooks--Makover computation is
 correct, nor does the Fenchel--Nielsen generator sample the Weil--Petersson
 measure.
+
+## Corrections in the integrated validation branch
+
+- In the Fenchel--Nielsen twist scan, `lambda_1` means the first positive
+  eigenvalue `vals[1]`.  The mean of the first three positive eigenvalues is
+  retained only as a separate diagnostic for the near-triple Bolza cluster.
+- Refinement preserves the normalized twist `t`; raw node shifts are never
+  reused across different boundary resolutions `m`.
+- The Bolza full self-test hard-fails on side-pairing defects, wrong vertex
+  classes, a missing zero mode, or excessive `lambda_1` error.
+- The Kravchuk--Mazac--Pal number is described only as a near-sharp upper bound;
+  this package makes no claim that that bound alone proves exact global
+  maximality of the Bolza surface.

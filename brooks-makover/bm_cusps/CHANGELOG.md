@@ -1,3 +1,15 @@
+# 0.4.2
+
+- Validation twist scan now uses `vals[1]` for lambda_1; triple-cluster means are reported separately only.
+- Twist refinement preserves the normalized Fenchel--Nielsen twist when changing mesh resolution.
+- Bolza validation now has hard assertions for side pairings, vertex class, zero mode, area/topology proxy, and lambda_1 accuracy.
+- Removed the incorrect claim that Bolza global maximality follows from the KMP upper bound; KMP is described only as a near-sharp upper bound.
+- Result schema 5 records all numerical run parameters and explicit solver-convergence/analysis-eligibility flags.
+- SLURM resume validates n, seed, h, L0, T_ext, neig, W, code/schema/graph versions, and compact-solver convergence.
+- Quarantined files are moved outside the default result glob and are explicitly ignored by analysis/aggregation.
+- Non-analysis-eligible results are excluded from downstream statistics by a mandatory quality filter.
+- Updated the stale H4 selftest text assertion.
+
 # Changelog
 
 ## 0.4.1 (2026-09-16) — Ensemble/H4/Resume hardening

@@ -206,8 +206,22 @@ def main():
     weyl = weyl_fit(vals_C, area_expected=area_g_exact)
     log("Weyl slope %.3f (g-1 = %d) -> heard genus %.2f" % (weyl["slope"], surf.g - 1, weyl["heard_genus"]))
 
+    liou_converged = bool(liou.get("converged", False))
+    dtn_converged = bool(dtn_info.get("converged", False))
+    compact_eigs_finite = bool(np.all(np.isfinite(vals_C[:min(len(vals_C), args.neig + 1)])))
+    compact_solver_converged = liou_converged and compact_eigs_finite
+    full_solver_converged = compact_solver_converged and dtn_converged
+
     res = dict(
         schema_version=SCHEMA_VERSION, code_version=__version__,
+        run_parameters=dict(n=int(surf.n), seed=int(args.seed), h=float(args.h), L0=float(args.L0),
+                            T_ext=float(args.T_ext), neig=int(args.neig), W=int(args.W)),
+        quality=dict(analysis_eligible=bool(compact_solver_converged),
+                     compact_solver_converged=bool(compact_solver_converged),
+                     full_solver_converged=bool(full_solver_converged),
+                     liouville_converged=bool(liou_converged),
+                     dtn_converged=bool(dtn_converged),
+                     compact_eigs_finite=bool(compact_eigs_finite)),
         n=surf.n, seed=args.seed, h=args.h, L0=args.L0, T_ext=args.T_ext,
         V=int(surf.V), genus=int(surf.g), chi=int(surf.chi),
         cusp_lengths=sorted(surf.k.tolist(), reverse=True),
@@ -242,6 +256,11 @@ def main():
     else:
         print(json.dumps(res, indent=1))
 
+    if not compact_solver_converged:
+        log("NONCONVERGED: compact branch failed convergence; result retained for diagnostics but is not analysis-eligible")
+        return 3
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

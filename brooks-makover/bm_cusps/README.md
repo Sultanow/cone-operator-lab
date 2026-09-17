@@ -1,6 +1,6 @@
 # Cusps und Kompaktifizierung: Brooks-Makover-Flächen numerisch
 
-**Version 0.4.1 — dies ist der einzige kanonische Stand.** Vor dem Start auf dem Cluster
+**Version 0.4.2 — dies ist der einzige kanonische Stand.** Vor dem Start auf dem Cluster
 `python selftest.py` im Arbeitsverzeichnis ausführen; der Test schlägt fehl, wenn dort ein
 älterer Code-Stand liegt (Root-Duplikate früherer Lieferungen bitte löschen). Änderungen:
 `CHANGELOG.md`.
@@ -9,6 +9,11 @@ Code zu **Punkt 3** (Schrohe-Linie): Vergleich der Spektrallücke einer zufälli
 Brooks-Makover-Fläche `S` (2n ideale Dreiecke, V Cusps) mit der ihrer
 Poincaré-Koebe-Kompaktifizierung `S̄` (Geschlecht g = n/2 + 1 − V/2), plus der
 konforme Faktor φ zwischen beiden Metriken als Funktion der Cusp-Längen.
+
+### Result eligibility and restart safety
+
+Version 0.4.2 writes a `run_parameters` block (`n`, `seed`, `h`, `L0`, `T_ext`, `neig`, `W`) and a `quality` block to every result.  Ensemble analyses accept only records with `quality.analysis_eligible=true`.  Non-converged compact solves remain available as diagnostics but are excluded from statistics.  SLURM restart validation checks all numerical parameters plus schema/code/graph-feature provenance and convergence status.  Rejected cached files are moved to `results/quarantine/` with a `.json.quarantine` suffix so they cannot match the normal `results/*.json` glob.
+
 
 ## Was gerechnet wird
 
