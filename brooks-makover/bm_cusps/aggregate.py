@@ -15,6 +15,7 @@ from result_quality import recompute_quality
 files = [f for f in sorted(glob.glob(sys.argv[1] if len(sys.argv) > 1 else "results/*.json", recursive=True))
          if ".invalid." not in f.rsplit("/", 1)[-1]
          and not f.endswith(".quarantine")
+         and f.rsplit("/", 1)[-1].upper() != "PROVENANCE.JSON"
          and "/quarantine/" not in f.replace("\\", "/")]
 rows = [json.load(open(f)) for f in files]
 if not rows:

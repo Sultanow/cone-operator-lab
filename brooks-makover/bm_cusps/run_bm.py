@@ -234,6 +234,8 @@ def main():
         lambda1_cusped_raw=lam_c_raw, lambda1_cusped=lam_c_accepted, dtn=dtn_info,
         lambda1_compact=float(vals_C[1]), eigs_compact=vals_C.tolist(),
         liouville=dict(iterations=int(liou["iterations"]), residual=float(liou["residual"]),
+                       converged=bool(liou.get("converged", False)),
+                       status=str(liou.get("status", "unknown")),
                        note=liou.get("note", ""), tol=float(liou.get("tol", 1e-11)),
                        maxit=int(liou.get("maxit", 60)), area_compact=area_g, area_compact_exact=area_g_exact,
                        chi_discrete=float(chi_discrete),

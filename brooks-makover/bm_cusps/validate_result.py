@@ -29,9 +29,9 @@ def main():
     if not os.path.isfile(a.file) or os.path.getsize(a.file)==0: return fail("missing or empty file")
     try: r=json.load(open(a.file))
     except Exception as e: return fail("not valid JSON: %s"%e)
+    if not provenance_is_native(r): return fail("result is not a native numerical run of the current pipeline")
     if r.get("schema_version") != SCHEMA_VERSION: return fail("schema_version=%r, expected %d"%(r.get("schema_version"),SCHEMA_VERSION))
     if r.get("code_version") != __version__: return fail("code_version=%r, expected %s"%(r.get("code_version"),__version__))
-    if not provenance_is_native(r): return fail("result is not a native numerical run of the current pipeline")
     rp=r.get("run_parameters")
     if not isinstance(rp,dict): return fail("missing run_parameters provenance")
     expected={"n":a.n,"seed":a.seed,"h":a.h,"L0":a.L0,"T_ext":a.T_ext,"neig":a.neig,"W":a.W}

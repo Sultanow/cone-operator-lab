@@ -35,7 +35,8 @@ def _is_quarantine_file(path):
 
 
 def load(pattern, require="compact"):
-    files = [f for f in sorted(glob.glob(pattern, recursive=True)) if not _is_quarantine_file(f)]
+    files = [f for f in sorted(glob.glob(pattern, recursive=True))
+             if not _is_quarantine_file(f) and f.rsplit("/", 1)[-1].upper() != "PROVENANCE.JSON"]
     rows = [json.load(open(f)) for f in files]
     if not rows:
         sys.exit("no result files for %s" % pattern)

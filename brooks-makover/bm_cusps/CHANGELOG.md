@@ -1,3 +1,12 @@
+# 0.4.5 — Liouville persistence and compact-spectrum invariants
+
+- Fixed a blocking 0.4.4 serialization regression: `run_bm.py` now persists the actual `liouville.converged` and `liouville.status` returned by `solve_liouville`.
+- Restored the compact-spectrum consistency invariant `lambda1_compact == eigs_compact[1]` (within strict numerical tolerance).
+- Restored the requested-spectrum-length invariant: `eigs_compact` must contain at least `run_parameters.neig + 1` finite values, including the zero mode.
+- Added adversarial regression tests for both compact-spectrum corruption cases and a guard that the Liouville convergence metadata is serialized.
+- Result discovery now ignores the `results_example/PROVENANCE.json` manifest instead of treating it as a numerical result file; archived fixtures are rejected explicitly by provenance before version checks.
+- No scientific interpretation of the small archived H1 ensemble is changed; those data remain smoke/regression fixtures, not evidence for an asymptotic limit.
+
 # 0.4.4 — branch-specific quality and adversarial validation
 
 - Recompute result quality from numerical payload in one shared `result_quality.py`; stored flags are descriptive only.

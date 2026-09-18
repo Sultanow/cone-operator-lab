@@ -38,8 +38,26 @@ def _liouville_ok(r):
 
 
 def _compact_eigs_ok(r):
+    """Validate the compact eigenvalue payload, not merely its finiteness.
+
+    Native run_bm writes neig+1 eigenvalues because index 0 is the constant
+    zero mode and lambda1_compact is eigs_compact[1].  Both invariants are
+    checked here so truncated/corrupted cached results cannot pass quality.
+    """
     eigs = r.get("eigs_compact")
-    return _finite(r.get("lambda1_compact")) and float(r["lambda1_compact"]) >= 0 and _finite_seq(eigs, 2)
+    lam1 = r.get("lambda1_compact")
+    rp = r.get("run_parameters") if isinstance(r.get("run_parameters"), dict) else {}
+    try:
+        neig = int(rp.get("neig"))
+    except Exception:
+        return False
+    if neig < 1 or not _finite_seq(eigs, neig + 1):
+        return False
+    if not (_finite(lam1) and float(lam1) > 0):
+        return False
+    if not math.isclose(float(lam1), float(eigs[1]), rel_tol=1e-10, abs_tol=1e-12):
+        return False
+    return True
 
 
 def _profile_ok(r):

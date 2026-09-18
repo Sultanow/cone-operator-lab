@@ -172,6 +172,8 @@ check(parch.returncode != 0 and "not a native numerical run" in (parch.stdout + 
 # values originate from an archived example, but this temporary object is used only to
 # exercise validation logic, never as scientific data.
 fixture = json.load(open(valid_example))
+fixture["code_version"] = __version__
+fixture["schema_version"] = SCHEMA_VERSION
 fixture["provenance"] = dict(kind="native_run", numerical_payload_recomputed=True, generated_by=__version__)
 fixture["dtn"].setdefault("tol", 1e-10)
 fixture["dtn"].setdefault("residual", 1e-12)
@@ -273,6 +275,31 @@ check(rr["lambda1_cusped"] == "" and rr["delta_compact_minus_cusped"] == "" and
 pbadW = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), native_fixture,
                        "--n", "16", "--seed", "1", "--h", "0.12", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "8"], capture_output=True, text=True)
 check(pbadW.returncode != 0, "validate_result.py rejects changed W / computation provenance")
+
+
+# 19) compact lambda1 must be exactly the first positive entry of eigs_compact.
+badlam = json.loads(json.dumps(fixture))
+badlam["lambda1_compact"] = float(badlam["eigs_compact"][1]) + 0.05
+badlam_file = os.path.join(tmp, "bad_lambda1_compact.json"); json.dump(badlam, open(badlam_file, "w"))
+pbadlam = subprocess.run(base_cmd[:2] + [badlam_file] + base_cmd[3:] + ["--require", "compact"], capture_output=True, text=True)
+check(pbadlam.returncode != 0,
+      "validator rejects lambda1_compact inconsistent with eigs_compact[1]")
+
+# 20) compact spectrum must contain the requested neig+1 values (including zero mode).
+short = json.loads(json.dumps(fixture))
+short["eigs_compact"] = short["eigs_compact"][:2]
+short_file = os.path.join(tmp, "short_eigs_compact.json"); json.dump(short, open(short_file, "w"))
+pshort = subprocess.run(base_cmd[:2] + [short_file] + base_cmd[3:] + ["--require", "compact"], capture_output=True, text=True)
+check(pshort.returncode != 0,
+      "validator rejects a compact eigenvalue list shorter than run_parameters.neig + 1")
+
+# 21) Liouville convergence metadata must be persisted as the solver reports it.
+# This catches the 0.4.4 regression where run_bm dropped converged/status while
+# result_quality correctly required them.
+run_src = open(os.path.join(HERE, "run_bm.py")).read()
+check('converged=bool(liou.get("converged", False))' in run_src and
+      'status=str(liou.get("status", "unknown"))' in run_src,
+      "run_bm.py persists actual Liouville converged/status metadata")
 
 print("\n%s" % ("ALL CHECKS PASSED -- this directory holds bm_cusps %s" % __version__ if fails == 0
                 else "%d CHECK(S) FAILED -- do not launch the campaign from this directory" % fails))
