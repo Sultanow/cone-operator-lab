@@ -1,9 +1,14 @@
-# 0.4.3
+# 0.4.4 — branch-specific quality and adversarial validation
 
-- Split compact and cusped/DtN result eligibility; failed DtN roots can no longer enter cusp statistics.
-- Recompute result quality from numerical payloads on read; stored flags cannot hide NaN/Infinity or branch failures.
-- Added native-vs-migrated numerical provenance. Historical `results_example/` payloads are explicitly metadata-migrated and are never accepted for production resume.
-- Result schema 6; current JSON output forbids NaN/Infinity.
+- Recompute result quality from numerical payload in one shared `result_quality.py`; stored flags are descriptive only.
+- Compact, H4-profile, cusped/DtN, and full-result eligibility are separate. Failed DtN roots keep `lambda1_cusped_raw` for diagnostics but never expose it as accepted `lambda1_cusped`.
+- DtN and Liouville diagnostics record tolerances/residuals; `converged=true` is accepted only when the recorded residual is consistent with the tolerance.
+- H4 validates the exact `u_at_length` profile values used for c0, requiring finite values and strictly positive actual horocycle lengths.
+- Top-level `(n, seed)` must agree with `run_parameters`; contradictory identities are rejected.
+- CSV aggregation blanks invalid cusp values and exports branch-specific quality flags plus DtN status.
+- SLURM resume now requires the full branch and rejects archived metadata-migrated examples.
+- The 15 bundled examples are explicitly marked as metadata-migrated historical payloads; their numerical values were not recomputed.
+- Schema bumped to 6, code version 0.4.4.
 
 # 0.4.2
 

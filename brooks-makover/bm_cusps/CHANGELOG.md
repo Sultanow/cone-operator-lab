@@ -1,11 +1,14 @@
-# 0.4.3
+# 0.4.4 — branch-specific quality and adversarial validation
 
-- Compact and cusped/DtN spectral branches now have separate acceptance rules. A failed DtN root search can no longer leak its last iterate into `lambda1_cusped`; the raw iterate is retained only as `lambda1_cusped_raw` for diagnostics.
-- `validate_result.py`, `analyze.py`, and `aggregate.py` independently reconstruct eligibility from numerical payloads rather than trusting stored quality flags. Non-finite compact eigenvalues (including JSON `NaN`) are rejected on read.
-- Cusp statistics and `P(lambda_1(S)<1/4)` use only DtN-eligible surfaces in their denominator; failed DtN runs remain usable for compact/H1/H4 analyses.
-- Result schema 6 adds explicit native-vs-migrated provenance. SLURM resume accepts only native current-version numerical payloads.
-- The 15 `results_example/` files are explicitly marked metadata-migrated historical examples: their eigenvalues, profiles and timings were not recomputed and must not be reported as v0.4.3 production results.
-- JSON output uses `allow_nan=False`; current native runs cannot silently serialize NaN/Infinity.
+- Recompute result quality from numerical payload in one shared `result_quality.py`; stored flags are descriptive only.
+- Compact, H4-profile, cusped/DtN, and full-result eligibility are separate. Failed DtN roots keep `lambda1_cusped_raw` for diagnostics but never expose it as accepted `lambda1_cusped`.
+- DtN and Liouville diagnostics record tolerances/residuals; `converged=true` is accepted only when the recorded residual is consistent with the tolerance.
+- H4 validates the exact `u_at_length` profile values used for c0, requiring finite values and strictly positive actual horocycle lengths.
+- Top-level `(n, seed)` must agree with `run_parameters`; contradictory identities are rejected.
+- CSV aggregation blanks invalid cusp values and exports branch-specific quality flags plus DtN status.
+- SLURM resume now requires the full branch and rejects archived metadata-migrated examples.
+- The 15 bundled examples are explicitly marked as metadata-migrated historical payloads; their numerical values were not recomputed.
+- Schema bumped to 6, code version 0.4.4.
 
 # 0.4.2
 

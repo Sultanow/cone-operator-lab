@@ -213,13 +213,14 @@ def cusp_eigs_dtn(K, M, dtn: CuspDtN, lam_start=None, tol=1e-10, log=None):
     if g_hi >= 0:
         return None, dict(note="no L2 eigenvalue below 1/4 detected in the discretisation "
                                "(frozen nu=0 value %.6f); numerical statement, not a certificate" % cache[hi],
-                          frozen_nu0=float(cache[hi]), evaluations=len(cache), certified=False,
-                          converged=True, status="no_l2_detected")
+                          frozen_nu0=float(cache[hi]), evaluations=len(cache), certified=False, converged=True, status="no_l2_detected",
+                          tol=float(tol), residual=0.0)
     lo = 1e-6
     g_lo = g(lo)
     if g_lo <= 0:
         return None, dict(note="frozen eigenvalue non-positive at lam->0 (surface disconnected?)",
-                          certified=False, converged=False, status="invalid_lower_endpoint")
+                          certified=False, converged=False, status="invalid_lower_endpoint",
+                          tol=float(tol), residual=float(abs(g_lo)))
     # Illinois (modified regula falsi) on the bracket, reusing the endpoint evaluations
     a, fa, b, fb, side = lo, g_lo, hi, g_hi, 0
     for _ in range(60):
@@ -227,7 +228,8 @@ def cusp_eigs_dtn(K, M, dtn: CuspDtN, lam_start=None, tol=1e-10, log=None):
         fx = g(x)
         if abs(fx) < tol or abs(b - a) < tol:
             return float(x), dict(evaluations=len(cache), frozen_nu0=float(cache[hi]),
-                                  certified=False, converged=True, status="root_converged")
+                                  certified=False, converged=True, status="root_converged",
+                                  tol=float(tol), residual=float(abs(fx)))
         if fx * fb < 0:
             a, fa, side_new = b, fb, -1
         else:
@@ -239,6 +241,7 @@ def cusp_eigs_dtn(K, M, dtn: CuspDtN, lam_start=None, tol=1e-10, log=None):
             pass
     return float(x), dict(evaluations=len(cache), frozen_nu0=float(cache[hi]),
                           certified=False, converged=False, status="root_not_converged",
+                          tol=float(tol), residual=float(abs(fx)),
                           note="root search not converged")
 
 

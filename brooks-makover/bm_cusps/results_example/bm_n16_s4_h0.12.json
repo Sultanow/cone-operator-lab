@@ -1,6 +1,6 @@
 {
  "schema_version": 6,
- "code_version": "0.4.3-metadata-migration",
+ "code_version": "0.4.4",
  "n": 16,
  "seed": 4,
  "h": 0.12,
@@ -384,20 +384,12 @@
   "full_solver_converged": true,
   "liouville_converged": true,
   "dtn_converged": true,
-  "compact_eigs_finite": true,
-  "compact_analysis_eligible": true,
-  "cusped_analysis_eligible": true,
-  "full_analysis_eligible": true
+  "compact_eigs_finite": true
  },
- "lambda1_cusped_raw": null,
  "provenance": {
   "kind": "archived_example_metadata_migration",
   "numerical_payload_recomputed": false,
-  "numerical_payload_code_version": null,
-  "original_computation_code_version_recorded": false,
-  "previous_metadata_code_version": "0.4.2",
-  "metadata_migrated": true,
-  "migration_code_version": "0.4.3",
-  "migration_note": "Numerical payload (eigenvalues, profiles, mesh counts and wallclock timings) was not recomputed; only schema, quality and provenance metadata were migrated."
+  "original_numerical_payload": "pre-0.4.4",
+  "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
  }
 }

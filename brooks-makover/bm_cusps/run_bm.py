@@ -27,6 +27,7 @@ import numpy as np
 
 from bmsurf import BMSurface, build_mesh
 from bmgraph import graph_features
+from result_quality import recompute_quality
 from version import GRAPH_FEATURE_VERSION, SCAN_SCHEMA_VERSION, SCHEMA_VERSION, __version__
 from bmfem import (CuspDtN, FOUR_PI, curvature_source, cusp_eigs_dtn, lumped, mass,
                    neumann_eigs, lowest, restrict, solve_liouville, stiffness, weyl_fit)
@@ -206,44 +207,21 @@ def main():
     weyl = weyl_fit(vals_C, area_expected=area_g_exact)
     log("Weyl slope %.3f (g-1 = %d) -> heard genus %.2f" % (weyl["slope"], surf.g - 1, weyl["heard_genus"]))
 
-    liou_converged = bool(liou.get("converged", False))
-    dtn_converged = bool(dtn_info.get("converged", False))
-    compact_eigs_finite = bool(np.all(np.isfinite(vals_C[:min(len(vals_C), args.neig + 1)])))
-    compact_lambda1_finite = bool(len(vals_C) > 1 and np.isfinite(vals_C[1]))
-    compact_solver_converged = liou_converged and compact_eigs_finite and compact_lambda1_finite
-
-    # The cusped/DtN branch has its own acceptance rule.  cusp_eigs_dtn() may
-    # return the last root iterate even when its root search did not converge;
-    # retain that number only as a diagnostic raw value, never as an accepted
-    # eigenvalue.  A converged `no_l2_detected` result is a valid negative
-    # finding and therefore has accepted value None.
+    # Keep raw DtN output for diagnostics, but only expose lambda1_cusped as a
+    # scientific result when that branch actually converged.  A successful
+    # no_l2_detected status is represented by lambda1_cusped = None.
     lam_c_raw = None if lam_c is None else float(lam_c)
-    cusp_value_finite = bool(lam_c is None or np.isfinite(lam_c))
-    cusped_analysis_eligible = bool(dtn_converged and cusp_value_finite)
-    lam_c_accepted = lam_c_raw if cusped_analysis_eligible else None
-    full_solver_converged = bool(compact_solver_converged and cusped_analysis_eligible)
+    if dtn_info.get("converged") is True and dtn_info.get("status") == "root_converged":
+        lam_c_accepted = lam_c_raw
+    else:
+        lam_c_accepted = None
 
     res = dict(
         schema_version=SCHEMA_VERSION, code_version=__version__,
+        provenance=dict(kind="native_run", numerical_payload_recomputed=True,
+                        generated_by=__version__),
         run_parameters=dict(n=int(surf.n), seed=int(args.seed), h=float(args.h), L0=float(args.L0),
                             T_ext=float(args.T_ext), neig=int(args.neig), W=int(args.W)),
-        quality=dict(
-                     # Backward-compatible alias: the generic ensemble analyses
-                     # (H1/H4) consume only the compact branch.
-                     analysis_eligible=bool(compact_solver_converged),
-                     compact_analysis_eligible=bool(compact_solver_converged),
-                     cusped_analysis_eligible=bool(cusped_analysis_eligible),
-                     full_analysis_eligible=bool(full_solver_converged),
-                     compact_solver_converged=bool(compact_solver_converged),
-                     full_solver_converged=bool(full_solver_converged),
-                     liouville_converged=bool(liou_converged),
-                     dtn_converged=bool(dtn_converged),
-                     compact_eigs_finite=bool(compact_eigs_finite),
-                     compact_lambda1_finite=bool(compact_lambda1_finite),
-                     cusped_value_finite=bool(cusp_value_finite)),
-        provenance=dict(kind="native_run", numerical_payload_recomputed=True,
-                        numerical_payload_code_version=__version__,
-                        metadata_migrated=False),
         n=surf.n, seed=args.seed, h=args.h, L0=args.L0, T_ext=args.T_ext,
         V=int(surf.V), genus=int(surf.g), chi=int(surf.chi),
         cusp_lengths=sorted(surf.k.tolist(), reverse=True),
@@ -253,12 +231,11 @@ def main():
                   cap_elements=int((tag == 2).sum()), area_SY=area_sy, area_SY_exact=area_sy_exact),
         lambda1_thick=float(vals_T[1]), eigs_thick=vals_T.tolist(),
         lambda1_neumann=float(vals_N[1]), eigs_neumann=vals_N.tolist(),
-        lambda1_cusped=lam_c_accepted, lambda1_cusped_raw=lam_c_raw, dtn=dtn_info,
+        lambda1_cusped_raw=lam_c_raw, lambda1_cusped=lam_c_accepted, dtn=dtn_info,
         lambda1_compact=float(vals_C[1]), eigs_compact=vals_C.tolist(),
         liouville=dict(iterations=int(liou["iterations"]), residual=float(liou["residual"]),
-                       converged=bool(liou.get("converged", False)), status=liou.get("status", "unknown"),
-                       tol=liou.get("tol"), maxit=liou.get("maxit"),
-                       note=liou.get("note", ""), area_compact=area_g, area_compact_exact=area_g_exact,
+                       note=liou.get("note", ""), tol=float(liou.get("tol", 1e-11)),
+                       maxit=int(liou.get("maxit", 60)), area_compact=area_g, area_compact_exact=area_g_exact,
                        chi_discrete=float(chi_discrete),
                        # discrete comparison constants (sup of the P1 factor u_h on subsets of S_Y)
                        eps_h_central=eps_central,        # S_Y minus height-1 horoballs = central regions
@@ -273,19 +250,18 @@ def main():
         delta_compact_minus_thick=float(vals_C[1] - vals_T[1]),
         wallclock_s=time.time() - T0,
     )
+    # Stored quality is a report, never a trust anchor.  Readers recompute it.
+    res["quality"] = recompute_quality(res)
     if args.out:
         with open(args.out, "w") as f:
             json.dump(res, f, indent=1, allow_nan=False)
         log("wrote %s" % args.out)
     else:
-        print(json.dumps(res, indent=1))
+        print(json.dumps(res, indent=1, allow_nan=False))
 
-    if not compact_solver_converged:
-        log("NONCONVERGED: compact branch failed convergence; result retained for diagnostics but is not compact-analysis-eligible")
+    if not res["quality"]["compact_analysis_eligible"]:
+        log("NONCONVERGED: compact branch failed validation; result retained for diagnostics but is not analysis-eligible")
         return 3
-    if not cusped_analysis_eligible:
-        log("NONCONVERGED: DtN/cusped branch failed; compact result remains eligible but cusp comparisons must exclude this sample")
-        return 4
     return 0
 
 

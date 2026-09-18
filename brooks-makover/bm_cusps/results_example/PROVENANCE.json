@@ -1,0 +1,200 @@
+{
+  "note": "Historical regression fixtures; metadata migrated, numerical payload not recomputed.",
+  "files": [
+    {
+      "file": "bm_n128_s1_h0.1.json",
+      "n": 128,
+      "seed": 1,
+      "h": 0.1,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "1bcb3af5e9b1b8412558ac2841652ccbcb7b0eb9beed77f49cc8b78177fb8878"
+    },
+    {
+      "file": "bm_n16_s1_h0.12.json",
+      "n": 16,
+      "seed": 1,
+      "h": 0.12,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "9e390b4a15a04e417106ecb6fe8f8683871d6d1c380507f75de87bf633b0705b"
+    },
+    {
+      "file": "bm_n16_s2_h0.12.json",
+      "n": 16,
+      "seed": 2,
+      "h": 0.12,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "0ca5b655a291b42d7e601fe8b5574970ce8e21e387504fcba2959945db5a47aa"
+    },
+    {
+      "file": "bm_n16_s3_h0.12.json",
+      "n": 16,
+      "seed": 3,
+      "h": 0.12,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "fdf138a45b3fc4fcb1b07c82fa139910b697631074b5c90817327e26d2490634"
+    },
+    {
+      "file": "bm_n16_s4_h0.12.json",
+      "n": 16,
+      "seed": 4,
+      "h": 0.12,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "cd165187c3525d7ad31593ffc8473a2a7f324bcf69325bf5820d3e9d3378cd84"
+    },
+    {
+      "file": "bm_n16_s5_h0.12.json",
+      "n": 16,
+      "seed": 5,
+      "h": 0.12,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "8b07d38e92adf207ee77380b300ba9bd4264901d68a84c99dce275bdd2efe971"
+    },
+    {
+      "file": "bm_n16_s6_h0.12.json",
+      "n": 16,
+      "seed": 6,
+      "h": 0.12,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "7283e5593847e67e29a702e34520a24a51b8744e0cc7ccaafd735eb9f3321bba"
+    },
+    {
+      "file": "bm_n16_s7_h0.12.json",
+      "n": 16,
+      "seed": 7,
+      "h": 0.12,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "75fc00d932dea7261f71b9ea3d744b606008181a6e49cbb854ccf0e8a8becac0"
+    },
+    {
+      "file": "bm_n16_s8_h0.12.json",
+      "n": 16,
+      "seed": 8,
+      "h": 0.12,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "9f8243503f2be1234c58da8f52867a61eade673cf1073edb1e66df4341dd6bef"
+    },
+    {
+      "file": "bm_n32_s1_h0.07.json",
+      "n": 32,
+      "seed": 1,
+      "h": 0.07,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "bf46815e298b096c42eaf4257690f9131ba9155f894ffd508688865cfbd23268"
+    },
+    {
+      "file": "bm_n32_s1_h0.1.json",
+      "n": 32,
+      "seed": 1,
+      "h": 0.1,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "c818e4bce5d8a57e4ee0560c77fc8afbca35677a08ae24e137b86a955961728e"
+    },
+    {
+      "file": "bm_n32_s2_h0.1.json",
+      "n": 32,
+      "seed": 2,
+      "h": 0.1,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "cae3a4eb43828cd195bdc7e9f3af968cf5cf6c0d55b8effa0a1c15e32312e2a6"
+    },
+    {
+      "file": "bm_n32_s3_h0.1.json",
+      "n": 32,
+      "seed": 3,
+      "h": 0.1,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "fb614f9a31dada16a79c6c3af4867fd10cc62c1e5b2bd79b8de9277aa6fbdaec"
+    },
+    {
+      "file": "bm_n32_s4_h0.1.json",
+      "n": 32,
+      "seed": 4,
+      "h": 0.1,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "31c1c3820f6e29573bc7f5bf8b7f5c71973a079779596ae96914b8b3bf7eaf4b"
+    },
+    {
+      "file": "bm_n64_s1_h0.1.json",
+      "n": 64,
+      "seed": 1,
+      "h": 0.1,
+      "provenance": {
+        "kind": "archived_example_metadata_migration",
+        "numerical_payload_recomputed": false,
+        "original_numerical_payload": "pre-0.4.4",
+        "migration_note": "Metadata/schema migrated for regression tests; eigenvalues, profiles, and timings were not recomputed."
+      },
+      "sha256": "761c95b92e89b4063e9d0a63dea9c400311efee817c8cb78f187ab42a47286a0"
+    }
+  ]
+}

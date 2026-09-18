@@ -26,7 +26,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from result_quality import assess_result, stored_quality_consistent
+from result_quality import recompute_quality
 
 
 def _is_quarantine_file(path):
@@ -34,35 +34,30 @@ def _is_quarantine_file(path):
     return ".invalid." in b or b.endswith(".quarantine") or "/quarantine/" in path.replace("\\", "/")
 
 
-def load(pattern):
+def load(pattern, require="compact"):
     files = [f for f in sorted(glob.glob(pattern, recursive=True)) if not _is_quarantine_file(f)]
     rows = [json.load(open(f)) for f in files]
     if not rows:
         sys.exit("no result files for %s" % pattern)
     check_schema(rows, files)
-    kept, dropped, inconsistent, migrated = [], [], [], []
+    migrated = [f for f, r in zip(files, rows) if r.get("provenance", {}).get("numerical_payload_recomputed") is False]
+    if migrated:
+        print("provenance warning: %d archived/migrated example(s); numerical payloads were not recomputed by current code" % len(migrated))
+    key = {"compact":"compact_analysis_eligible", "h4":"h4_analysis_eligible",
+           "cusped":"cusped_analysis_eligible", "full":"full_analysis_eligible"}[require]
+    kept, dropped = [], []
     for f, r in zip(files, rows):
         r["_source_file"] = f
-        dq = assess_result(r)
-        r["_derived_quality"] = dq
-        bad = stored_quality_consistent(r, dq)
-        if bad:
-            inconsistent.append((f, bad))
-        if r.get("provenance", {}).get("metadata_migrated") is True:
-            migrated.append(f)
-        if dq["compact_analysis_eligible"]:
+        q = recompute_quality(r)
+        r["_recomputed_quality"] = q
+        if q[key]:
             kept.append(r)
         else:
-            dropped.append((f, dq["reasons"]["compact"]))
-    if inconsistent:
-        sys.exit("stored quality flags contradict numerical payload in %s: %s" % (inconsistent[0][0], "; ".join(inconsistent[0][1])))
+            dropped.append(f)
     if dropped:
-        print("quality filter: excluding %d compact-ineligible result(s), e.g. %s (%s)" %
-              (len(dropped), dropped[0][0], "; ".join(dropped[0][1])))
-    if migrated:
-        print("provenance: %d archived/migrated example(s); numerical payloads were not recomputed by the current code" % len(migrated))
+        print("quality filter (%s): excluding %d invalid result(s), e.g. %s" % (require, len(dropped), dropped[0]))
     if not kept:
-        sys.exit("all matching results are compact-ineligible")
+        sys.exit("all matching results are invalid for %s analysis" % require)
     return kept
 
 
@@ -123,7 +118,7 @@ def _fit_log(ns, m):
 
 
 def h1(args):
-    rows = select_unique_surfaces(load(args.glob))
+    rows = select_unique_surfaces(load(args.glob, require="compact"))
     by_n = defaultdict(list)
     for r in rows:
         by_n[r["n"]].append(r["lambda1_compact"])
@@ -211,6 +206,8 @@ def c0_table(rows):
             if not ual:
                 continue
             ell1, (u1, _, la1) = min(((float(e), v) for e, v in ual.items()), key=lambda t: t[0])
+            if not (np.isfinite(u1) and np.isfinite(la1) and la1 > 0):
+                continue
             half_log_c0 = u1 - np.log(2 * np.pi / la1) + 2 * np.pi / la1
             c0 = float(np.exp(2 * half_log_c0))
             rho = 2 / np.sqrt(c0)
@@ -276,7 +273,7 @@ def _regress_c0(C):
 
 
 def h4(args):
-    rows = select_unique_surfaces(load(args.glob))
+    rows = select_unique_surfaces(load(args.glob, require="h4"))
     T = cusp_table(rows)
     C = c0_table(rows)
     if C:

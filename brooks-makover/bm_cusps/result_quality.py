@@ -1,11 +1,16 @@
-"""Recompute result eligibility from numerical payloads; never trust stored flags alone."""
+"""Central, re-computed quality checks for Brooks--Makover result JSON.
+
+Stored quality flags are descriptive only.  Every consumer must call
+``recompute_quality`` and base acceptance on the returned values.
+"""
+from __future__ import annotations
 import math
 
 
 def _finite(x):
     try:
         return math.isfinite(float(x))
-    except (TypeError, ValueError):
+    except Exception:
         return False
 
 
@@ -13,86 +18,102 @@ def _finite_seq(xs, min_len=0):
     return isinstance(xs, list) and len(xs) >= min_len and all(_finite(x) for x in xs)
 
 
-def assess_result(r):
-    """Return independently derived compact/cusped/full eligibility and reasons.
+def _seed_consistent(r):
+    rp = r.get("run_parameters")
+    if not isinstance(rp, dict):
+        return False
+    return r.get("seed") == rp.get("seed") and r.get("n") == rp.get("n")
 
-    This deliberately ignores r['quality'] while deriving the result.  Callers may
-    separately compare the stored flags with this assessment to detect corruption.
-    """
-    reasons = {"compact": [], "cusped": []}
 
-    # Compact branch ---------------------------------------------------------
-    li = r.get("liouville", {}) if isinstance(r.get("liouville"), dict) else {}
-    eigc = r.get("eigs_compact")
-    lamc = r.get("lambda1_compact")
-    if li.get("converged") is not True:
-        reasons["compact"].append("Liouville solve not converged")
-    for key in ("residual", "area_compact", "area_compact_exact", "chi_discrete"):
-        if not _finite(li.get(key)):
-            reasons["compact"].append("non-finite liouville.%s" % key)
-    if not _finite(lamc):
-        reasons["compact"].append("lambda1_compact is non-finite")
-    if not _finite_seq(eigc, 2):
-        reasons["compact"].append("eigs_compact missing/contains non-finite values")
-    elif _finite(lamc) and not math.isclose(float(lamc), float(eigc[1]), rel_tol=1e-10, abs_tol=1e-12):
-        reasons["compact"].append("lambda1_compact disagrees with eigs_compact[1]")
-    weyl = r.get("weyl", {}) if isinstance(r.get("weyl"), dict) else {}
-    if not _finite(weyl.get("slope")):
-        reasons["compact"].append("non-finite Weyl slope")
-    # H4 consumes per-cusp profiles, so they are part of compact eligibility.
-    upc = li.get("u_per_cusp")
-    if not isinstance(upc, list) or not upc:
-        reasons["compact"].append("missing liouville.u_per_cusp")
-    else:
-        for i, p in enumerate(upc):
-            if not isinstance(p, dict) or not _finite(p.get("u_height1_mean")) or not _finite(p.get("u_height1_sup")):
-                reasons["compact"].append("non-finite cusp profile at index %d" % i)
-                break
+def _liouville_ok(r):
+    li = r.get("liouville")
+    if not isinstance(li, dict) or li.get("converged") is not True:
+        return False
+    residual, tol = li.get("residual"), li.get("tol")
+    # Current native runs must carry both quantities.  Historical migrated examples
+    # may not; consumers can inspect provenance and decide whether to use them.
+    if not (_finite(residual) and _finite(tol) and float(tol) > 0):
+        return False
+    return float(residual) <= float(tol)
 
-    compact_ok = not reasons["compact"]
 
-    # Cusped/DtN branch ------------------------------------------------------
-    dtn = r.get("dtn", {}) if isinstance(r.get("dtn"), dict) else {}
-    status = dtn.get("status")
-    dtn_conv = dtn.get("converged") is True
+def _compact_eigs_ok(r):
+    eigs = r.get("eigs_compact")
+    return _finite(r.get("lambda1_compact")) and float(r["lambda1_compact"]) >= 0 and _finite_seq(eigs, 2)
+
+
+def _profile_ok(r):
+    """Validate exactly the fields used by H4/c0_table."""
+    li = r.get("liouville")
+    if not isinstance(li, dict) or not isinstance(li.get("u_per_cusp"), list):
+        return False
+    if not li["u_per_cusp"]:
+        return False
+    for p in li["u_per_cusp"]:
+        if not isinstance(p, dict):
+            return False
+        try:
+            if int(p.get("k", 0)) <= 0:
+                return False
+        except Exception:
+            return False
+        ual = p.get("u_at_length")
+        if not isinstance(ual, dict) or not ual:
+            return False
+        usable = False
+        for _, trip in ual.items():
+            if not (isinstance(trip, (list, tuple)) and len(trip) == 3):
+                return False
+            mean_u, sup_u, actual_length = trip
+            if not (_finite(mean_u) and _finite(sup_u) and _finite(actual_length)):
+                return False
+            if float(actual_length) <= 0:
+                return False
+            usable = True
+        if not usable:
+            return False
+    return True
+
+
+def _dtn_ok(r):
+    d = r.get("dtn")
+    if not isinstance(d, dict) or d.get("converged") is not True:
+        return False
+    status = d.get("status")
+    if status == "no_l2_detected":
+        return r.get("lambda1_cusped") is None
+    if status != "root_converged":
+        return False
     lam = r.get("lambda1_cusped")
-    raw = r.get("lambda1_cusped_raw", lam)
-    if not dtn_conv:
-        reasons["cusped"].append("DtN solve not converged")
-    elif status == "root_converged":
-        if not _finite(lam) or not (0.0 < float(lam) < 0.25):
-            reasons["cusped"].append("root_converged but accepted cusp eigenvalue is not finite in (0,1/4)")
-        if not _finite(raw):
-            reasons["cusped"].append("root_converged but raw cusp eigenvalue is non-finite")
-        elif _finite(lam) and not math.isclose(float(raw), float(lam), rel_tol=1e-10, abs_tol=1e-12):
-            reasons["cusped"].append("accepted and raw cusp eigenvalues disagree")
-    elif status == "no_l2_detected":
-        if lam is not None:
-            reasons["cusped"].append("no_l2_detected must have lambda1_cusped=null")
-        if raw is not None:
-            reasons["cusped"].append("no_l2_detected must have lambda1_cusped_raw=null")
-    else:
-        reasons["cusped"].append("unrecognized/failed DtN status %r" % status)
-
-    cusped_ok = not reasons["cusped"]
-    return dict(
-        compact_analysis_eligible=compact_ok,
-        cusped_analysis_eligible=cusped_ok,
-        full_analysis_eligible=bool(compact_ok and cusped_ok),
-        reasons=reasons,
-    )
+    if not (_finite(lam) and 0 < float(lam) < 0.25):
+        return False
+    residual, tol = d.get("residual"), d.get("tol")
+    if not (_finite(residual) and _finite(tol) and float(tol) > 0):
+        return False
+    return float(residual) <= float(tol)
 
 
-def stored_quality_consistent(r, derived):
-    q = r.get("quality", {}) if isinstance(r.get("quality"), dict) else {}
-    expected = {
-        "analysis_eligible": derived["compact_analysis_eligible"],
-        "compact_analysis_eligible": derived["compact_analysis_eligible"],
-        "cusped_analysis_eligible": derived["cusped_analysis_eligible"],
-        "full_analysis_eligible": derived["full_analysis_eligible"],
+def recompute_quality(r):
+    seed_ok = _seed_consistent(r)
+    li_ok = _liouville_ok(r)
+    ce_ok = _compact_eigs_ok(r)
+    prof_ok = _profile_ok(r)
+    compact_ok = seed_ok and li_ok and ce_ok
+    cusp_ok = seed_ok and _dtn_ok(r)
+    return {
+        "identity_consistent": bool(seed_ok),
+        "liouville_converged": bool(li_ok),
+        "compact_eigs_finite": bool(ce_ok),
+        "h4_profile_valid": bool(prof_ok),
+        "compact_analysis_eligible": bool(compact_ok),
+        "h4_analysis_eligible": bool(compact_ok and prof_ok),
+        "cusped_analysis_eligible": bool(cusp_ok),
+        "full_analysis_eligible": bool(compact_ok and cusp_ok),
+        # Backward-compatible alias used by H1 and compact-surface ensemble code.
+        "analysis_eligible": bool(compact_ok),
     }
-    bad = []
-    for k, v in expected.items():
-        if q.get(k) is not v:
-            bad.append("quality.%s=%r, derived=%r" % (k, q.get(k), v))
-    return bad
+
+
+def provenance_is_native(r):
+    p = r.get("provenance", {})
+    return isinstance(p, dict) and p.get("kind") == "native_run" and p.get("numerical_payload_recomputed") is True
