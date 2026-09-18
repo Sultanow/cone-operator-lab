@@ -1,6 +1,6 @@
 # Cusps und Kompaktifizierung: Brooks-Makover-Flächen numerisch
 
-**Version 0.4.2 — dies ist der einzige kanonische Stand.** Vor dem Start auf dem Cluster
+**Version 0.4.3 — dies ist der einzige kanonische Stand.** Vor dem Start auf dem Cluster
 `python selftest.py` im Arbeitsverzeichnis ausführen; der Test schlägt fehl, wenn dort ein
 älterer Code-Stand liegt (Root-Duplikate früherer Lieferungen bitte löschen). Änderungen:
 `CHANGELOG.md`.
@@ -12,7 +12,7 @@ konforme Faktor φ zwischen beiden Metriken als Funktion der Cusp-Längen.
 
 ### Result eligibility and restart safety
 
-Version 0.4.2 writes a `run_parameters` block (`n`, `seed`, `h`, `L0`, `T_ext`, `neig`, `W`) and a `quality` block to every result.  Ensemble analyses accept only records with `quality.analysis_eligible=true`.  Non-converged compact solves remain available as diagnostics but are excluded from statistics.  SLURM restart validation checks all numerical parameters plus schema/code/graph-feature provenance and convergence status.  Rejected cached files are moved to `results/quarantine/` with a `.json.quarantine` suffix so they cannot match the normal `results/*.json` glob.
+Version 0.4.3 writes a `run_parameters`, `quality`, and `provenance` block to every result. Compact and cusped/DtN branches have separate eligibility flags. Downstream analyses recompute eligibility from the numerical payload instead of trusting stored flags; non-finite values therefore invalidate the affected branch even if metadata claims success. SLURM restart validation checks all numerical parameters, schema/code/graph-feature provenance, current native numerical provenance, and the requested branch convergence. Rejected cached files are moved to `results/quarantine/` with a `.json.quarantine` suffix so they cannot match the normal `results/*.json` glob. See `RESULT_PROVENANCE.md` for the strict distinction between native production results and metadata-migrated archived examples.
 
 
 ## Was gerechnet wird
@@ -23,7 +23,7 @@ Pro Stichprobe (`n`, `seed`):
 |---|---|
 | `V`, `cusp_lengths`, `genus` | Kombinatorik des zufälligen kubischen Ribbon-Graphen (Konfigurationsmodell) |
 | `lambda1_thick` | λ₁ des dicken Teils `S_Y` (Cusps an Horozyklen der Länge `L0` abgeschnitten, Neumann) |
-| `lambda1_cusped` | kleinster **L²-Eigenwert von S unterhalb 1/4** über die exakte Cusp-DtN-Bedingung (Moden `y^{1/2−ν}`, `√y K_ν`); `null` = in der Diskretisierung keiner gefunden (numerische Aussage, kein Zertifikat) |
+| `lambda1_cusped` | akzeptierter kleinster **L²-Eigenwert von S unterhalb 1/4** über die exakte Cusp-DtN-Bedingung. Bei `root_converged` ist er endlich; bei einem konvergierten `no_l2_detected` ist er `null`; bei fehlgeschlagener DtN-Rechnung ist er ebenfalls `null`, aber `quality.cusped_analysis_eligible=false`. Ein letzter unkonvergierter Iterationswert wird ausschließlich als `lambda1_cusped_raw` zur Diagnose gespeichert und nie statistisch verwendet. |
 | `lambda1_compact` | λ₁ der **uniformisierten** Kompaktifizierung: Liouville-Gleichung `Δ₀φ = K₀ + e^{2φ}` (Newton), dann `K u = λ M(ρ₀ e^{2φ}) u` |
 | `liouville.u_per_cusp`, `eps_h_*` | diskreter konformer Faktor u_h (ḡ_h = e^{2u_h} g₀): Mittel und sup auf Höhe-1- und Länge-ℓ-Horozyklen je Cusp; `eps_h_central/outside(ℓ)/long(ℓ)` = sup|u_h| auf Teilmengen von S_Y (dort g₀ = g). Vergleichskonstanten der *berechneten* Metrik auf dem genannten Gebiet, nicht zertifiziert; Kappen gehen nie ein, über den ganzen ursprünglichen Cusp gibt es keinen beidseitigen Vergleich (u → −∞ an der Punktierung) |
 | `weyl` | Steigung der Zählfunktion von S̄; Weyl: Area/4π = g − 1 („Geschlecht hören") |

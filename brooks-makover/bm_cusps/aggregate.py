@@ -10,6 +10,8 @@ from collections import defaultdict
 
 import numpy as np
 
+from result_quality import assess_result, stored_quality_consistent
+
 files = [f for f in sorted(glob.glob(sys.argv[1] if len(sys.argv) > 1 else "results/*.json", recursive=True))
          if ".invalid." not in f.rsplit("/", 1)[-1]
          and not f.endswith(".quarantine")
@@ -22,12 +24,28 @@ old = [f for f, r in zip(files, rows) if r.get("schema_version", 0) < SCHEMA_VER
 if old:
     sys.exit("%d result file(s) have an old schema (< %d); regenerate with the current run_bm.py, e.g. %s"
              % (len(old), SCHEMA_VERSION, old[0]))
-eligible = [(f, r) for f, r in zip(files, rows) if r.get("quality", {}).get("analysis_eligible") is True]
-dropped = [f for f, r in zip(files, rows) if r.get("quality", {}).get("analysis_eligible") is not True]
+eligible = []
+dropped = []
+migrated = []
+for f, r in zip(files, rows):
+    dq = assess_result(r)
+    bad = stored_quality_consistent(r, dq)
+    if bad:
+        sys.exit("stored quality flags contradict numerical payload in %s: %s" % (f, "; ".join(bad)))
+    r["_derived_quality"] = dq
+    if r.get("provenance", {}).get("metadata_migrated") is True:
+        migrated.append(f)
+    if dq["compact_analysis_eligible"]:
+        eligible.append((f, r))
+    else:
+        dropped.append((f, dq["reasons"]["compact"]))
 if dropped:
-    print("quality filter: excluding %d non-converged/non-eligible result(s), e.g. %s" % (len(dropped), dropped[0]))
+    print("quality filter: excluding %d compact-ineligible result(s), e.g. %s (%s)" %
+          (len(dropped), dropped[0][0], "; ".join(dropped[0][1])))
+if migrated:
+    print("provenance: %d archived/migrated example(s); numerical payloads were not recomputed by the current code" % len(migrated))
 if not eligible:
-    sys.exit("all matching results are non-converged or not analysis-eligible")
+    sys.exit("all matching results are compact-ineligible")
 files = [x[0] for x in eligible]
 rows = [x[1] for x in eligible]
 
@@ -43,6 +61,7 @@ GRAPH_COLS = ["girth", "n_short_cycles", "n_tangle_walks", "n_cusps_short", "sys
 
 def flat(r):
     d = {k: r.get(k) for k in cols if k in r}
+    d["cusped_analysis_eligible"] = bool(r.get("_derived_quality", {}).get("cusped_analysis_eligible", False))
     d["liou_area_err"] = abs(r["liouville"]["area_compact"] - r["liouville"]["area_compact_exact"]) / r["liouville"]["area_compact_exact"]
     d["weyl_slope"] = r["weyl"]["slope"]
     d["weyl_slope_expected"] = r["weyl"].get("slope_expected")
@@ -98,6 +117,8 @@ for key, hs in by.items():
         a, b = hs[h1], hs[h2]
         ex = {}
         for q in ("lambda1_compact", "lambda1_cusped", "lambda1_thick"):
+            if q == "lambda1_cusped" and not (a.get("cusped_analysis_eligible") and b.get("cusped_analysis_eligible")):
+                continue
             if a.get(q) is not None and b.get(q) is not None:
                 ex[q] = (a[q] * h2 ** 2 - b[q] * h1 ** 2) / (h2 ** 2 - h1 ** 2)
         rich.append((key, h1, h2, ex))
@@ -112,14 +133,21 @@ print("%5s %4s | %6s %6s | %9s %9s %9s | %8s %8s | %7s %7s" % (
     "n", "#", "V", "genus", "lam1_thk", "lam1_S", "lam1_Sbar", "P(<1/4)", "d(Sbar-S)", "min u", "t[s]"))
 for n in sorted({d["n"] for d in flat_rows}):
     g = [d for d in flat_rows if d["n"] == n]
-    S = [d["lambda1_cusped"] for d in g if d["lambda1_cusped"] is not None]
-    dl = [d["delta_compact_minus_cusped"] for d in g if d["delta_compact_minus_cusped"] is not None]
+    cg = [d for d in g if d.get("cusped_analysis_eligible")]
+    S = [d["lambda1_cusped"] for d in cg if d["lambda1_cusped"] is not None]
+    dl = [d["delta_compact_minus_cusped"] for d in cg if d["delta_compact_minus_cusped"] is not None]
+    # P(<1/4) is conditioned on a valid DtN branch; failed DtN solves are neither
+    # positive nor negative findings and therefore do not enter its denominator.
+    p_detect = len(S) / len(cg) if cg else float("nan")
     print("%5d %4d | %6.2f %6.1f | %9.4f %9.4f %9.4f | %8.2f %8.4f | %7.2f %7.0f" % (
         n, len(g), np.mean([d["V"] for d in g]), np.mean([d["genus"] for d in g]),
         np.mean([d["lambda1_thick"] for d in g]), np.mean(S) if S else float("nan"),
-        np.mean([d["lambda1_compact"] for d in g]), len(S) / len(g),
+        np.mean([d["lambda1_compact"] for d in g]), p_detect,
         np.mean(dl) if dl else float("nan"), np.mean([d["u_min_at_height1"] for d in g]),
         np.mean([d["wallclock_s"] for d in g])))
+    if len(cg) != len(g):
+        print("      DtN eligibility: %d/%d surfaces; %d failed DtN solve(s) excluded from cusp statistics" %
+              (len(cg), len(g), len(g)-len(cg)))
 
 # ---- dependence on the shortest cusp -------------------------------------------------
 print("\nlambda_1(S^bar) - lambda_1(S_thick) grouped by shortest cusp length k_min:")

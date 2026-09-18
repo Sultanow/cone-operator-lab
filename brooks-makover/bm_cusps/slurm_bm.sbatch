@@ -26,7 +26,7 @@ read -r n seed h L0 <<< "$line"
 out="results/bm_n${n}_s${seed}_h${h}.json"
 mkdir -p results results/quarantine
 if [ -s "$out" ]; then
-  if python validate_result.py "$out" --n "$n" --seed "$seed" --h "$h" --L0 "$L0" --T-ext 6.0 --neig 60 --W 10; then
+  if python validate_result.py "$out" --n "$n" --seed "$seed" --h "$h" --L0 "$L0" --T-ext 6.0 --neig 60 --W 10 --require full; then
     echo "validated existing result; skip: $out"
     exit 0
   fi

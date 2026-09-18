@@ -26,6 +26,8 @@ from collections import defaultdict
 
 import numpy as np
 
+from result_quality import assess_result, stored_quality_consistent
+
 
 def _is_quarantine_file(path):
     b = path.rsplit("/", 1)[-1]
@@ -38,17 +40,29 @@ def load(pattern):
     if not rows:
         sys.exit("no result files for %s" % pattern)
     check_schema(rows, files)
-    kept, dropped = [], []
+    kept, dropped, inconsistent, migrated = [], [], [], []
     for f, r in zip(files, rows):
         r["_source_file"] = f
-        if r.get("quality", {}).get("analysis_eligible") is True:
+        dq = assess_result(r)
+        r["_derived_quality"] = dq
+        bad = stored_quality_consistent(r, dq)
+        if bad:
+            inconsistent.append((f, bad))
+        if r.get("provenance", {}).get("metadata_migrated") is True:
+            migrated.append(f)
+        if dq["compact_analysis_eligible"]:
             kept.append(r)
         else:
-            dropped.append(f)
+            dropped.append((f, dq["reasons"]["compact"]))
+    if inconsistent:
+        sys.exit("stored quality flags contradict numerical payload in %s: %s" % (inconsistent[0][0], "; ".join(inconsistent[0][1])))
     if dropped:
-        print("quality filter: excluding %d non-converged/non-eligible result(s), e.g. %s" % (len(dropped), dropped[0]))
+        print("quality filter: excluding %d compact-ineligible result(s), e.g. %s (%s)" %
+              (len(dropped), dropped[0][0], "; ".join(dropped[0][1])))
+    if migrated:
+        print("provenance: %d archived/migrated example(s); numerical payloads were not recomputed by the current code" % len(migrated))
     if not kept:
-        sys.exit("all matching results are non-converged or not analysis-eligible")
+        sys.exit("all matching results are compact-ineligible")
     return kept
 
 

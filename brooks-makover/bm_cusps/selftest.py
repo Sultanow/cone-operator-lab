@@ -31,6 +31,7 @@ from version import GRAPH_FEATURE_VERSION, SCAN_SCHEMA_VERSION, SCHEMA_VERSION, 
 from bmsurf import BMSurface                              # noqa: E402
 from bmgraph import cycle_and_length_features, nonbacktracking  # noqa: E402
 from analyze import FEATS, _regress_c0, select_unique_surfaces  # noqa: E402
+from result_quality import assess_result  # noqa: E402
 
 fails = 0
 
@@ -161,14 +162,60 @@ all_rows = open(all_path).read().strip().splitlines() if os.path.exists(all_path
 check(pagg.returncode == 0 and len(summary_rows) == 15 and len(all_rows) == 16 and "n=32 seed=1" in pagg.stdout,
       "aggregate.py reduces 15 files to 14 independent surfaces while retaining all resolutions separately")
 
-# 9) SLURM resume validator accepts only current, matching results
+# 9) SLURM resume validator: archived examples are never reusable production results;
+# a native current-version clone with the same numerical payload is accepted.
 valid_example = os.path.join(HERE, "results_example", "bm_n16_s1_h0.12.json")
-pvalid = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
+parch = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
                          "--n", "16", "--seed", "1", "--h", "0.12", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "10"], capture_output=True, text=True)
-pbad = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
+check(parch.returncode != 0 and "archived/migrated" in (parch.stderr + parch.stdout),
+      "resume validator rejects metadata-migrated archived examples")
+
+native = json.load(open(valid_example))
+native["code_version"] = __version__
+native["provenance"] = dict(kind="native_run", numerical_payload_recomputed=True,
+                            numerical_payload_code_version=__version__, metadata_migrated=False)
+native_path = os.path.join(tmp, "native_current.json")
+json.dump(native, open(native_path, "w"), allow_nan=False)
+pvalid = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), native_path,
+                         "--n", "16", "--seed", "1", "--h", "0.12", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "10"], capture_output=True, text=True)
+pbad = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), native_path,
                        "--n", "16", "--seed", "1", "--h", "0.11", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "10"], capture_output=True, text=True)
 check(pvalid.returncode == 0 and pbad.returncode != 0,
-      "validate_result.py accepts matching current results and rejects parameter mismatches")
+      "validate_result.py accepts matching native current results and rejects parameter mismatches")
+
+# Stored flags cannot hide a corrupted numerical payload.
+nanrec = json.loads(json.dumps(native))
+nanrec["lambda1_compact"] = float("nan")
+nanrec["quality"]["analysis_eligible"] = True
+nanrec["quality"]["compact_analysis_eligible"] = True
+nan_path = os.path.join(tmp, "nan_current.json")
+# Python's JSON reader accepts NaN tokens by default, reproducing the review case.
+json.dump(nanrec, open(nan_path, "w"))
+pnan = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), nan_path,
+                       "--n", "16", "--seed", "1", "--h", "0.12", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "10"], capture_output=True, text=True)
+check(pnan.returncode != 0 and "non-finite" in (pnan.stderr + pnan.stdout),
+      "validator recomputes finiteness and rejects NaN despite optimistic stored quality flags")
+
+# A failed DtN solve invalidates only the cusped branch; compact/H1/H4 data remain usable.
+dtnfail = json.loads(json.dumps(native))
+dtnfail["dtn"].update(converged=False, status="root_not_converged")
+dtnfail["lambda1_cusped_raw"] = 0.2
+dtnfail["lambda1_cusped"] = None
+dtnfail["delta_compact_minus_cusped"] = None
+dq = assess_result(dtnfail)
+check(dq["compact_analysis_eligible"] and not dq["cusped_analysis_eligible"] and not dq["full_analysis_eligible"],
+      "failed DtN solve rejects only cusp/full branches, not the compact branch")
+dtnfail["quality"].update(analysis_eligible=True, compact_analysis_eligible=True,
+                           cusped_analysis_eligible=False, full_analysis_eligible=False,
+                           dtn_converged=False, full_solver_converged=False)
+dtn_path=os.path.join(tmp,"dtn_failed.json")
+json.dump(dtnfail,open(dtn_path,"w"),allow_nan=False)
+pc=subprocess.run([sys.executable, os.path.join(HERE,"validate_result.py"), dtn_path,
+                   "--n","16","--seed","1","--h","0.12","--L0","1.0","--T-ext","6.0","--neig","20","--W","10","--require","compact"],capture_output=True,text=True)
+pf=subprocess.run([sys.executable, os.path.join(HERE,"validate_result.py"), dtn_path,
+                   "--n","16","--seed","1","--h","0.12","--L0","1.0","--T-ext","6.0","--neig","20","--W","10","--require","full"],capture_output=True,text=True)
+check(pc.returncode == 0 and pf.returncode != 0,
+      "branch-specific validator accepts compact-only reuse and rejects full reuse after DtN failure")
 
 # 10) n fixed effects block a spurious size-confounded H4 signal
 rng2 = np.random.default_rng(456)
@@ -189,20 +236,23 @@ check(np.max(np.abs(bconf)) < 1e-10 and abs(pr2conf) < 1e-10,
 
 # 11) quarantine files and non-converged results must not enter downstream statistics
 qdir = tempfile.mkdtemp()
-good_src = valid_example
+good_src = native_path
 good_dst = os.path.join(qdir, "good.json")
 open(good_dst, "w").write(open(good_src).read())
 q_dst = os.path.join(qdir, "bad.invalid.20260917.json")
 open(q_dst, "w").write(open(good_src).read())
-badq = json.load(open(good_src)); badq["quality"]["analysis_eligible"] = False
+badq = json.load(open(good_src)); badq["liouville"]["converged"] = False
+badq["quality"]["analysis_eligible"] = False
+badq["quality"]["compact_analysis_eligible"] = False
+badq["quality"]["full_analysis_eligible"] = False
 nonconv = os.path.join(qdir, "nonconv.json")
-json.dump(badq, open(nonconv, "w"))
+json.dump(badq, open(nonconv, "w"), allow_nan=False)
 pq = subprocess.run([sys.executable, "analyze.py", "h4", "--glob", os.path.join(qdir, "*.json"), "--boot", "2"], capture_output=True, text=True)
-check(pq.returncode == 0 and "excluding 1 non-converged" in pq.stdout,
-      "analysis ignores quarantined filenames and excludes non-converged results")
+check(pq.returncode == 0 and "excluding 1 compact-ineligible" in pq.stdout,
+      "analysis ignores quarantined filenames and independently excludes compact-ineligible results")
 
 # 12) resume validation checks all computation parameters and convergence eligibility
-pbadW = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), valid_example,
+pbadW = subprocess.run([sys.executable, os.path.join(HERE, "validate_result.py"), native_path,
                        "--n", "16", "--seed", "1", "--h", "0.12", "--L0", "1.0", "--T-ext", "6.0", "--neig", "20", "--W", "8"], capture_output=True, text=True)
 check(pbadW.returncode != 0, "validate_result.py rejects changed W / computation provenance")
 

@@ -1,3 +1,10 @@
+# 0.4.3
+
+- Split compact and cusped/DtN result eligibility; failed DtN roots can no longer enter cusp statistics.
+- Recompute result quality from numerical payloads on read; stored flags cannot hide NaN/Infinity or branch failures.
+- Added native-vs-migrated numerical provenance. Historical `results_example/` payloads are explicitly metadata-migrated and are never accepted for production resume.
+- Result schema 6; current JSON output forbids NaN/Infinity.
+
 # 0.4.2
 
 - Validation twist scan now uses `vals[1]` for lambda_1; triple-cluster means are reported separately only.

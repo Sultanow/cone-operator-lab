@@ -1,3 +1,12 @@
+# 0.4.3
+
+- Compact and cusped/DtN spectral branches now have separate acceptance rules. A failed DtN root search can no longer leak its last iterate into `lambda1_cusped`; the raw iterate is retained only as `lambda1_cusped_raw` for diagnostics.
+- `validate_result.py`, `analyze.py`, and `aggregate.py` independently reconstruct eligibility from numerical payloads rather than trusting stored quality flags. Non-finite compact eigenvalues (including JSON `NaN`) are rejected on read.
+- Cusp statistics and `P(lambda_1(S)<1/4)` use only DtN-eligible surfaces in their denominator; failed DtN runs remain usable for compact/H1/H4 analyses.
+- Result schema 6 adds explicit native-vs-migrated provenance. SLURM resume accepts only native current-version numerical payloads.
+- The 15 `results_example/` files are explicitly marked metadata-migrated historical examples: their eigenvalues, profiles and timings were not recomputed and must not be reported as v0.4.3 production results.
+- JSON output uses `allow_nan=False`; current native runs cannot silently serialize NaN/Infinity.
+
 # 0.4.2
 
 - Validation twist scan now uses `vals[1]` for lambda_1; triple-cluster means are reported separately only.
