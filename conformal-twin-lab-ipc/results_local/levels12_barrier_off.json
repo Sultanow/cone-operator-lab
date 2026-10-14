@@ -1,0 +1,216 @@
+{
+ "args": {
+  "levels": "1,2",
+  "w_fit": 1.0,
+  "w_will": 0.001,
+  "w_rep": 10.0,
+  "barrier": "off",
+  "dhat": 2.0,
+  "wc_schedule": "1,100,1e4,1e6",
+  "iters": 200,
+  "seed": 0,
+  "noise": 0.0,
+  "out": "out_local"
+ },
+ "levels": {
+  "1": {
+   "history": [
+    {
+     "V": 108,
+     "conf_rms": 0.07027863442436123,
+     "conf_max": 0.216700859252705,
+     "dist_rms": 24.975174466330298,
+     "dist_max": 80.16144053751798,
+     "willmore_over_4pi": 2.4507345575268435,
+     "self_intersections": 0,
+     "sym_err": 1.1102230246251565e-16,
+     "wc": 1.0,
+     "rejects": 0,
+     "seconds": 15.1,
+     "diag": {
+      "nit": 1,
+      "alpha": 1.0,
+      "msg": "ABNORMAL: ",
+      "active": 3564
+     }
+    },
+    {
+     "V": 108,
+     "conf_rms": 0.0026289674208895665,
+     "conf_max": 0.010042324330065133,
+     "dist_rms": 26.416664671523353,
+     "dist_max": 66.66089262643058,
+     "willmore_over_4pi": 3.2967011463018876,
+     "self_intersections": 54,
+     "sym_err": 5.551115123125783e-17,
+     "wc": 100.0,
+     "rejects": 0,
+     "seconds": 39.5,
+     "diag": {
+      "nit": 50,
+      "alpha": 1.0,
+      "msg": "STOP: TOTAL NO. OF ITERA",
+      "active": 3820
+     }
+    },
+    {
+     "V": 108,
+     "conf_rms": 9.109042931529512e-05,
+     "conf_max": 0.00028563451858942823,
+     "dist_rms": 26.547076243940435,
+     "dist_max": 66.30007309136883,
+     "willmore_over_4pi": 3.309321993021193,
+     "self_intersections": 54,
+     "sym_err": 5.551115123125783e-17,
+     "wc": 10000.0,
+     "rejects": 0,
+     "seconds": 54.9,
+     "diag": {
+      "nit": 50,
+      "alpha": 1.0,
+      "msg": "STOP: TOTAL NO. OF ITERA",
+      "active": 4180
+     }
+    },
+    {
+     "V": 108,
+     "conf_rms": 2.715163053649759e-07,
+     "conf_max": 1.348453615768186e-06,
+     "dist_rms": 26.548286108063618,
+     "dist_max": 66.2987721194733,
+     "willmore_over_4pi": 3.3100765082627035,
+     "self_intersections": 54,
+     "sym_err": 5.551115123125783e-17,
+     "wc": 1000000.0,
+     "rejects": 0,
+     "seconds": 57.2,
+     "diag": {
+      "nit": 1,
+      "alpha": 1.0,
+      "msg": "CONVERGENCE: RELATIVE RE",
+      "active": 4184
+     }
+    }
+   ],
+   "final": {
+    "V": 108,
+    "conf_rms": 2.715163053649759e-07,
+    "conf_max": 1.348453615768186e-06,
+    "dist_rms": 26.548286108063618,
+    "dist_max": 66.2987721194733,
+    "willmore_over_4pi": 3.3100765082627035,
+    "self_intersections": 54,
+    "sym_err": 5.551115123125783e-17,
+    "wc": 1000000.0,
+    "rejects": 0,
+    "seconds": 57.2,
+    "diag": {
+     "nit": 1,
+     "alpha": 1.0,
+     "msg": "CONVERGENCE: RELATIVE RE",
+     "active": 4184
+    }
+   }
+  },
+  "2": {
+   "history": [
+    {
+     "V": 444,
+     "conf_rms": 0.05303354578428718,
+     "conf_max": 0.20543532648616192,
+     "dist_rms": 22.947186565325577,
+     "dist_max": 46.02476353111864,
+     "willmore_over_4pi": 3.6395585751225976,
+     "self_intersections": 90,
+     "sym_err": 5.551115123125783e-17,
+     "wc": 1.0,
+     "rejects": 0,
+     "seconds": 41.6,
+     "diag": {
+      "nit": 1,
+      "alpha": 1.0,
+      "msg": "CONVERGENCE: RELATIVE RE",
+      "active": 42340
+     }
+    },
+    {
+     "V": 444,
+     "conf_rms": 0.0035278656130708617,
+     "conf_max": 0.014104190698532415,
+     "dist_rms": 22.771266440353376,
+     "dist_max": 49.647829495490925,
+     "willmore_over_4pi": 4.814562928764031,
+     "self_intersections": 106,
+     "sym_err": 5.551115123125783e-17,
+     "wc": 100.0,
+     "rejects": 0,
+     "seconds": 72.6,
+     "diag": {
+      "nit": 50,
+      "alpha": 1.0,
+      "msg": "STOP: TOTAL NO. OF ITERA",
+      "active": 39924
+     }
+    },
+    {
+     "V": 444,
+     "conf_rms": 6.980782628997007e-05,
+     "conf_max": 0.00023785052138747265,
+     "dist_rms": 22.711647643765787,
+     "dist_max": 49.1879533673332,
+     "willmore_over_4pi": 4.927362497811944,
+     "self_intersections": 98,
+     "sym_err": 1.1102230246251565e-16,
+     "wc": 10000.0,
+     "rejects": 0,
+     "seconds": 108.5,
+     "diag": {
+      "nit": 50,
+      "alpha": 1.0,
+      "msg": "STOP: TOTAL NO. OF ITERA",
+      "active": 40544
+     }
+    },
+    {
+     "V": 444,
+     "conf_rms": 7.997065540767736e-07,
+     "conf_max": 3.338563013377538e-06,
+     "dist_rms": 22.709577633368195,
+     "dist_max": 49.169571076619285,
+     "willmore_over_4pi": 4.930272203136709,
+     "self_intersections": 98,
+     "sym_err": 5.551115123125783e-17,
+     "wc": 1000000.0,
+     "rejects": 0,
+     "seconds": 127.7,
+     "diag": {
+      "nit": 50,
+      "alpha": 1.0,
+      "msg": "STOP: TOTAL NO. OF ITERA",
+      "active": 40504
+     }
+    }
+   ],
+   "final": {
+    "V": 444,
+    "conf_rms": 7.997065540767736e-07,
+    "conf_max": 3.338563013377538e-06,
+    "dist_rms": 22.709577633368195,
+    "dist_max": 49.169571076619285,
+    "willmore_over_4pi": 4.930272203136709,
+    "self_intersections": 98,
+    "sym_err": 5.551115123125783e-17,
+    "wc": 1000000.0,
+    "rejects": 0,
+    "seconds": 127.7,
+    "diag": {
+     "nit": 50,
+     "alpha": 1.0,
+     "msg": "STOP: TOTAL NO. OF ITERA",
+     "active": 40504
+    }
+   },
+   "move_of_coarse_vertices_max": 33.97339774470453
+  }
+ }
+}

@@ -1,0 +1,12 @@
+[wf1_ww0.001_wr10_boff_s0] level 1: V=108; the polyhedron itself: {"V": 108, "conf_rms": 0.5475485241336328, "conf_max": 1.636877183808303, "dist_rms": 8.789075398650122e-15, "dist_max": 3.72380122987091e-14, "willmore_over_4pi": 7.083476483869263, "self_intersections": 0, "sym_err": 0.0}
+  L1 wc=1       conf_rms=7.03e-02 conf_max=2.17e-01 dist_rms=24.98 dist_max=80.16 W/4pi=2.451 selfint=0 rej=0 t=15.1s {'nit': 1, 'alpha': 1.0, 'msg': 'ABNORMAL: ', 'active': 3564}
+  L1 wc=100     conf_rms=2.63e-03 conf_max=1.00e-02 dist_rms=26.42 dist_max=66.66 W/4pi=3.297 selfint=54 rej=0 t=39.5s {'nit': 50, 'alpha': 1.0, 'msg': 'STOP: TOTAL NO. OF ITERA', 'active': 3820}
+  L1 wc=10000   conf_rms=9.11e-05 conf_max=2.86e-04 dist_rms=26.55 dist_max=66.30 W/4pi=3.309 selfint=54 rej=0 t=54.9s {'nit': 50, 'alpha': 1.0, 'msg': 'STOP: TOTAL NO. OF ITERA', 'active': 4180}
+  L1 wc=1e+06   conf_rms=2.72e-07 conf_max=1.35e-06 dist_rms=26.55 dist_max=66.30 W/4pi=3.310 selfint=54 rej=0 t=57.2s {'nit': 1, 'alpha': 1.0, 'msg': 'CONVERGENCE: RELATIVE RE', 'active': 4184}
+[wf1_ww0.001_wr10_boff_s0] level 2: V=444; prolongated from level 1
+  L2 wc=1       conf_rms=5.30e-02 conf_max=2.05e-01 dist_rms=22.95 dist_max=46.02 W/4pi=3.640 selfint=90 rej=0 t=41.6s {'nit': 1, 'alpha': 1.0, 'msg': 'CONVERGENCE: RELATIVE RE', 'active': 42340}
+  L2 wc=100     conf_rms=3.53e-03 conf_max=1.41e-02 dist_rms=22.77 dist_max=49.65 W/4pi=4.815 selfint=106 rej=0 t=72.6s {'nit': 50, 'alpha': 1.0, 'msg': 'STOP: TOTAL NO. OF ITERA', 'active': 39924}
+  L2 wc=10000   conf_rms=6.98e-05 conf_max=2.38e-04 dist_rms=22.71 dist_max=49.19 W/4pi=4.927 selfint=98 rej=0 t=108.5s {'nit': 50, 'alpha': 1.0, 'msg': 'STOP: TOTAL NO. OF ITERA', 'active': 40544}
+  L2 wc=1e+06   conf_rms=8.00e-07 conf_max=3.34e-06 dist_rms=22.71 dist_max=49.17 W/4pi=4.930 selfint=98 rej=0 t=127.7s {'nit': 50, 'alpha': 1.0, 'msg': 'STOP: TOTAL NO. OF ITERA', 'active': 40504}
+  coarse vertices moved by at most 33.973 units under refinement
+done wf1_ww0.001_wr10_boff_s0

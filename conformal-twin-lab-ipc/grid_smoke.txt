@@ -1,0 +1,2 @@
+--levels 1,2 --w-fit 1 --w-will 0.001 --barrier off --seed 0 --noise 0 --iters 40 --wc-schedule 1,100,1e4
+--levels 1,2 --w-fit 0.2 --w-will 0.001 --barrier on --seed 1 --noise 0.3 --iters 40 --wc-schedule 1,100,1e4

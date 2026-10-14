@@ -1,0 +1,16 @@
+--levels 1,2,3,4 --w-fit 1 --w-will 0.001 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 1 --w-will 0.001 --barrier on --seed 1 --noise 0.3 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 1 --w-will 0.01 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 1 --w-will 0.01 --barrier on --seed 1 --noise 0.3 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.2 --w-will 0.001 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.2 --w-will 0.001 --barrier on --seed 1 --noise 0.3 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.2 --w-will 0.01 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.2 --w-will 0.01 --barrier on --seed 1 --noise 0.3 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.05 --w-will 0.001 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.05 --w-will 0.001 --barrier on --seed 1 --noise 0.3 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.05 --w-will 0.01 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.05 --w-will 0.01 --barrier on --seed 1 --noise 0.3 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.01 --w-will 0.001 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.01 --w-will 0.001 --barrier on --seed 1 --noise 0.3 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.01 --w-will 0.01 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc
+--levels 1,2,3,4 --w-fit 0.01 --w-will 0.01 --barrier on --seed 1 --noise 0.3 --iters 800 --wc-schedule 1,100,1e4,1e6 --solver ipc

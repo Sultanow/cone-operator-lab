@@ -1,0 +1,12 @@
+--levels 1,2,3,4 --w-fit 1 --w-will 0.001 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 1 --w-will 0.01 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 1 --w-will 0.1 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 1 --w-will 1 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 0.2 --w-will 0.001 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 0.2 --w-will 0.01 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 0.2 --w-will 0.1 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 0.2 --w-will 1 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 0.05 --w-will 0.001 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 0.05 --w-will 0.01 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 0.05 --w-will 0.1 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P
+--levels 1,2,3,4 --w-fit 0.05 --w-will 1 --barrier on --seed 0 --noise 0 --iters 800 --wc-schedule 1e4,1e5,1e6 --solver ipc --target P

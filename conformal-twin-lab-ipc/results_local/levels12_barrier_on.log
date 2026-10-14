@@ -1,0 +1,8 @@
+[wf0.2_ww0.001_wr10_bon_s0] level 1: V=108; the polyhedron itself: {"V": 108, "conf_rms": 0.5475485241336328, "conf_max": 1.636877183808303, "dist_rms": 8.789075398650122e-15, "dist_max": 3.72380122987091e-14, "willmore_over_4pi": 7.083476483869263, "self_intersections": 0, "sym_err": 0.0}
+  L1 wc=1       conf_rms=8.10e-02 conf_max=1.90e-01 dist_rms=81.44 dist_max=188.12 W/4pi=2.234 selfint=0 rej=0 t=33.8s {'nit': 50, 'alpha': 1.0, 'msg': 'STOP: TOTAL NO. OF ITERA', 'active': 136}
+  L1 wc=100     conf_rms=6.61e-02 conf_max=1.49e-01 dist_rms=81.05 dist_max=184.07 W/4pi=2.635 selfint=0 rej=31 t=54.6s {'nit': 3, 'alpha': 0.0078125, 'msg': 'STOP: TOTAL NO. OF ITERA', 'active': 152}
+  L1 wc=10000   conf_rms=6.61e-02 conf_max=1.49e-01 dist_rms=81.05 dist_max=184.07 W/4pi=2.635 selfint=0 rej=31 t=71.7s {}
+  L1 wc=1e+06   conf_rms=6.61e-02 conf_max=1.49e-01 dist_rms=81.05 dist_max=184.07 W/4pi=2.635 selfint=0 rej=31 t=88.7s {}
+[wf0.2_ww0.001_wr10_bon_s0] level 2: V=444; prolongated from level 1
+  L2 wc=1       conf_rms=8.59e-02 conf_max=3.68e-01 dist_rms=63.46 dist_max=167.23 W/4pi=2.657 selfint=0 rej=0 t=51.9s {'nit': 50, 'alpha': 1.0, 'msg': 'STOP: TOTAL NO. OF ITERA', 'active': 1308}
+  L2 wc=100     conf_rms=5.83e-02 conf_max=3.54e-01 dist_rms=61.41 dist_max=172.12 W/4pi=6.494 selfint=0 rej=0 t=82.9s {'nit': 1, 'alpha': 1.0, 'msg': 'CONVERGENCE: RELATIVE RE', 'active': 3848}

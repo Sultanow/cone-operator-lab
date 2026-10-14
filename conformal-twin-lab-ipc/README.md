@@ -1,0 +1,132 @@
+# conformal-twin-lab (IPC update)
+
+This copy lives in `~/conformal-twin-lab-ipc` so that the running L-BFGS sweep in
+`~/conformal-twin-lab` keeps its code unchanged. Same conda environment, separate run
+directory (`$CT_OUT/sweep_ipc`).
+
+Hard-work package for the genus-three paper ("There and back again"): can Mizhaev's
+polyhedron P be smoothed into an **embedded, C4-symmetric surface in R^3 that is
+conformal to its circle-packing hyperbolic twin (S, h_cp)**, and how close to P can it stay?
+
+## Work packages
+
+| WP | Question | Status |
+|----|----------|--------|
+| A  | Are the 24 circle-packing radii correct? | **Proven.** Krawczyk test in Arb ball arithmetic: unique solution in a box of radius 1e-60 (log radii), at 256 and 512 bits. `src/certify_radii.py`, `slurm/certify.sbatch`. |
+| B  | Does a discretely conformal, symmetric, embedded surface near P exist? | Pipeline ready, sweep prepared (this package). |
+| C  | How far is P's own conformal structure from h_cp? | Next step (discrete uniformisation of P). |
+
+## Method (WP B)
+
+* `src/fine_mesh.py` refines every hyperbolic triangle of (S, h_cp) into n^2 geodesic
+  triangles (n = 2^level, Klein-linear subdivision on the hyperboloid). Exact hyperbolic
+  edge lengths, the same barycentric grid on P, and the tau-permutation of fine vertices.
+* Discrete conformality (Bobenko-Pinkall-Springborn 2015): Euclidean lengths l_ij of the
+  surface in R^3 must satisfy `log l_ij = (u_i+u_j)/2 + log(2 sinh(L_ij/2))` for some u.
+  The residual of this equation is `conf_rms` / `conf_max`.
+* C4 symmetry f(tau v) = T f(v) is exact by construction (symmetrised parametrisation).
+* Energy: penalty continuation in the conformal term, plus fit to P (point-to-plane),
+  discrete Willmore energy, and an optional point-to-triangle barrier with an
+  intersection-guarded line search (`--barrier on`).
+* Multilevel: level 2 -> 3 -> 4 by exact prolongation; checkpoint after each level;
+  `--resume` skips finished levels.
+
+## Findings so far (local runs, levels 1-2)
+
+* P itself is far from conformal to h_cp: conf_rms 0.54, conf_max 1.6.
+* Without barrier: residual driven to 3e-7 (level 1) and 8e-7 (level 2), surface within
+  23-27 units RMS of P (diameter 632), but self-intersecting (54 / 98 face pairs), mainly
+  between nonagons 1/2 and 7/8.
+* With barrier: stays embedded but stalls at conf_rms ~ 0.06 (line search jams in contact).
+* Coarse vertices still move by 22-34 units from level 1 to 2: geometry not converged yet.
+
+## IPC solver (`--solver ipc`)
+
+The L-BFGS + barrier combination jams in contact. `src/ipc.py` adds IPC-style contact
+handling (Li et al. 2020): point-triangle **and** edge-edge barrier pairs below a small
+`dhat` (0.25 fine edge lengths), recomputed at every energy evaluation, and a conservative
+CCD bound on every step, so the surface can slide past itself but never pass through.
+The search direction is a hand-written L-BFGS two-loop recursion with Armijo backtracking
+inside the CCD-safe interval.
+
+Local result, level 1, starting from P, `--w-fit 0.05`: **embedded**, conf_rms 6.3e-4
+(conf_max 1.6e-3), still decreasing at the end of the run; the old barrier solver jammed at
+6.6e-2. With `--w-fit 1`: embedded, conf_rms 1.1e-2.
+
+```bash
+sbatch slurm/sweep_ipc.sbatch      # 16 tasks, levels 1 -> 2 -> 3 -> 4, partition std
+python3 scripts/collect.py /home/esul01/data/outputs/conformal_twin/sweep_ipc
+```
+
+## Target h_P (`--target P`): conformal smoothing of the polyhedron
+
+Work package C (`src/wpc/wp_c.py`, `slurm/wp_c.sbatch`) shows that the circle-packing twin h_cp
+and the polyhedron's own conformal structure h_P are different points of Teichmueller space:
+over 62,306 closed curves the length ratio h_P/h_cp ranges over [0.796, 1.259] (level 3), i.e.
+Thurston distance >= 0.23, stable under refinement (0.252, 0.240, 0.232, 0.230).
+h_cp also depends on the arbitrary diagonals chosen inside the nonagons; h_P does not.
+
+With `--target P` the solver keeps the surface discretely conformal to P itself (residual 0 at
+the start) and smooths it. Local level-1 test: embedded, residual 6.9e-5, distance to P 5.2 RMS /
+16 max units (h_cp target: 50 / 229), Willmore W/4pi 4.0 (polyhedron 7.1).
+
+```bash
+sbatch slurm/wp_c.sbatch           # minutes; writes $CT_OUT/wp_c/wp_c_report.json
+sbatch slurm/sweep_hp.sbatch       # 12 tasks, levels 1 -> 4
+python3 scripts/collect.py /home/esul01/data/outputs/conformal_twin/sweep_hp
+```
+
+## Alexandrov-type search (`src/alex`, `slurm/alex.sbatch`)
+
+Question: is P the only polyhedral surface in R^3 (up to congruence) with its intrinsic flat metric?
+Alexandrov's uniqueness theorem covers convex polyhedra of genus 0 only.
+
+Facts established locally: P is infinitesimally rigid (rank 66); the graph of K is generically
+globally rigid in R^3 (Gortler-Healy-Thurston stress rank 20 = n-d-1); P admits no positive
+semidefinite full-rank stress, so Connelly's universal-rigidity certificate does not apply; P is
+non-generic (integer, symmetric, 64 collinear vertex triples inside the nonagons).
+
+The search solves |X_i - X_j|^2 = D_ij (exact integers) by Levenberg-Marquardt from random,
+noisy and 'popped' starts, for K (odd tasks) and for nonagons folded along random other diagonals
+(even tasks), and classifies solutions modulo congruence and the symmetry relabelling.
+
+```bash
+sbatch slurm/alex.sbatch                         # 128 tasks x 50,000 starts (about 40 min each)
+CT_ALEX_N=200000 sbatch slurm/alex.sbatch        # larger round
+python3 scripts/collect_alex.py /home/esul01/data/outputs/conformal_twin/alexandrov
+```
+
+## Cluster workflow
+
+```bash
+# once, on the login node (edit slurm/config.sh first if paths differ)
+bash slurm/setup_env.sh
+python3 scripts/make_grid.py > grid.txt              # 96 tasks
+python3 scripts/make_grid.py --smoke > grid_smoke.txt
+
+sbatch slurm/certify.sbatch                          # WP A, minutes
+sbatch slurm/smoke.sbatch                            # 2 short tasks: validates env + paths
+# inspect $CT_OUT/smoke/*.log, then:
+sbatch slurm/sweep.sbatch                            # array 1-96, at most 32 at once
+python3 scripts/collect.py /home/esul01/data/outputs/conformal_twin/sweep1
+```
+
+Partition lines are commented out (`##SBATCH --partition=CHANGE_ME`); uncomment and set
+if the cluster requires one. All jobs are CPU-only (JAX on CPU, float64).
+
+## Reading the results
+
+`collect.py` writes `summary.csv` and prints, for the deepest level: embedded runs ranked by
+conformal residual, the best immersed runs, and the Pareto front (conformal residual vs.
+distance to P) among embedded runs. A **positive result** would be: embedded at every
+level, conf_rms < 1e-6 at level 4, and `move` (motion of coarse vertices under refinement)
+shrinking from level 3 to 4. A **negative result** (no embedded run below, say, 1e-3) is
+also informative and goes into the paper as a measured obstruction near P.
+
+## Caveats
+
+* Discrete conformality on a fixed mesh is numerical evidence, not a proof of a smooth
+  conformal embedding; convergence under refinement is the evidence to look for.
+* The barrier + L-BFGS combination jams in contact. If the sweep finds no embedded
+  low-residual run, the next step is a proper IPC-style Newton solver with continuous
+  collision detection.
