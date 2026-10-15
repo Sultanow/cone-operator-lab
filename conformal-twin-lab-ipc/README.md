@@ -111,6 +111,20 @@ sbatch slurm/symm.sbatch                         # 384 tasks of about 40 s
 python3 src/symm/collect_symm.py /home/esul01/data/outputs/conformal_twin/symmetric
 ```
 
+## Visualisation (`visual/`, `scripts/export_obj.py`)
+
+`visual/mizhaev_visual.wl` (Wolfram Language) shows the polyhedron, a conformal surface from the cluster and
+the canonical twin h_P in the Poincare disk as rotatable graphics and exports the current view (PNG, PDF,
+turntable GIF). The data files next to it are produced by `scripts/export_obj.py`; the OBJ files also open in
+Blender, MeshLab or ParaView.
+
+```bash
+python3 scripts/export_obj.py polyhedron visual/          # P (8 nonagons) and K (56 triangles)
+python3 scripts/export_obj.py RESULT_L4.npz visual/       # any surface from an embedding sweep
+```
+
+Job status at a glance: `bash scripts/ctstat.sh [JOBID ...]`.
+
 ## Cluster workflow
 
 ```bash
