@@ -13,3 +13,4 @@ export JAX_PLATFORMS=cpu
 export XLA_FLAGS="--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=$NT"
 echo "started=$(date) node=$(hostname) threads=$NT python=$(command -v python3)"
 export PYTHONDONTWRITEBYTECODE=1
+export PYTHONNOUSERSITE=1          # ignore packages in ~/.local, use only the environment
