@@ -1,7 +1,7 @@
 #!/bin/bash
 # Overview of conformal-twin job arrays: task counts per state, one line per job.
-# Usage: bash ~/ctstat.sh                  all jobs named ct-* of the last 14 days
-#        bash ~/ctstat.sh 152770 152705    only these job ids (space or comma separated)
+# Usage: bash scripts/ctstat.sh                  all jobs named ct-* of the last 14 days
+#        bash scripts/ctstat.sh 152770 152705    only these job ids (space or comma separated)
 IDS=""
 if [ $# -gt 0 ]; then IDS=$(echo "$*" | tr ' ' ','); SEL=(-j "$IDS"); else SEL=(-u "$USER" -S now-14days); fi
 {
