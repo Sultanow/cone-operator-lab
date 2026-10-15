@@ -15,6 +15,7 @@ ap.add_argument('--seed', type=int, default=0)
 ap.add_argument('--restarts', type=int, default=8, help='flat mode: independent annealing runs')
 ap.add_argument('--iters', type=int, default=4000, help='flat mode: annealing steps per run')
 ap.add_argument('--layout', default=None, help='redraw a saved fig_ribbon_layout.json without searching')
+ap.add_argument('--polish', type=int, default=0, help='with --layout: steps of local polishing that keep crossings and twists')
 ap.add_argument('--mode', choices=['flat', 'symmetric'], default='flat',
                 help='flat: every vertex face up, no twists, fewest crossings; symmetric: C4-symmetric layout (forces twists)')
 args = ap.parse_args(); os.makedirs(args.out, exist_ok=True)
@@ -62,6 +63,29 @@ def signs(pos):                                                      # +1: plana
         order = [nb[i] for i in np.argsort(ang)]
         k = order.index(nb[0]); s[v] = 1 if order[k:] + order[:k] == nb else -1
     return s
+EI = np.array(EDGES)
+SHARE = np.array([[bool(set(a) & set(b)) for b in EDGES] for a in EDGES])
+def crossings_fast(pos):
+    A, B = pos[EI[:, 0]], pos[EI[:, 1]]
+    def orient(p, q, r): return np.sign((q[..., 0] - p[..., 0]) * (r[..., 1] - p[..., 1]) - (q[..., 1] - p[..., 1]) * (r[..., 0] - p[..., 0]))
+    o1 = orient(A[:, None], B[:, None], A[None, :]); o2 = orient(A[:, None], B[:, None], B[None, :])
+    o3 = orient(A[None, :], B[None, :], A[:, None]); o4 = orient(A[None, :], B[None, :], B[:, None])
+    X = (o1 * o2 < 0) & (o3 * o4 < 0) & ~SHARE
+    return int(np.triu(X, 1).sum())
+def degeneracy(pos, clear=0.07, ang=np.radians(22), sep=0.16):
+    # bands passing close to a vertex that is not their endpoint
+    A, B = pos[EI[:, 0]], pos[EI[:, 1]]; D = B - A
+    t = np.clip(np.einsum('evk,ek->ev', pos[None, :, :] - A[:, None, :], D) / (D * D).sum(1)[:, None], 0, 1)
+    dist = np.linalg.norm(pos[None, :, :] - (A[:, None, :] + t[..., None] * D[:, None, :]), axis=2)
+    dist[np.arange(len(EI)), EI[:, 0]] = np.inf; dist[np.arange(len(EI)), EI[:, 1]] = np.inf
+    pen = np.maximum(0, clear - dist).sum() / clear
+    # nearly parallel bands at a vertex
+    for v in range(24):
+        a = np.sort([np.arctan2(*(pos[u] - pos[v])[::-1]) for u in ROT[v]]); g = np.diff(np.r_[a, a[0] + 2 * np.pi])
+        pen += np.maximum(0, ang - g).sum() / ang
+    # vertices too close to each other
+    dd = np.linalg.norm(pos[:, None] - pos[None], axis=2)[np.triu_indices(24, 1)]
+    return pen + np.maximum(0, sep - dd).sum() / sep
 def crossings(pos):
     P = np.array([[pos[u], pos[v]] for u, v in EDGES]); n = 0
     for i in range(len(EDGES)):
@@ -85,6 +109,19 @@ def min_angle(pos):                                                  # smallest 
     return m
 if args.layout:
     pos = np.array(json.load(open(args.layout))['positions']); best = pos
+    if args.polish:
+        cr0 = crossings_fast(pos); s0 = signs(pos); down0 = sum(x < 0 for x in s0.values())
+        def pcost(q):        # degenerate layouts (vertices on bands, coinciding directions) hide crossings and twists,
+            sq = signs(q)    # so crossings are not frozen but penalised: the polished layout reports the honest count
+            return crossings_fast(q) + 20 * sum(x < 0 for x in sq.values()) + 4 * degeneracy(q)
+        c = pcost(pos); print(f'polish: start degeneracy {degeneracy(pos):.3f}, {cr0} crossings')
+        for it in range(args.polish):
+            v = rng.integers(24); old = pos[v].copy(); pos[v] = pos[v] + rng.normal(scale=0.025 if it % 5 else 0.12, size=2)
+            cn = pcost(pos)
+            if cn <= c: c = cn
+            else: pos[v] = old
+        pos = pos - pos.mean(0); pos = pos / np.abs(pos).max(); best = pos
+        print(f'polish: end degeneracy {degeneracy(pos):.3f}, {crossings_fast(pos)} crossings')
 elif args.mode == 'symmetric':
     start = np.array([[np.hypot(*VP[r, :2]) / 300, np.arctan2(VP[r, 1], VP[r, 0])] for r in reps])  # view down the axis
     best = start.copy(); bc, _ = cost(best)
@@ -98,18 +135,18 @@ else:
     def fcost(pos):
         s_ = signs(pos); down = sum(x < 0 for x in s_.values())
         dmin = min(np.linalg.norm(pos[i] - pos[j]) for i in range(24) for j in range(i + 1, 24))
-        return crossings(pos) + 10 * down + 4 * max(0, 0.12 - dmin) / 0.12 + 2 * max(0, 0.45 - min_angle(pos)) / 0.45
+        return crossings_fast(pos) + 10 * down + 0.5 * degeneracy(pos)
     best_pos, bc = None, np.inf
     for restart in range(args.restarts):
         pos = nx.kamada_kawai_layout(G, pos=nx.spring_layout(G, seed=int(rng.integers(1 << 30))))
         pos = np.array([pos[v] for v in range(24)]); pos /= np.abs(pos).max(); c = fcost(pos); T0 = 1.0
         for it in range(args.iters):                                 # simulated annealing, one vertex at a time
-            v = rng.integers(24); old = pos[v].copy(); pos[v] = np.clip(pos[v] + rng.normal(scale=0.08, size=2), -1, 1)
+            v = rng.integers(24); old = pos[v].copy(); pos[v] = pos[v] + rng.normal(scale=0.08, size=2)
             cn = fcost(pos); T = T0 * (1 - it / args.iters) + 1e-3
             if cn <= c or rng.random() < np.exp((c - cn) / T): c = cn
             else: pos[v] = old
         if c < bc: best_pos, bc = pos.copy(), c
-    pos = best_pos; best = pos
+    pos = best_pos - best_pos.mean(0); pos = pos / np.abs(pos).max(); best = pos
 s = signs(pos); tw = sum(s[u] != s[v] for u, v in EDGES); cr = crossings(pos)
 print(f'layout ({args.mode}): {cr} crossings, {tw} twisted bands, {sum(x < 0 for x in s.values())} face-down vertices')
 
@@ -150,6 +187,7 @@ for v in range(24):
 ax.set_aspect('equal'); ax.axis('off')
 fig.savefig(os.path.join(args.out, 'fig_ribbon.pdf'), bbox_inches='tight', pad_inches=.02)
 fig.savefig(os.path.join(args.out, 'fig_ribbon.png'), bbox_inches='tight', pad_inches=.02)
-json.dump(dict(mode=args.mode, seed=args.seed, positions=pos.tolist(), crossings=int(cr), twists=int(tw), min_angle_deg=float(np.degrees(min_angle(pos))), rotation={str(v + 1): [u + 1 for u in ROT[v]] for v in range(24)}),
+json.dump(dict(mode=args.mode, seed=args.seed, positions=pos.tolist(), crossings=int(cr), twists=int(tw), min_angle_deg=float(np.degrees(min_angle(pos))),
+               degeneracy=float(degeneracy(pos)), rotation={str(v + 1): [u + 1 for u in ROT[v]] for v in range(24)}),
           open(os.path.join(args.out, 'fig_ribbon_layout.json'), 'w'), indent=1)
 print('written', os.path.join(args.out, 'fig_ribbon.pdf'))

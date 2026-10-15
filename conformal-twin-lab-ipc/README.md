@@ -143,6 +143,7 @@ python3 src/ribbon.py OUT/                         # Appendix B: ribbon graph (r
 sbatch slurm/certify.sbatch                        # Theorem 3: certified radii
 sbatch slurm/wp_c.sbatch                           # Proposition 6, Table 3, length data for Fig. 6
 python3 src/pants/cuffs.py OUT/                    # Table 4: pants decomposition and cuff lengths
+python3 src/alex/stress.py OUT/                    # Section 9: rigidity rank, stress rank (GHT), Connelly SDP
 sbatch slurm/alex.sbatch                           # random search for other realisations
 sbatch slurm/symm.sbatch                           # Proposition 8: homotopy runs 0-2 (then --array=385-640%96 for 3-4)
 python3 visual/fig_poly.py FIGS/                   # Fig. 1
@@ -152,8 +153,9 @@ python3 visual/fig_disk.py FIGS/                   # Fig. 4
 python3 visual/fig_hp_disk.py FIGS/                # Fig. 5 (and hp_disk.json for Mathematica)
 python3 visual/fig_lengths.py $CT_OUT/wp_c/length_compare.npz FIGS/   # Fig. 6
 python3 visual/fig_views.py WEAK.json STRONG.json  # Fig. 7 (surfaces exported with scripts/export_obj.py)
-sbatch slurm/ribbon.sbatch                         # ribbon-graph figure: 64 layout searches
-python3 scripts/pick_ribbon.py $CT_OUT/ribbon      # picks the best layout -> $CT_OUT/ribbon/best/fig_ribbon.pdf
+python3 visual/fig_ribbon.py FIGS/ --layout visual/fig_ribbon_layout.json   # Fig. 8 from the committed layout
+sbatch slurm/ribbon.sbatch                         # (optional) new layout search: 64 tasks
+python3 scripts/pick_ribbon.py $CT_OUT/ribbon      # picks and polishes the best layout -> $CT_OUT/ribbon/best/
 ```
 
 The first two steps reproduce the shipped `src/results.json` and `src/development.json` exactly.
