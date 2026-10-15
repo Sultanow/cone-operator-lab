@@ -7,8 +7,9 @@
 #SBATCH --output=/home/esul01/data/outputs/logs/ct_wpc_%j.out
 #SBATCH --error=/home/esul01/data/outputs/logs/ct_wpc_%j.err
 #SBATCH --partition=std
-# Work package C: h_P (polyhedron's own conformal structure) versus h_cp (circle packing).
+# h_P (the polyhedron's own conformal structure) versus h_cp, and the exact way back (Troyanov).
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR:-$PWD}/slurm/common.sh"
-python3 "$CT_ROOT/src/wpc/wp_c.py" "$CT_OUT/wp_c"
+python3 "$CT_ROOT/src/wpc/wp_c.py" "$CT_OUT/wp_c"          # Proposition 6: h_P against h_cp
+python3 "$CT_ROOT/src/wpc/roundtrip.py" "$CT_OUT/wp_c"     # Table 3: the exact way back
 echo "finished=$(date)"

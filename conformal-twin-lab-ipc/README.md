@@ -123,6 +123,14 @@ python3 scripts/export_obj.py polyhedron visual/          # P (8 nonagons) and K
 python3 scripts/export_obj.py RESULT_L4.npz visual/       # any surface from an embedding sweep
 ```
 
+Figures of the paper from the repository:
+
+```bash
+python3 visual/fig_hp_disk.py visual/                     # Fig. 4 (canonical twin) and visual/hp_disk.json
+python3 visual/fig_views.py WEAK.json STRONG.json         # Fig. 6 (three views of one object)
+python3 src/wpc/roundtrip.py OUTDIR                       # Table 3 (exact way back), also run by slurm/wp_c.sbatch
+```
+
 Job status at a glance: `bash scripts/ctstat.sh [JOBID ...]`.
 
 ## Cluster workflow
