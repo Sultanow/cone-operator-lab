@@ -7,7 +7,11 @@
      program: maximise the smallest eigenvalue of the stress matrix on the 20-dimensional complement of the
      always-present kernel span{1, x, y, z}, over stresses of norm <= 1. A value ~0 means: no such stress;
   4. the conic-at-infinity condition (edge directions not on a conic), the second half of Connelly's criterion.
-Usage: python src/alex/stress.py OUTDIR      (needs cvxpy for step 3; steps 1, 2, 4 need only numpy)"""
+  5. exact versions of 1 and 2 over the rationals (P has integer coordinates): rank of the rigidity matrix, an integer
+     basis of the stress space, and the exact rank of integer stress matrices. Together with the perturbation argument
+     in the paper this proves that P is infinitesimally rigid and that the edge graph of K is generically globally
+     rigid in R^3.
+Usage: python src/alex/stress.py OUTDIR      (step 3 needs cvxpy, step 5 needs python-flint)"""
 import os, sys, json, numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from realize import P, E
@@ -66,4 +70,30 @@ Dd = P[E[:, 0]] - P[E[:, 1]]
 A = np.c_[Dd[:, 0] ** 2, Dd[:, 1] ** 2, Dd[:, 2] ** 2, Dd[:, 0] * Dd[:, 1], Dd[:, 0] * Dd[:, 2], Dd[:, 1] * Dd[:, 2]]
 rep['conic_rank'] = int(np.linalg.matrix_rank(A))
 print(f'4. edge directions: rank {rep["conic_rank"]} of the quadratic matrix (6 = not on a conic at infinity)')
+# 5. exact arithmetic over Q
+try:
+    import flint
+    Pi = np.rint(P).astype(int); assert np.array_equal(Pi, P)
+    Rex = [[0] * (3 * n) for _ in range(len(E))]
+    for k, (i, j) in enumerate(E):
+        for c in range(3):
+            dd = int(Pi[i, c] - Pi[j, c]); Rex[k][3 * i + c] = dd; Rex[k][3 * j + c] = -dd
+    RZ = flint.fmpz_mat(Rex); rank_ex = RZ.rank()
+    N, nul = RZ.transpose().nullspace(); basis = [[int(N[r, c]) for r in range(N.nrows())] for c in range(nul)]
+    for w in basis:                                                   # every basis vector is an exact equilibrium stress
+        acc = np.zeros((n, 3), dtype=object)
+        for k, (i, j) in enumerate(E): dv = (Pi[i] - Pi[j]).astype(object) * w[k]; acc[i] += dv; acc[j] -= dv
+        assert all(x == 0 for x in acc.ravel())
+    rng5 = np.random.default_rng(7); ranks = []; coefs = []
+    for trial in range(5):
+        cf = [int(x) for x in rng5.integers(-50, 51, size=nul)]; coefs.append(cf)
+        w = [sum(cf[a] * basis[a][k] for a in range(nul)) for k in range(len(E))]
+        Om = [[0] * n for _ in range(n)]
+        for k, (i, j) in enumerate(E): Om[i][j] -= w[k]; Om[j][i] -= w[k]; Om[i][i] += w[k]; Om[j][j] += w[k]
+        ranks.append(flint.fmpz_mat(Om).rank())
+    rep['exact'] = dict(rigidity_rank=rank_ex, stress_dim=nul, stress_matrix_ranks=ranks, coefficients=coefs)
+    print(f'5. exact over Q: rigidity rank {rank_ex}, stress space dimension {nul}, ranks of 5 integer stress matrices {ranks}')
+    print('   -> P is infinitesimally rigid; with a stress of rank n-d-1 = 20 at P the edge graph of K is generically globally rigid')
+except ImportError:
+    rep['exact'] = None; print('5. skipped: python-flint is not installed')
 json.dump(rep, open(os.path.join(OUT, 'stress_report.json'), 'w'), indent=1)

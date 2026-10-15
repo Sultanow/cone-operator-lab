@@ -145,7 +145,11 @@ sbatch slurm/wp_c.sbatch                           # Proposition 6, Table 3, len
 python3 src/pants/cuffs.py OUT/                    # Table 4: pants decomposition and cuff lengths
 python3 src/alex/stress.py OUT/                    # Section 9: rigidity rank, stress rank (GHT), Connelly SDP
 sbatch slurm/alex.sbatch                           # random search for other realisations
-sbatch slurm/symm.sbatch                           # Proposition 8: homotopy runs 0-2 (then --array=385-640%96 for 3-4)
+sbatch slurm/symm.sbatch                           # symmetric uniqueness, numerically: homotopy runs 0-2 (then --array=385-640%96 for 3-4)
+python3 src/symm/msolve_input.py OUT/algebraic     # symmetric uniqueness, algebraically: exact system for msolve and Singular
+msolve -f OUT/algebraic/symm_system.ms -o OUT/algebraic/symm_system.out    # about 30 s (msolve: slurm/setup_algebra.sh)
+python3 src/symm/check_algebraic.py OUT/algebraic   # 4 real solutions, all copies of P
+sbatch slurm/groebner.sbatch                       # deterministic Groebner basis over Q with Singular (export CT_SINGULAR first)
 python3 visual/fig_poly.py FIGS/                   # Fig. 1
 python3 visual/fig_slices.py FIGS/                 # Fig. 2 (three handles)
 python3 visual/fig_flowers.py FIGS/                # Fig. 3
