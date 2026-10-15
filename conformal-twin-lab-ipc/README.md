@@ -133,6 +133,26 @@ python3 src/wpc/roundtrip.py OUTDIR                       # Table 3 (exact way b
 
 Job status at a glance: `bash scripts/ctstat.sh [JOBID ...]`.
 
+## Reproduce every number and figure of the paper
+
+```bash
+python3 src/experiment.py                          # src/results.json: triangulation K, circle packing h_cp
+python3 src/develop.py                             # src/development.json: K unfolded in the Poincare disk
+python3 src/symmetry_period_certificate.py OUT/    # homology character (6,0,-2,0) of the symmetry
+sbatch slurm/certify.sbatch                        # Theorem 3: certified radii
+sbatch slurm/wp_c.sbatch                           # Proposition 6, Table 3, length data for Fig. 5
+sbatch slurm/alex.sbatch                           # random search for other realisations
+sbatch slurm/symm.sbatch                           # Proposition 8: homotopy runs 0-2 (then --array=385-640%96 for 3-4)
+python3 visual/fig_poly.py FIGS/                   # Fig. 1
+python3 visual/fig_flowers.py FIGS/                # Fig. 2
+python3 visual/fig_disk.py FIGS/                   # Fig. 3
+python3 visual/fig_hp_disk.py FIGS/                # Fig. 4 (and hp_disk.json for Mathematica)
+python3 visual/fig_lengths.py $CT_OUT/wp_c/length_compare.npz FIGS/   # Fig. 5
+python3 visual/fig_views.py WEAK.json STRONG.json  # Fig. 6 (surfaces exported with scripts/export_obj.py)
+```
+
+The first two steps reproduce the shipped `src/results.json` and `src/development.json` exactly.
+
 ## Cluster workflow
 
 ```bash

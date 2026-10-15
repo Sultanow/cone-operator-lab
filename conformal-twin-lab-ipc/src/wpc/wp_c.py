@@ -40,3 +40,4 @@ for lev in (0, 1, 2, 3):
     print(f'level {lev}: uniformisation residual {U["residual"]:.1e}; ratio h_P/h_cp in [{r.min():.4f}, {r.max():.4f}]; '
           f'Thurston distance >= {max(np.log(r.max()), np.log(1 / r.min())):.3f}')
 json.dump(report, open(os.path.join(out, 'wp_c_report.json'), 'w'), indent=1)
+np.savez(os.path.join(out, 'length_compare.npz'), lcp=lcp, keep=keep, P3=lP)   # level-3 lengths, input of visual/fig_lengths.py
