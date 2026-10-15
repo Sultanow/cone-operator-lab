@@ -96,6 +96,21 @@ CT_ALEX_N=200000 sbatch slurm/alex.sbatch        # larger round
 python3 scripts/collect_alex.py /home/esul01/data/outputs/conformal_twin/alexandrov
 ```
 
+## Complete classification of C4-symmetric realisations (`src/symm`, `slurm/symm.sbatch`)
+
+With the symmetry X[tau v] = T X[v] the realisation problem reduces to 17 unknowns (six orbit
+representatives, rotation about the axis fixed) and 22 quadratic equations. The 22 equations are
+randomised to 17 and solved by projective total-degree homotopy continuation over all 2^17 = 131,072
+start points; every isolated nonsingular complex solution is reached with probability one. Three runs
+with independent gamma must give the same solution set. Paths ending at singular points at infinity
+are irrelevant; singular finite end points (which would include flexible realisations) are reported.
+The tracker was validated on random dense quadratic systems (all 2^n solutions found).
+
+```bash
+sbatch slurm/symm.sbatch                         # 384 tasks of about 40 s
+python3 src/symm/collect_symm.py /home/esul01/data/outputs/conformal_twin/symmetric
+```
+
 ## Cluster workflow
 
 ```bash
