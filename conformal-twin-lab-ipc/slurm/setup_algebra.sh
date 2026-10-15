@@ -6,7 +6,7 @@ set -euo pipefail
 source "$(dirname "$0")/config.sh"
 source "$CT_CONDA_SH"
 ENV=$HOME/envs/ct-algebra
-conda create -y -p "$ENV" -c conda-forge singular flint gmp mpfr autoconf automake libtool make compilers git
+conda create -y -p "$ENV" -c conda-forge singular libflint gmp mpfr autoconf automake libtool make compilers git
 conda activate "$ENV"
 Singular -v -q -c 'quit;' >/dev/null 2>&1 && echo "Singular ok: $(command -v Singular)"
 SRC=$HOME/opt/msolve-src; rm -rf "$SRC"; git clone --depth 1 https://github.com/algebraic-solving/msolve.git "$SRC"
