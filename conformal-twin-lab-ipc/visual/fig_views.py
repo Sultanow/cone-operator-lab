@@ -16,7 +16,7 @@ def rot(elev, azim):
     Rz = np.array([[np.cos(a), -np.sin(a), 0], [np.sin(a), np.cos(a), 0], [0, 0, 1]]); Rx = np.array([[1, 0, 0], [0, np.cos(e), -np.sin(e)], [0, np.sin(e), np.cos(e)]])
     return Rx @ Rz
 def render(X, F, fcol, marks, elev=22, azim=40, N=700, span=335):
-    Pm = X @ rot(elev, azim).T; sx, sy, dep = Pm[:, 0], Pm[:, 2], -Pm[:, 1]
+    Pm = X @ rot(elev, azim).T; sx, sy, dep = -Pm[:, 0], Pm[:, 2], -Pm[:, 1]   # -x to the right: no mirror image
     px = (sx / span + 1) * N / 2; py = N - (sy / span + 1) * N / 2
     img = np.ones((N, N, 4)); img[..., 3] = 0; zb = np.full((N, N), np.inf); L = np.array([0.35, 0.8, 0.5]); L /= np.linalg.norm(L)
     for n, (i, j, k) in enumerate(F):

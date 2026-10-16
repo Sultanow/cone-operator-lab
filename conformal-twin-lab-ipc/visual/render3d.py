@@ -15,7 +15,7 @@ def rot(elev,azim):
     return Rx@Rz
 def render(X,elev=25,azim=30,N=700,span=None,light=(0.35,0.5,0.8),bg=1.0,edges=True,hidden=True):
     Rm=rot(elev,azim); P=X@Rm.T  # x right, y "into"? we use (x, z) screen, depth = y
-    sx,sy,dep=P[:,0],P[:,2],-P[:,1]
+    sx,sy,dep=-P[:,0],P[:,2],-P[:,1]   # a real camera on the +y side sees -x to the right (no mirror image)
     span=span or 1.08*np.abs(np.c_[sx,sy]).max()
     to=lambda u:(u/span+1)*N/2
     px,py=to(sx),N-to(sy)
