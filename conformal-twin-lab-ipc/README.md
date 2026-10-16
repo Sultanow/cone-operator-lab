@@ -149,7 +149,8 @@ sbatch slurm/symm.sbatch                           # symmetric uniqueness, numer
 python3 src/symm/msolve_input.py OUT/algebraic     # symmetric uniqueness, algebraically: exact system for msolve and Singular
 msolve -f OUT/algebraic/symm_system.ms -o OUT/algebraic/symm_system.out    # about 30 s (msolve: slurm/setup_algebra.sh)
 python3 src/symm/check_algebraic.py OUT/algebraic   # 4 real solutions, all copies of P
-sbatch slurm/groebner.sbatch                       # deterministic Groebner basis over Q with Singular (export CT_SINGULAR first)
+sbatch slurm/groebner.sbatch                       # Theorem 11: deterministic Groebner basis over Q with Singular (export CT_SINGULAR first);
+                                                   # slimgb: dimension 0, vdim 4 in 19 min (results_local/algebraic/)
 python3 visual/fig_poly.py FIGS/                   # Fig. 1
 python3 visual/fig_slices.py FIGS/                 # Fig. 2 (three handles)
 python3 visual/fig_flowers.py FIGS/                # Fig. 3
