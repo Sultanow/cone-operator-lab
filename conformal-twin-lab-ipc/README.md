@@ -119,7 +119,9 @@ the sweeps, overlaid or side by side, with buttons for transparent PNG screensho
 
 ```bash
 python3 visual/view3d.py                                   # P alone
-python3 visual/view3d.py visual/*_L4.json --side-by-side   # P next to surfaces from the sweeps
+cd visual && python3 view3d.py --side-by-side --material wax \
+    wf1_ww0.001_wr10_bon_s0_n0_ipc_tP_L4.json wf0.2_ww0.1_wr10_bon_s0_n0_ipc_tP_L4.json \
+    wf1_ww1_wr10_bon_s0_n0_ipc_tP_L4.json                 # P next to three views of h_P (as in the paper's appendix)
 python3 visual/view3d.py --turntable 72 --out frames/      # 72 frames of a full turn, no window
 ```
 

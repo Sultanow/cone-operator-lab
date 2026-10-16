@@ -16,6 +16,8 @@ ap.add_argument('--restarts', type=int, default=8, help='flat mode: independent 
 ap.add_argument('--iters', type=int, default=4000, help='flat mode: annealing steps per run')
 ap.add_argument('--layout', default=None, help='redraw a saved fig_ribbon_layout.json without searching')
 ap.add_argument('--polish', type=int, default=0, help='with --layout: steps of local polishing that keep crossings and twists')
+ap.add_argument('--beautify', type=int, default=0, help='with --layout: steps that spread the vertices and even out the edge lengths '
+                                                        'without adding crossings or twists')
 ap.add_argument('--mode', choices=['flat', 'symmetric'], default='flat',
                 help='flat: every vertex face up, no twists, fewest crossings; symmetric: C4-symmetric layout (forces twists)')
 args = ap.parse_args(); os.makedirs(args.out, exist_ok=True)
@@ -86,6 +88,11 @@ def degeneracy(pos, clear=0.07, ang=np.radians(22), sep=0.16):
     # vertices too close to each other
     dd = np.linalg.norm(pos[:, None] - pos[None], axis=2)[np.triu_indices(24, 1)]
     return pen + np.maximum(0, sep - dd).sum() / sep
+def aesthetics(pos, sep=0.2):
+    # even edge lengths and comfortable distances between all vertices (for the figure)
+    L = np.linalg.norm(pos[EI[:, 0]] - pos[EI[:, 1]], axis=1); uneven = np.var(L / L.mean())
+    dd = np.linalg.norm(pos[:, None] - pos[None], axis=2)[np.triu_indices(24, 1)]
+    return uneven + (np.maximum(0, sep - dd) / sep).__pow__(2).sum()
 def crossings(pos):
     P = np.array([[pos[u], pos[v]] for u, v in EDGES]); n = 0
     for i in range(len(EDGES)):
@@ -109,6 +116,19 @@ def min_angle(pos):                                                  # smallest 
     return m
 if args.layout:
     pos = np.array(json.load(open(args.layout))['positions']); best = pos
+    if args.beautify:
+        cr0 = crossings_fast(pos); down0 = sum(x < 0 for x in signs(pos).values())
+        def bcost(q):
+            if crossings_fast(q) > cr0 or sum(x < 0 for x in signs(q).values()) > down0: return np.inf   # never worse
+            return 4 * degeneracy(q, clear=0.06, ang=np.radians(25), sep=0.15) + 2 * aesthetics(q)
+        c = bcost(pos); print(f'beautify: start {c:.3f} ({cr0} crossings)')
+        for it in range(args.beautify):
+            v = rng.integers(24); old = pos[v].copy(); pos[v] = pos[v] + rng.normal(scale=0.02 if it % 4 else 0.08, size=2)
+            cn = bcost(pos)
+            if cn <= c: c = cn
+            else: pos[v] = old
+        pos = pos - pos.mean(0); pos = pos / np.abs(pos).max(); best = pos
+        print(f'beautify: end {c:.3f} ({crossings_fast(pos)} crossings)')
     if args.polish:
         cr0 = crossings_fast(pos); s0 = signs(pos); down0 = sum(x < 0 for x in s0.values())
         def pcost(q):        # degenerate layouts (vertices on bands, coinciding directions) hide crossings and twists,
@@ -164,13 +184,15 @@ assert sorted(len(c) for _, c in bnd) == [9] * 8 and sorted(k for k, _ in bnd) =
 print('check: 8 boundary cycles = the 8 nonagons, genus', (2 - (24 - 36 + 8)) // 2)
 
 # ---------------- drawing
-fig, ax = plt.subplots(figsize=(5.6, 5.6), dpi=240); w = 0.011
+from matplotlib.patches import Circle
+span = np.ptp(pos, axis=0); fig, ax = plt.subplots(figsize=(4.4, 4.4 * span[1] / span[0]), dpi=300)   # printed at about 75% of the text width
+w, RV = 0.0095, 0.048                     # half width of a band, radius of a vertex disc (layout units)
 Z = [2]
 def rim(p, q, colour_left, colour_right):
     d = q - p; n = np.array([-d[1], d[0]]) / np.linalg.norm(d) * w
-    ax.plot(*np.c_[p, q], color='white', lw=7.0, solid_capstyle='butt', zorder=Z[0])          # halo: gap at crossings
-    ax.plot(*np.c_[p + n, q + n], color=colour_left, lw=1.5, solid_capstyle='butt', zorder=Z[0] + .1)
-    ax.plot(*np.c_[p - n, q - n], color=colour_right, lw=1.5, solid_capstyle='butt', zorder=Z[0] + .1)
+    ax.plot(*np.c_[p, q], color='white', lw=3.8, solid_capstyle='butt', zorder=Z[0])          # halo: gap at crossings
+    ax.plot(*np.c_[p + n, q + n], color=colour_left, lw=0.95, solid_capstyle='butt', zorder=Z[0] + .1)
+    ax.plot(*np.c_[p - n, q - n], color=colour_right, lw=0.95, solid_capstyle='butt', zorder=Z[0] + .1)
 for u, v in EDGES:
     Z[0] += 0.2
     m = (pos[u] + pos[v]) / 2
@@ -179,11 +201,10 @@ for u, v in EDGES:
     rim(pos[u], m, *((L, Rr) if s[u] > 0 else (Rr, L)))
     rim(m, pos[v], *((L, Rr) if s[v] > 0 else (Rr, L)))
     if s[u] != s[v]: ax.plot(*m, marker='x', color='#1b2733', ms=3.5, mew=.8, zorder=3)
-for v in range(24):
-    ax.plot(*pos[v], 'o', ms=7.5, mfc='#1b2733' if s[v] > 0 else 'white', mec='#1b2733', mew=.9, zorder=100)
-    a = np.sort([np.arctan2(*(pos[u] - pos[v])[::-1]) for u in ROT[v]]); gaps = np.diff(np.r_[a, a[0] + 2 * np.pi])
-    k = int(np.argmax(gaps)); phi = a[k] + gaps[k] / 2                  # label in the widest free sector
-    ax.text(*(pos[v] + 0.065 * np.array([np.cos(phi), np.sin(phi)])), str(v + 1), ha='center', va='center', fontsize=6.5, zorder=101)
+for v in range(24):                      # a small disc with the vertex number inside; face-down vertices in grey
+    ax.add_patch(Circle(pos[v], RV, facecolor='white' if s[v] > 0 else '#d9dde2', edgecolor='#3a4652', lw=0.7, zorder=100))
+    ax.text(*pos[v], str(v + 1), ha='center', va='center_baseline', fontsize=6.2, color='#1b2733', zorder=101)
+pad = 1.6 * RV; ax.set_xlim(pos[:, 0].min() - pad, pos[:, 0].max() + pad); ax.set_ylim(pos[:, 1].min() - pad, pos[:, 1].max() + pad)
 ax.set_aspect('equal'); ax.axis('off')
 fig.savefig(os.path.join(args.out, 'fig_ribbon.pdf'), bbox_inches='tight', pad_inches=.02)
 fig.savefig(os.path.join(args.out, 'fig_ribbon.png'), bbox_inches='tight', pad_inches=.02)
