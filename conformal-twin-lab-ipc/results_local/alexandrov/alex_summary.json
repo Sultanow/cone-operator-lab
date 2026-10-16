@@ -1,0 +1,21 @@
+{
+ "totals": {
+  "K": {
+   "tasks": 64,
+   "starts": 3200000,
+   "converged": 334824,
+   "trivial": 334824,
+   "new": 0,
+   "seconds": 102348.20000000001
+  },
+  "retriangulated": {
+   "tasks": 64,
+   "starts": 3200000,
+   "converged": 643090,
+   "trivial": 643090,
+   "new": 0,
+   "seconds": 78648.40000000001
+  }
+ },
+ "distinct": []
+}

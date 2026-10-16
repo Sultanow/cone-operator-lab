@@ -1,0 +1,12 @@
+// reduced Groebner basis over Q, deterministic exact arithmetic (slimgb)
+ring r = 0, (v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17), dp;
+ideal I = v1^2-2*v1*v3+v2^2-2*v2*v5+v3^2+v4^2+v5^2-9136, v1^2-2*v1*v6+v2^2-2*v2*v8+v6^2+v7^2+v8^2-98496, v1^2-2*v1*v9+v10^2+v11^2-2*v11*v2+v2^2+v9^2-2736, v1^2-2*v1*v10+v10^2+v11^2+2*v11*v2+v2^2+v9^2-14400, v1^2+2*v1*v13+v12^2+v13^2+v14^2+2*v14*v2+v2^2-61875, v1^2+2*v1*v12+v12^2+v13^2+v14^2-2*v14*v2+v2^2-93051, v3^2-2*v3*v6+v4^2-2*v4*v7+v5^2-2*v5*v8+v6^2+v7^2+v8^2-54064, v10^2-2*v10*v4+v11^2-2*v11*v5+v3^2-2*v3*v9+v4^2+v5^2+v9^2-20800, v10^2-2*v10*v3+v11^2+2*v11*v5+v3^2+v4^2+2*v4*v9+v5^2+v9^2-14896, v10^2+2*v10*v3+v11^2+2*v11*v5+v3^2+v4^2-2*v4*v9+v5^2+v9^2-45616, v15^2-2*v15*v3+v16^2-2*v16*v4+v17^2-2*v17*v5+v3^2+v4^2+v5^2-2284, v12^2-2*v12*v6+v13^2-2*v13*v7+v14^2-2*v14*v8+v6^2+v7^2+v8^2-24219, 4*v6^2+4*v7^2-360000, v12^2+2*v12*v6+v13^2+2*v13*v7+v14^2-2*v14*v8+v6^2+v7^2+v8^2-200619, v15^2-2*v15*v6+v16^2-2*v16*v7+v17^2-2*v17*v8+v6^2+v7^2+v8^2-38700, 2*v10^2+4*v11^2+2*v9^2-20016, v10^2-2*v10*v12+v11^2+2*v11*v14+v12^2+v13^2+2*v13*v9+v14^2+v9^2-41211, v10^2+2*v10*v13+v11^2-2*v11*v14+v12^2+2*v12*v9+v13^2+v14^2+v9^2-94275, v10^2-2*v10*v15+v11^2+2*v11*v17+v15^2+v16^2+2*v16*v9+v17^2+v9^2-21996, v10^2+2*v10*v15+v11^2+2*v11*v17+v15^2+v16^2-2*v16*v9+v17^2+v9^2-60876, v12^2-2*v12*v15+v13^2-2*v13*v16+v14^2-2*v14*v17+v15^2+v16^2+v17^2-5139, 4*v15^2+4*v16^2-64800;
+option(redSB);
+int t0 = timer;
+ideal G = slimgb(I);
+"dimension of the ideal: " + string(dim(G));
+"number of complex solutions with multiplicity (vdim): " + string(vdim(G));
+"size of the reduced Groebner basis: " + string(size(G));
+"seconds: " + string(timer - t0);
+write(":w /home/esul01/data/outputs/conformal_twin/algebraic/symm_groebner_slimgb.txt", G);
+quit;
