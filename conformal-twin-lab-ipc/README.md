@@ -113,6 +113,17 @@ python3 src/symm/collect_symm.py /home/esul01/data/outputs/conformal_twin/symmet
 
 ## Visualisation (`visual/`, `scripts/export_obj.py`)
 
+`visual/view3d.py` is an interactive viewer on the graphics card (OpenGL via Polyscope, `pip install polyscope`):
+P with its nonagons, edges, cone points (coloured by cone angle) and symmetry axis, plus any surfaces exported from
+the sweeps, overlaid or side by side, with buttons for transparent PNG screenshots and turntable frames.
+
+```bash
+python3 visual/view3d.py                                   # P alone
+python3 visual/view3d.py visual/*_L4.json --side-by-side   # P next to surfaces from the sweeps
+python3 visual/view3d.py --turntable 72 --out frames/      # 72 frames of a full turn, no window
+```
+
+
 `visual/mizhaev_visual.wl` (Wolfram Language) shows the polyhedron, a conformal surface from the cluster and
 the canonical twin h_P in the Poincare disk as rotatable graphics and exports the current view (PNG, PDF,
 turntable GIF). The data files next to it are produced by `scripts/export_obj.py`; the OBJ files also open in

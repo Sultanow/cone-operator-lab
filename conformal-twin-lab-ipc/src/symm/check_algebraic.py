@@ -21,3 +21,16 @@ if os.path.exists(f):
                   f'self-intersections {self_intersections(align(X, P)[1], TRI)}, box width {np.max(hi - lo):.1e}')
 for log in sorted(glob.glob(os.path.join(out, 'singular_*.log'))):
     txt = open(log).read(); print(os.path.basename(log) + ':', ' | '.join(l.strip() for l in txt.splitlines() if l.strip()) or 'no result yet')
+# Table 5 of the paper: the exact normal form of the solution, checked symbolically against all 22 equations
+try:
+    import sympy as sp
+    from symsys import reps, KEYS, eqs, Tp
+    r = sp.sqrt(85)
+    def nf(v): x, y, z = [sp.Integer(int(t)) for t in v]; return [(7 * y - 6 * x) / r, -(7 * x + 6 * y) / r, z]
+    Xn = [sp.Matrix(nf(P[k])) for k in reps]; T = [sp.Matrix(np.rint(M).astype(int).tolist()) for M in Tp]
+    ok = all(sp.simplify((Xn[k] - T[d] * Xn[l]).dot(Xn[k] - T[d] * Xn[l]) - eqs[(k, l, d)]) == 0 for (k, l, d) in KEYS)
+    assert Xn[0][1] == 0, 'vertex 1 must lie in the xz-plane'
+    print('exact normal form (Table 5) satisfies all 22 equations exactly:', ok)
+    for k, X in zip(reps, Xn): print(f'  vertex {k + 1:2d}:', [sp.nsimplify(c) for c in X])
+except ImportError:
+    print('sympy not installed: exact check of Table 5 skipped')
