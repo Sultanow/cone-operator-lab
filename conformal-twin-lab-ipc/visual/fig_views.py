@@ -4,6 +4,7 @@ Usage: python visual/fig_views.py WEAK.json STRONG.json   (exports of scripts/ex
 (hence to h_P), with the 24 cone points of P marked. Input: npz checkpoints of --target P runs."""
 import sys, json, numpy as np, matplotlib
 matplotlib.use('Agg'); import matplotlib.pyplot as plt
+plt.rcParams.update({'pdf.fonttype': 42, 'ps.fonttype': 42})   # embed TrueType, not Type 3 fonts (publisher requirement)
 import os
 HERE = os.path.dirname(os.path.abspath(__file__)); SRC = os.path.join(os.path.dirname(HERE), 'src'); sys.path.insert(0, SRC)
 from fine_mesh import build

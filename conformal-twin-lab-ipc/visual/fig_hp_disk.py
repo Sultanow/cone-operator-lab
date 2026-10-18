@@ -3,6 +3,7 @@ Poincare disk, with the 24 cone points of P marked by their cone angle. Also wri
 visual/mizhaev_visual.wl.  Usage: python visual/fig_hp_disk.py OUTDIR"""
 import numpy as np, json, os, sys, heapq, matplotlib
 matplotlib.use('Agg'); import matplotlib.pyplot as plt
+plt.rcParams.update({'pdf.fonttype': 42, 'ps.fonttype': 42})   # embed TrueType, not Type 3 fonts (publisher requirement)
 from matplotlib.collections import PolyCollection, LineCollection
 HERE = os.path.dirname(os.path.abspath(__file__)); SRC = os.path.join(os.path.dirname(HERE), 'src')
 sys.path.insert(0, SRC); sys.path.insert(0, os.path.join(SRC, 'wpc'))

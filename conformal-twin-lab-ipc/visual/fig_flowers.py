@@ -4,6 +4,7 @@ sys.path.insert(0, HERE)
 OUT = sys.argv[1] if len(sys.argv) > 1 else '.'; os.makedirs(OUT, exist_ok=True)
 import json,numpy as np,matplotlib
 matplotlib.use('Agg');import matplotlib.pyplot as plt
+plt.rcParams.update({'pdf.fonttype': 42, 'ps.fonttype': 42})   # embed TrueType, not Type 3 fonts (publisher requirement)
 plt.rcParams.update({'font.family':'serif','mathtext.fontset':'cm','font.size':9})
 D=json.load(open(os.path.join(SRC, 'development.json')));R=json.load(open(os.path.join(SRC, 'results.json')))
 V=np.array(R['vertices'],float);rr=np.array(R['radii'])

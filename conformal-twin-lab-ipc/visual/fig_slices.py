@@ -2,6 +2,7 @@
 around the symmetry axis, two walls (turned by 90 degrees), one wall. Usage: python visual/fig_slices.py OUTDIR"""
 import os, sys, json, numpy as np, matplotlib
 matplotlib.use('Agg'); import matplotlib.pyplot as plt
+plt.rcParams.update({'pdf.fonttype': 42, 'ps.fonttype': 42})   # embed TrueType, not Type 3 fonts (publisher requirement)
 from matplotlib.path import Path; from matplotlib.patches import PathPatch
 HERE = os.path.dirname(os.path.abspath(__file__)); SRC = os.path.join(os.path.dirname(HERE), 'src')
 OUT = sys.argv[1] if len(sys.argv) > 1 else '.'; os.makedirs(OUT, exist_ok=True)

@@ -9,6 +9,7 @@ a quarter turn does not, every second vertex of an orbit must then lie face down
 Usage: python visual/fig_ribbon.py OUTDIR [--mode flat|symmetric] [--restarts N] [--iters M] [--seed S] [--layout FILE]"""
 import os, sys, json, argparse, numpy as np, networkx as nx, matplotlib
 matplotlib.use('Agg'); import matplotlib.pyplot as plt
+plt.rcParams.update({'pdf.fonttype': 42, 'ps.fonttype': 42})   # embed TrueType, not Type 3 fonts (publisher requirement)
 HERE = os.path.dirname(os.path.abspath(__file__)); SRC = os.path.join(os.path.dirname(HERE), 'src')
 ap = argparse.ArgumentParser(); ap.add_argument('out', nargs='?', default='.'); ap.add_argument('--samples', type=int, default=20000)
 ap.add_argument('--seed', type=int, default=0)

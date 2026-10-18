@@ -3,6 +3,7 @@ OUT = sys.argv[2] if len(sys.argv) > 2 else '.'; os.makedirs(OUT, exist_ok=True)
 # Figure 5: lengths of test geodesics in h_cp vs h_P 
 # Usage: python visual/fig_lengths.py OUTDIR_of_wp_c/length_compare.npz OUTDIR
 import numpy as np, matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
+plt.rcParams.update({'pdf.fonttype': 42, 'ps.fonttype': 42})   # embed TrueType, not Type 3 fonts (publisher requirement)
 plt.rcParams.update({'font.family':'serif','mathtext.fontset':'cm','font.size':8.5})
 Z=np.load(sys.argv[1] if len(sys.argv) > 1 else 'length_compare.npz'); x=Z['lcp'][Z['keep']]; y=Z['P3'][Z['keep']]
 pairs=np.unique(np.round(np.c_[x,y],5),axis=0); r=y/x
