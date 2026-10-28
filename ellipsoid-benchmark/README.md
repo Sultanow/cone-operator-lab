@@ -1,30 +1,43 @@
 # Hearing Ellipsoid Bench
 
+[![AppliedMath](https://img.shields.io/badge/AppliedMath-6%2811%29%2C%20179%20%282026%29-orange)](https://www.mdpi.com/2673-9909/6/11/179) [![DOI](https://img.shields.io/badge/DOI-10.3390%2Fappliedmath6110179-blue)](https://doi.org/10.3390/appliedmath6110179) [![Open Access](https://img.shields.io/badge/Paper-open%20access-lightgrey)](https://www.mdpi.com/2673-9909/6/11/179/pdf)
+
+> **Paper:** E. G. Sultanow, A. Hatziiliou, L. Faubel-Teich, M. Amir, *Hearing Ellipsoids: A Benchmark of Krylov, Spectral Galerkin, and Filter Diagonalization Eigensolvers*. AppliedMath 6 (2026), 179, [doi:10.3390/appliedmath6110179](https://doi.org/10.3390/appliedmath6110179). **Read it on [MDPI](https://www.mdpi.com/2673-9909/6/11/179).** This package contains the solvers, Slurm jobs, scripts and notebooks behind all numerical results of the paper; the meshes, spectra, certification reports and result tables are in [`data/ellipsoid-benchmark`](../data/ellipsoid-benchmark).
+
 Clean Python package for benchmarking algorithms that generate large Dirichlet eigenvalue spectra on triaxial ellipsoids.
+
+The paper compares four algorithmic families on the working ellipsoid $\Omega(1,1.5,2.3)$ and on the unit ball. Three unrelated solvers on the same finite-element matrices (FEM–ARPACK, SLEPc spectrum slicing, gap-free block-Hankel) agree to a median relative deviation of $3\times10^{-11}$, and Sylvester inertia counts certify the level count exactly at about 0.05 % of the cost of the spectrum. For this problem size, spectrum slicing is by far the cheapest route (4.9 core-hours against roughly 69,400 for the block-Hankel run). As the eigenvalue index grows, the error in the reconstructed geometry is dominated by the mesh, not by the eigensolver: SSG, which needs no volume mesh, reconstructs the volume to about 0.025 %, and halving the mesh size to $h=0.03$ improves the curvature term of the finite-element spectrum by a factor of 31.
 
 ## Two validation tracks
 
 1. **Unit-ball ground truth**  
-   Set `a=b=c=1` and compare numerical spectra against precomputed unit-ball eigenvalues.
+   Set `a=b=c=1` and compare numerical spectra against the exact unit-ball eigenvalues $\lambda_{\ell,k}=j_{\ell+1/2,k}^2$ with multiplicity $2\ell+1$ ([`unit_ball_N20000.txt`](../data/ellipsoid-benchmark/reference/unit_ball_N20000.txt), first 20,000 levels).
 
 2. **Reverse geometry / Weyl validation**  
-   For a real triaxial ellipsoid such as `a=1, b=1.5, c=2.3`, estimate volume and surface-related quantities via Weyl asymptotics over growing prefix sizes `K = 100, 200, 300, 500, 1000, ...`.
+   For a real triaxial ellipsoid such as `a=1, b=1.5, c=2.3`, fit the three-term Weyl law to growing spectral prefixes `K = 100, 200, 300, 500, 1000, ...` and compare the recovered volume, surface area and integrated mean curvature with their values from the semi-axes.
 
 ## Algorithm families
 
-- FEM + ARPACK
-- FEM + SLEPc/PETSc
-- Windowed spectral slicing
-- Scalar FDM / filter diagonalization
-- Multi-probe Block-Hankel FDM
-- Stretched Spectral Galerkin (SSG)
-- DMC validation for the ground-state eigenvalue
+Evaluated in the paper:
+
+| family | solver code | paper |
+|--------|-------------|-------|
+| FEM + ARPACK (shift-invert Arnoldi) | `solvers/arpack.py`, `solvers/arnoldi_reference.py` | Sections 2.1, 3.2, 5.1 |
+| FEM + SLEPc/PETSc (Krylov–Schur spectrum slicing, MUMPS inertia) | `solvers/slepc.py` | Sections 2.4, 3.4, 5.3 |
+| Stretched Spectral Galerkin (SSG) | `solvers/ssg.py` | Sections 2.2, 3.3, 5.2 |
+| Multi-probe Block-Hankel FDM, gap-free resolvent variant | `solvers/fdm_block.py`, `scripts/run_hankel_band.py` | Sections 2.3, 3.5, 5.4 |
+| Inertia certification (solver-agnostic) | `scripts/certify_inertia.py` | Section 3.6, Appendix D |
+
+The package also contains code outside the scope of the paper: windowed spectral slicing, scalar FDM / filter diagonalization, a boundary method of fundamental solutions (`solvers/boundary_mfs.py`) and DMC validation for the ground-state eigenvalue (`dmc/`).
 
 ## Quick start
 
 ```bash
-cd /home/jovyan/hearing-ellipsoid-bench
-pip install -e .
+git clone https://github.com/Sultanow/cone-operator-lab.git
+cd cone-operator-lab/ellipsoid-benchmark
+pip install -e .            # core package
+pip install -e ".[slepc]"   # optional: petsc4py, slepc4py, mpi4py
+pytest tests
 ```
 
 ```python
@@ -34,6 +47,29 @@ from hearing_ellipsoid_bench.validation.sphere import compare_to_truth
 
 The notebooks should become thin orchestration layers. The reusable logic lives in `src/hearing_ellipsoid_bench`.
 
+For the refined mesh ($h=0.03$), PETSc/SLEPc must be built with 64-bit indices; the conda-forge packages use 32-bit indices and end in a segmentation fault after about ninety minutes instead of a clear error message (paper, Section 3.4 and Listing 2). See [`SLEPC_TESTING.md`](SLEPC_TESTING.md) for the SLEPc smoke test.
+
+## Reproducing the paper
+
+All production runs were executed as Slurm batch jobs. Results are written to [`data/ellipsoid-benchmark/outputs`](../data/ellipsoid-benchmark/outputs).
+
+| result | script | Slurm job |
+|--------|--------|-----------|
+| FEM–ARPACK, triaxial and unit ball | `scripts/run_arnoldi_reference.py` | `jobs/run_arnoldi_h006_N2000_ncv20*.slurm` |
+| SSG, triaxial and unit ball | `scripts/run_ssg_reference.py` | `jobs/run_ssg_l36_n20_q64_56_112_N2000_mem700.slurm`, `jobs/run_ssg_unitball_l36_n20_N2000.slurm` |
+| SLEPc spectrum slicing, $h=0.06$ and $h=0.03$ | `scripts/run_slepc_slicing.py`, `scripts/run_slepc_slicing_unitball.py` | `jobs/run_slepc_slicing*.slurm` |
+| Gap-free block-Hankel, 48 (band, seed) tasks | `scripts/run_hankel_band.py` | `jobs/run_hankel_full_spectrum_array*.slurm`, chained by `jobs/submit_chain.sh` |
+| Consensus merge (Appendix C) | `scripts/merge_hankel_full_spectrum.py` | part of the array job |
+| Rank-cap test on the unit ball (Section 5.4) | `scripts/run_hankel_band.py` | `jobs/run_ballrank_test.slurm` |
+| Inertia certification (Section 3.6, Appendix D) | `scripts/certify_inertia.py` | `jobs/run_certify_inertia*.slurm` |
+| Cross-method comparison (Appendix E) | `scripts/compare_vs_reference.py`, `scripts/adjudicate_positions.py` | – |
+| Multiplicities against the ball spectrum (Appendix F) | `scripts/validate_unitball_multiplicities.py` | – |
+| Figure 1 (working ellipsoid) | [`mathematica/Render_Ellipsoid.nb`](../mathematica/Render_Ellipsoid.nb) | – |
+| Figure 2 (reverse geometry) | [`notebooks/reverse_geometry_A2_validation.ipynb`](notebooks/reverse_geometry_A2_validation.ipynb) | – |
+| Figure 3 (unit-ball deviation) | [`notebooks/unit_ball_ground_truth_validation.ipynb`](notebooks/unit_ball_ground_truth_validation.ipynb) | – |
+
+All finite-element runs use the same mesh, [`ellipsoid_a1_b1.5_c2.3_h0.06.msh`](../data/ellipsoid-benchmark/ellipsoid_a1_b1.5_c2.3_h0.06.msh), with quadratic elements, so the stiffness and mass matrices are identical across solvers.
+
 ## Reverse-geometry fit window
 
 The exhaustive stable selection of `FIT_START` and `FIT_END_MAX` is documented in
@@ -42,3 +78,25 @@ The exhaustive stable selection of `FIT_START` and `FIT_END_MAX` is documented i
 ```bash
 python scripts/optimize_reverse_geometry_window.py --dry-run
 ```
+
+## Citation
+
+```bibtex
+@article{sultanow2026hearing,
+  title   = {Hearing Ellipsoids: A Benchmark of Krylov, Spectral Galerkin,
+             and Filter Diagonalization Eigensolvers},
+  author  = {Sultanow, Eldar Gunter and Hatziiliou, Andreas and
+             Faubel-Teich, Leonhard and Amir, Malik},
+  journal = {AppliedMath},
+  volume  = {6},
+  number  = {11},
+  pages   = {179},
+  year    = {2026},
+  doi     = {10.3390/appliedmath6110179},
+  url     = {https://www.mdpi.com/2673-9909/6/11/179}
+}
+```
+
+## Acknowledgments
+
+The production runs were executed on the Research Computing Infrastructure of the EDIH Hamburg project at the University of Hamburg. We thank Kai Himstedt and Stephanie von Riegen for access and support, and Elmar Schrohe for suggesting the study of inverse spectral questions.
