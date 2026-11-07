@@ -1,20 +1,32 @@
-# conformal-twin-lab (IPC update)
+# conformal-twin-lab: Mizhaev's genus-3 polyhedron, its hyperbolic twin, and its rigidity
 
-This copy lives in `~/conformal-twin-lab-ipc` so that the running L-BFGS sweep in
-`~/conformal-twin-lab` keeps its code unchanged. Same conda environment, separate run
-directory (`$CT_OUT/sweep_ipc`).
+Code, summaries and figures for the paper *There and back again: a genus-three polyhedron, its hyperbolic twin, and
+its rigidity* (E. Sultanow, submitted). Mizhaev's equivelar polyhedron of genus 3 (24 integer vertices, eight planar
+nonagons, every two sharing an edge) is turned into a hyperbolic surface and back; the paper measures how far the
+canonical hyperbolic structure h_P is from the circle-packing structure h_cp, and proves that the intrinsic geometry
+determines the polyhedron among C4-symmetric realisations.
 
-Hard-work package for the genus-three paper ("There and back again"): can Mizhaev's
-polyhedron P be smoothed into an **embedded, C4-symmetric surface in R^3 that is
-conformal to its circle-packing hyperbolic twin (S, h_cp)**, and how close to P can it stay?
+## Data and archives
+
+| What | Where |
+|---|---|
+| this code, archived release v1.0 | https://doi.org/10.5281/zenodo.23423742 |
+| raw cluster outputs: embedding sweeps (`sweep1`, `sweep_ipc`, `sweep_hp`), homotopy solution sets (`symmetric`), ribbon layout searches (`ribbon`) | https://www.kaggle.com/datasets/eldarsultanow/mizhaevs-genus-3-polyhedron-raw-cluster-outputs |
+| summaries used in the paper (certificate, Thurston distance, sweeps, Alexandrov search, Groebner basis, homotopy) | `results_local/` |
+| raw outputs of the Alexandrov search | `results_local/alexandrov/alexandrov_raw.tar.gz` |
+
+`$CT_OUT` in the commands below is the output directory of the cluster runs (set in `slurm/config.sh`). The cluster
+used for the paper is no longer needed to read the results: download the Kaggle dataset and point the collect scripts
+at its folders, e.g. `python3 scripts/collect.py <kaggle>/sweep_ipc`.
 
 ## Work packages
 
 | WP | Question | Status |
 |----|----------|--------|
 | A  | Are the 24 circle-packing radii correct? | **Proven.** Krawczyk test in Arb ball arithmetic: unique solution in a box of radius 1e-60 (log radii), at 256 and 512 bits. `src/certify_radii.py`, `slurm/certify.sbatch`. |
-| B  | Does a discretely conformal, symmetric, embedded surface near P exist? | Pipeline ready, sweep prepared (this package). |
-| C  | How far is P's own conformal structure from h_cp? | Next step (discrete uniformisation of P). |
+| B  | Does a discretely conformal, symmetric, embedded surface near P exist? | **Done.** Embedding sweeps with L-BFGS and IPC, towards h_cp and towards h_P (Section 10 of the paper; raw outputs on Kaggle). |
+| C  | How far is P's own conformal structure from h_cp? | **Done.** Thurston distance at least 0.23, stable under refinement; exact way back from h_P to P (`src/wpc`). |
+| D  | Is P determined by its intrinsic geometry? | **Done for C4-symmetric realisations:** Groebner basis over Q (Singular slimgb) and msolve give exactly four complex solutions, all copies of P; confirmed by homotopy continuation. Infinitesimal rigidity and generic global rigidity in exact arithmetic (`src/alex`, `src/symm`). |
 
 ## Method (WP B)
 
@@ -31,7 +43,7 @@ conformal to its circle-packing hyperbolic twin (S, h_cp)**, and how close to P 
 * Multilevel: level 2 -> 3 -> 4 by exact prolongation; checkpoint after each level;
   `--resume` skips finished levels.
 
-## Findings so far (local runs, levels 1-2)
+## Early findings (local runs, levels 1-2, before the IPC solver)
 
 * P itself is far from conformal to h_cp: conf_rms 0.54, conf_max 1.6.
 * Without barrier: residual driven to 3e-7 (level 1) and 8e-7 (level 2), surface within
@@ -55,7 +67,7 @@ Local result, level 1, starting from P, `--w-fit 0.05`: **embedded**, conf_rms 6
 
 ```bash
 sbatch slurm/sweep_ipc.sbatch      # 16 tasks, levels 1 -> 2 -> 3 -> 4, partition std
-python3 scripts/collect.py /home/esul01/data/outputs/conformal_twin/sweep_ipc
+python3 scripts/collect.py $CT_OUT/sweep_ipc
 ```
 
 ## Target h_P (`--target P`): conformal smoothing of the polyhedron
@@ -73,7 +85,7 @@ the start) and smooths it. Local level-1 test: embedded, residual 6.9e-5, distan
 ```bash
 sbatch slurm/wp_c.sbatch           # minutes; writes $CT_OUT/wp_c/wp_c_report.json
 sbatch slurm/sweep_hp.sbatch       # 12 tasks, levels 1 -> 4
-python3 scripts/collect.py /home/esul01/data/outputs/conformal_twin/sweep_hp
+python3 scripts/collect.py $CT_OUT/sweep_hp
 ```
 
 ## Alexandrov-type search (`src/alex`, `slurm/alex.sbatch`)
@@ -93,7 +105,7 @@ noisy and 'popped' starts, for K (odd tasks) and for nonagons folded along rando
 ```bash
 sbatch slurm/alex.sbatch                         # 128 tasks x 50,000 starts (about 40 min each)
 CT_ALEX_N=200000 sbatch slurm/alex.sbatch        # larger round
-python3 scripts/collect_alex.py /home/esul01/data/outputs/conformal_twin/alexandrov
+python3 scripts/collect_alex.py $CT_OUT/alexandrov
 ```
 
 ## Complete classification of C4-symmetric realisations (`src/symm`, `slurm/symm.sbatch`)
@@ -108,7 +120,7 @@ The tracker was validated on random dense quadratic systems (all 2^n solutions f
 
 ```bash
 sbatch slurm/symm.sbatch                         # 384 tasks of about 40 s
-python3 src/symm/collect_symm.py /home/esul01/data/outputs/conformal_twin/symmetric
+python3 src/symm/collect_symm.py $CT_OUT/symmetric
 ```
 
 ## Visualisation (`visual/`, `scripts/export_obj.py`)
@@ -163,7 +175,8 @@ python3 src/symm/msolve_input.py OUT/algebraic     # symmetric uniqueness, algeb
 msolve -f OUT/algebraic/symm_system.ms -o OUT/algebraic/symm_system.out    # about 30 s (msolve: slurm/setup_algebra.sh)
 python3 src/symm/check_algebraic.py OUT/algebraic   # 4 real solutions, all copies of P
 sbatch slurm/groebner.sbatch                       # Theorem 11: deterministic Groebner basis over Q with Singular (export CT_SINGULAR first);
-                                                   # slimgb: dimension 0, vdim 4 in 19 min (results_local/algebraic/)
+                                                   # slimgb: dimension 0, vdim 4 in 19 min (results_local/algebraic/);
+                                                   # the second run with std did not finish within the time limit
 python3 visual/fig_poly.py FIGS/                   # Fig. 1
 python3 visual/fig_slices.py FIGS/                 # Fig. 2 (three handles)
 python3 visual/fig_flowers.py FIGS/                # Fig. 3
@@ -190,7 +203,7 @@ sbatch slurm/certify.sbatch                          # WP A, minutes
 sbatch slurm/smoke.sbatch                            # 2 short tasks: validates env + paths
 # inspect $CT_OUT/smoke/*.log, then:
 sbatch slurm/sweep.sbatch                            # array 1-96, at most 32 at once
-python3 scripts/collect.py /home/esul01/data/outputs/conformal_twin/sweep1
+python3 scripts/collect.py $CT_OUT/sweep1
 ```
 
 Partition lines are commented out (`##SBATCH --partition=CHANGE_ME`); uncomment and set
@@ -209,6 +222,5 @@ also informative and goes into the paper as a measured obstruction near P.
 
 * Discrete conformality on a fixed mesh is numerical evidence, not a proof of a smooth
   conformal embedding; convergence under refinement is the evidence to look for.
-* The barrier + L-BFGS combination jams in contact. If the sweep finds no embedded
-  low-residual run, the next step is a proper IPC-style Newton solver with continuous
-  collision detection.
+* The barrier + L-BFGS combination jams in contact; this is why the IPC solver
+  (`src/ipc.py`) was added, and the paper's embedding results use it.
